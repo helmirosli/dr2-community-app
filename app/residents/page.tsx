@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const statuses = ["ACTIVE", "INACTIVE", "MOVED_OUT"] as const;
+const statuses = ["ACTIVE", "EXEMPT", "FOR_SALE", "MOVED_OUT"] as const;
 
 type ResidentsPageProps = {
   searchParams: Promise<{
@@ -17,7 +17,10 @@ type ResidentsPageProps = {
 };
 
 function statusLabel(status: string) {
-  return status === "MOVED_OUT" ? "Moved out" : status.charAt(0) + status.slice(1).toLowerCase();
+  if (status === "FOR_SALE") return "For sale";
+  if (status === "MOVED_OUT") return "Moved out";
+  if (status === "EXEMPT") return "Exempt";
+  return status.charAt(0) + status.slice(1).toLowerCase();
 }
 
 export default async function ResidentsPage({ searchParams }: ResidentsPageProps) {

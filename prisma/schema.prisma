@@ -9,7 +9,8 @@ datasource db {
 
 enum ResidentStatus {
   ACTIVE
-  INACTIVE
+  EXEMPT
+  FOR_SALE
   MOVED_OUT
 }
 

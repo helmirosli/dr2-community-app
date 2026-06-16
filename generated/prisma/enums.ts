@@ -11,7 +11,8 @@
 
 export const ResidentStatus = {
   ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
+  EXEMPT: 'EXEMPT',
+  FOR_SALE: 'FOR_SALE',
   MOVED_OUT: 'MOVED_OUT'
 } as const
 

@@ -15,6 +15,11 @@ This action plan continues from `plan.md` and tracks the practical MVP build ord
 - Resident inventory is implemented with protected list, search/filter, add, edit, detail, payment history, and audit logging.
 - Official payment recording is implemented with protected entry form, RM50 month-range amount check, duplicate coverage protection, optional proof upload, coverage creation, and audit logging.
 - Public duplicate handling now blocks overlapping pending monthly submissions for the same unit, blocks submissions that overlap already-approved official coverage, stores proof file SHA-256 hashes, and rejects duplicate coverage during AJK approval.
+- Monthly report view is implemented at `/reports` with month/year selection, optional inactive households, per-resident paid-until, selected-month status (paid/upfront/partial/unpaid), outstanding months and amount, special-collection arrears, last payment date, and a privacy-safe (no phone/bank/proof) shareable layout. Report calculations live in the server-only, testable `lib/reports/monthly.ts` module.
+- Excel (`.xlsx`) and PDF report export are implemented as authenticated Node route handlers at `/reports/monthly.xlsx` and `/reports/monthly.pdf`, sharing the same query/calculation as the web view via `lib/reports/monthly-data.ts` and `lib/reports/exporters.ts` (ExcelJS + pdfmake with bundled Roboto fonts). Exports require login (401 otherwise) and stay privacy-safe.
+- Year-grid report shows all 12 months for all residents at `/reports` (new primary report view) and public `/status` page, with proper status labels (FOR SALE, MOVED OUT, EXEMPT) for non-paying units. Monthly detail (old view) accessible at `/reports/monthly-detail`. Reports now show special collection status in a dedicated column when active.
+- Resident status expanded from 3 to 4 values: ACTIVE (paying RM50), EXEMPT (exempt from monthly fee but may pay utilities), FOR_SALE (vacant unit), MOVED_OUT (pending new resident). Updated all forms, lists, and reports; database records migrated via Prisma migration.
+- Special collections management fully built: `/special-collections` list, `/special-collections/new` create form, `/special-collections/[id]/edit` edit form, `/special-collections/[id]` detail view. Admin/AJK can create collections, assign to all-active or select-specific residents, track amount due/paid, and view collection status. Collections appear in year-grid reports and resident status records.
 
 ## Immediate Next Action
 
@@ -106,6 +111,8 @@ Acceptance:
 
 ### 5. Build Monthly Report View
 
+Status: Done.
+
 Goal: admin can see who is paid, unpaid, partial, or paid upfront.
 
 Tasks:
@@ -123,6 +130,8 @@ Acceptance:
 
 ### 6. Add Excel and PDF Export
 
+Status: Done.
+
 Goal: committee can share resident fee reports.
 
 Tasks:
@@ -136,6 +145,8 @@ Acceptance:
 - Admin can download monthly report as `.xlsx` and `.pdf`.
 
 ### 7. Add Special Collections
+
+Status: Done.
 
 Goal: track extra payments separately from monthly RM50 fees.
 
@@ -152,9 +163,46 @@ Acceptance:
 
 ## Hardening Backlog
 
-- Add CAPTCHA or Turnstile to public submissions.
+- Add CAPTCHA or Turnstile to public submissions. Status: Done.
 - Add IP, unit number, and phone rate limiting.
 - Add duplicate public submission detection. Status: Done for same-unit overlapping monthly submissions and duplicate proof hashes.
 - Add suspicious submission quarantine.
 - Add backup/export script for SQLite and uploads.
 - Add tests for month range logic, upload validation, approval flow, and reports.
+
+## Design & Layout Overhaul
+
+### 8. Complete Design Redesign with Persistent Navigation
+
+Status: Done.
+
+Goal: unified design system with persistent sidebar on all admin pages and redesigned public pages.
+
+Tasks:
+
+- Create persistent sidebar layout component that appears on all admin pages (dashboard, residents, payments, reports, collections).
+- Design unified color scheme and component styling using Tailwind CSS.
+- Redesign admin dashboard with improved metrics cards, submission queue, and collection health indicators.
+- Redesign public `/submit` page with better form organization, info cards, and help sections.
+- Redesign public `/status` page with improved table styling, year selector, and legend.
+- Implement mobile-responsive design for all pages (sidebar collapses on mobile, touch-friendly interactions).
+- Create public layout wrapper with header and footer for public-only routes.
+
+Completed:
+
+- app/layout-wrapper.tsx: Server component providing persistent sidebar with navigation, user info, and logout.
+- app/(public)/layout.tsx: Public route group layout with header, navigation, and footer.
+- Updated app/dashboard/page.tsx to work with new layout (removed duplicate sidebar).
+- Redesigned app/(public)/submit/page.tsx with better UX, info cards, and form sections.
+- Redesigned app/(public)/status/page.tsx with improved table styling and legend.
+- All pages now mobile-responsive with proper Tailwind breakpoints.
+
+Acceptance:
+
+- Sidebar appears on all authenticated admin pages (dashboard, residents, payments, reports, collections).
+- Public pages have a clean header/footer layout separate from admin sidebar.
+- Dashboard shows metrics cards (collection, residents, pending, collections) with better visual hierarchy.
+- Submit form has clear sections: Resident Info, Payment Info, Coverage Period, Additional Info, Proof, Verification.
+- Status page has improved table readability with better color coding and legend.
+- Mobile view works smoothly with responsive design (sidebar visible on desktop, navigation in header on mobile).
+- No breaking changes to existing functionality.

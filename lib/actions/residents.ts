@@ -20,7 +20,7 @@ const residentSchema = z.object({
   phone: optionalText,
   email: z.email("Please enter a valid email.").optional().or(z.literal("")),
   streetBlock: optionalText,
-  status: z.enum(["ACTIVE", "INACTIVE", "MOVED_OUT"]),
+  status: z.enum(["ACTIVE", "EXEMPT", "FOR_SALE", "MOVED_OUT"]),
   notes: optionalText,
 });
 

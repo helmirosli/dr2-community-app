@@ -20,7 +20,7 @@ type ResidentFormValues = {
   phone?: string | null;
   email?: string | null;
   streetBlock?: string | null;
-  status?: "ACTIVE" | "INACTIVE" | "MOVED_OUT";
+  status?: "ACTIVE" | "EXEMPT" | "FOR_SALE" | "MOVED_OUT";
   notes?: string | null;
 };
 
@@ -67,9 +67,10 @@ export function ResidentForm({ resident }: ResidentFormProps) {
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Status
           <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.status ?? "ACTIVE"} name="status">
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-            <option value="MOVED_OUT">Moved out</option>
+            <option value="ACTIVE">Active — paying RM50</option>
+            <option value="EXEMPT">Exempt — exempt from monthly fee</option>
+            <option value="FOR_SALE">For sale — vacant</option>
+            <option value="MOVED_OUT">Moved out — pending new resident</option>
           </select>
         </label>
       </div>

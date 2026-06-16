@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { findDuplicatePublicSubmission, findExistingOfficialCoverageByUnitNumber } from "@/lib/payments/duplicates";
 import { prisma } from "@/lib/prisma";
 import { getSingleUploadedFile, removeStoredUpload, storeProofUpload } from "@/lib/uploads";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { publicSubmissionSchema } from "@/lib/validation";
 
 export type PublicSubmissionState = {
@@ -24,6 +25,16 @@ export async function createPublicSubmission(
     return {
       ok: false,
       message: parsed.error.issues[0]?.message ?? "Please check the form details.",
+    };
+  }
+
+  // Verify CAPTCHA
+  const turnstileToken = formData.get("cf-turnstile-response")?.toString() ?? "";
+  const isHuman = await verifyTurnstile(turnstileToken);
+  if (!isHuman) {
+    return {
+      ok: false,
+      message: "Security verification failed. Please try again.",
     };
   }
 

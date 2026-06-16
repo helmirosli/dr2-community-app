@@ -15,7 +15,10 @@ type ResidentDetailPageProps = {
 };
 
 function statusLabel(status: string) {
-  return status === "MOVED_OUT" ? "Moved out" : status.charAt(0) + status.slice(1).toLowerCase();
+  if (status === "FOR_SALE") return "For sale";
+  if (status === "MOVED_OUT") return "Moved out";
+  if (status === "EXEMPT") return "Exempt";
+  return status.charAt(0) + status.slice(1).toLowerCase();
 }
 
 export default async function ResidentDetailPage({ params }: ResidentDetailPageProps) {
