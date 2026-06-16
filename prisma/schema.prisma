@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ResidentStatus {
+  ACTIVE
+  INACTIVE
+  MOVED_OUT
+}
+
+enum UserRole {
+  ADMIN
+  AJK
+  VIEWER
+}
+
+enum PaymentType {
+  MONTHLY_FEE
+  SPECIAL_COLLECTION
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  DUITNOW_QR
+  EWALLET
+  CHEQUE
+  OTHER
+}
+
+enum CoverageStatus {
+  PAID
+  PARTIAL
+  ADJUSTED
+}
+
+enum SubmissionStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  QUARANTINED
+}
+
+enum SpecialCollectionStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+model Resident {
+  id          String           @id @default(cuid())
+  unitNumber  String           @unique
+  name        String
+  phone       String?
+  email       String?
+  streetBlock String?
+  status      ResidentStatus   @default(ACTIVE)
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  payments    Payment[]
+  coverages   PaymentCoverage[]
+  assignments SpecialCollectionAssignment[]
+
+  @@index([status])
+  @@index([streetBlock])
+}
+
+model FeePlan {
+  id            String            @id @default(cuid())
+  name          String
+  amountSen     Int
+  frequency     String            @default("MONTHLY")
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  isActive      Boolean           @default(true)
+  coverages     PaymentCoverage[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model Payment {
+  id          String            @id @default(cuid())
+  residentId  String
+  resident    Resident          @relation(fields: [residentId], references: [id])
+  paymentType PaymentType
+  amountSen   Int
+  paymentDate DateTime
+  method      PaymentMethod
+  referenceNo String?
+  notes       String?
+  createdById String?
+  createdBy   User?             @relation(fields: [createdById], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  coverages   PaymentCoverage[]
+  uploads     Upload[]
+
+  @@index([residentId, paymentDate])
+  @@index([paymentType])
+}
+
+model PaymentCoverage {
+  id            String         @id @default(cuid())
+  paymentId     String
+  payment       Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  residentId    String
+  resident      Resident       @relation(fields: [residentId], references: [id])
+  year          Int
+  month         Int
+  feePlanId     String?
+  feePlan       FeePlan?       @relation(fields: [feePlanId], references: [id])
+  amountApplied Int
+  status        CoverageStatus @default(PAID)
+  createdAt     DateTime       @default(now())
+
+  @@unique([residentId, year, month, paymentId])
+  @@index([residentId, year, month])
+}
+
+model SpecialCollection {
+  id                String                         @id @default(cuid())
+  title             String
+  description       String?
+  amountPerResident Int
+  dueDate           DateTime?
+  eventStartDate    DateTime?
+  eventEndDate      DateTime?
+  status            SpecialCollectionStatus        @default(DRAFT)
+  assignments       SpecialCollectionAssignment[]
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+}
+
+model SpecialCollectionAssignment {
+  id                  String            @id @default(cuid())
+  specialCollectionId String
+  specialCollection   SpecialCollection @relation(fields: [specialCollectionId], references: [id], onDelete: Cascade)
+  residentId          String
+  resident            Resident          @relation(fields: [residentId], references: [id])
+  amountDue           Int
+  amountPaid          Int               @default(0)
+  status              SubmissionStatus  @default(PENDING_REVIEW)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@unique([specialCollectionId, residentId])
+}
+
+model Upload {
+  id               String                   @id @default(cuid())
+  paymentId        String?
+  payment          Payment?                 @relation(fields: [paymentId], references: [id])
+  submissionId     String?
+  submission       PublicPaymentSubmission? @relation(fields: [submissionId], references: [id])
+  originalFilename String
+  storedFilename   String
+  mimeType         String
+  sizeBytes        Int
+  contentHash      String?
+  storagePath      String
+  uploadedAt       DateTime                 @default(now())
+}
+
+model PublicPaymentSubmission {
+  id                 String           @id @default(cuid())
+  unitNumber         String
+  residentName       String
+  phone              String
+  paymentType        PaymentType
+  amountSen          Int
+  paymentDate        DateTime
+  method             PaymentMethod
+  coverageStartYear  Int
+  coverageStartMonth Int
+  coverageEndYear    Int
+  coverageEndMonth   Int
+  referenceNo        String?
+  notes              String?
+  status             SubmissionStatus @default(PENDING_REVIEW)
+  reviewReason       String?
+  reviewedById       String?
+  reviewedBy         User?            @relation(fields: [reviewedById], references: [id])
+  reviewedAt         DateTime?
+  createdAt          DateTime         @default(now())
+  uploads            Upload[]
+
+  @@index([status, createdAt])
+  @@index([unitNumber])
+}
+
+model User {
+  id                  String                    @id @default(cuid())
+  name                String
+  email               String                    @unique
+  passwordHash        String
+  role                UserRole                  @default(AJK)
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  payments            Payment[]
+  reviewedSubmissions PublicPaymentSubmission[]
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  beforeJson String?
+  afterJson  String?
+  createdBy  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+}
