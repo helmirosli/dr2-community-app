@@ -14,7 +14,9 @@ function buildFromKKEnv(): string | null {
   const password = process.env.KK_PASSWORD ?? "";
   const database = process.env.KK_DATABASE ?? "";
   const ssl = process.env.KK_SSL;
-  const scheme = process.env.SCHEME ?? "postgresql";
+  const schemeEnv = process.env.SCHEME ?? "desarestu_db";
+  // Some deployments use a custom scheme name; map known aliases to a URL scheme.
+  const scheme = schemeEnv === "desarestu_db" ? "postgresql" : schemeEnv;
 
   let auth = "";
   if (username) {
