@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["desarestu_db"]
 }
 
 enum ResidentStatus {
