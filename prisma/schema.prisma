@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum ResidentStatus {
@@ -13,17 +12,23 @@ enum ResidentStatus {
   EXEMPT
   FOR_SALE
   MOVED_OUT
+
+  @@schema("desarestu_db")
 }
 
 enum UserRole {
   ADMIN
   AJK
   VIEWER
+
+  @@schema("desarestu_db")
 }
 
 enum PaymentType {
   MONTHLY_FEE
   SPECIAL_COLLECTION
+
+  @@schema("desarestu_db")
 }
 
 enum PaymentMethod {
@@ -33,12 +38,16 @@ enum PaymentMethod {
   EWALLET
   CHEQUE
   OTHER
+
+  @@schema("desarestu_db")
 }
 
 enum CoverageStatus {
   PAID
   PARTIAL
   ADJUSTED
+
+  @@schema("desarestu_db")
 }
 
 enum SubmissionStatus {
@@ -46,12 +55,16 @@ enum SubmissionStatus {
   APPROVED
   REJECTED
   QUARANTINED
+
+  @@schema("desarestu_db")
 }
 
 enum SpecialCollectionStatus {
   DRAFT
   ACTIVE
   CLOSED
+
+  @@schema("desarestu_db")
 }
 
 model Resident {
@@ -71,6 +84,7 @@ model Resident {
 
   @@index([status])
   @@index([streetBlock])
+  @@schema("desarestu_db")
 }
 
 model FeePlan {
@@ -84,6 +98,8 @@ model FeePlan {
   coverages     PaymentCoverage[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  @@schema("desarestu_db")
 }
 
 model Payment {
@@ -105,6 +121,7 @@ model Payment {
 
   @@index([residentId, paymentDate])
   @@index([paymentType])
+  @@schema("desarestu_db")
 }
 
 model PaymentCoverage {
@@ -123,6 +140,7 @@ model PaymentCoverage {
 
   @@unique([residentId, year, month, paymentId])
   @@index([residentId, year, month])
+  @@schema("desarestu_db")
 }
 
 model SpecialCollection {
@@ -137,6 +155,8 @@ model SpecialCollection {
   assignments       SpecialCollectionAssignment[]
   createdAt         DateTime                       @default(now())
   updatedAt         DateTime                       @updatedAt
+
+  @@schema("desarestu_db")
 }
 
 model SpecialCollectionAssignment {
@@ -152,6 +172,7 @@ model SpecialCollectionAssignment {
   updatedAt           DateTime          @updatedAt
 
   @@unique([specialCollectionId, residentId])
+  @@schema("desarestu_db")
 }
 
 model Upload {
@@ -167,6 +188,8 @@ model Upload {
   contentHash      String?
   storagePath      String
   uploadedAt       DateTime                 @default(now())
+
+  @@schema("desarestu_db")
 }
 
 model PublicPaymentSubmission {
@@ -194,6 +217,7 @@ model PublicPaymentSubmission {
 
   @@index([status, createdAt])
   @@index([unitNumber])
+  @@schema("desarestu_db")
 }
 
 model User {
@@ -206,6 +230,8 @@ model User {
   updatedAt           DateTime                  @updatedAt
   payments            Payment[]
   reviewedSubmissions PublicPaymentSubmission[]
+
+  @@schema("desarestu_db")
 }
 
 model AuditLog {
@@ -218,4 +244,6 @@ model AuditLog {
   createdBy  String?
   ipAddress  String?
   createdAt  DateTime @default(now())
+
+  @@schema("desarestu_db")
 }

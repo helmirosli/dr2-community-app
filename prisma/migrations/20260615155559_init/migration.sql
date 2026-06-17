@@ -8,8 +8,8 @@ CREATE TABLE "Resident" (
     "streetBlock" TEXT,
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "notes" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
@@ -18,11 +18,22 @@ CREATE TABLE "FeePlan" (
     "name" TEXT NOT NULL,
     "amountSen" INTEGER NOT NULL,
     "frequency" TEXT NOT NULL DEFAULT 'MONTHLY',
-    "effectiveFrom" DATETIME NOT NULL,
-    "effectiveTo" DATETIME,
+    "effectiveFrom" TIMESTAMP NOT NULL,
+    "effectiveTo" TIMESTAMP,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'AJK',
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
@@ -31,13 +42,13 @@ CREATE TABLE "Payment" (
     "residentId" TEXT NOT NULL,
     "paymentType" TEXT NOT NULL,
     "amountSen" INTEGER NOT NULL,
-    "paymentDate" DATETIME NOT NULL,
+    "paymentDate" TIMESTAMP NOT NULL,
     "method" TEXT NOT NULL,
     "referenceNo" TEXT,
     "notes" TEXT,
     "createdById" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
     CONSTRAINT "Payment_residentId_fkey" FOREIGN KEY ("residentId") REFERENCES "Resident" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Payment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -52,7 +63,7 @@ CREATE TABLE "PaymentCoverage" (
     "feePlanId" TEXT,
     "amountApplied" INTEGER NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'PAID',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "PaymentCoverage_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "PaymentCoverage_residentId_fkey" FOREIGN KEY ("residentId") REFERENCES "Resident" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "PaymentCoverage_feePlanId_fkey" FOREIGN KEY ("feePlanId") REFERENCES "FeePlan" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -64,12 +75,12 @@ CREATE TABLE "SpecialCollection" (
     "title" TEXT NOT NULL,
     "description" TEXT,
     "amountPerResident" INTEGER NOT NULL,
-    "dueDate" DATETIME,
-    "eventStartDate" DATETIME,
-    "eventEndDate" DATETIME,
+    "dueDate" TIMESTAMP,
+    "eventStartDate" TIMESTAMP,
+    "eventEndDate" TIMESTAMP,
     "status" TEXT NOT NULL DEFAULT 'DRAFT',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL
 );
 
 -- CreateTable
@@ -80,10 +91,34 @@ CREATE TABLE "SpecialCollectionAssignment" (
     "amountDue" INTEGER NOT NULL,
     "amountPaid" INTEGER NOT NULL DEFAULT 0,
     "status" TEXT NOT NULL DEFAULT 'PENDING_REVIEW',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
     CONSTRAINT "SpecialCollectionAssignment_specialCollectionId_fkey" FOREIGN KEY ("specialCollectionId") REFERENCES "SpecialCollection" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "SpecialCollectionAssignment_residentId_fkey" FOREIGN KEY ("residentId") REFERENCES "Resident" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "PublicPaymentSubmission" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "unitNumber" TEXT NOT NULL,
+    "residentName" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "paymentType" TEXT NOT NULL,
+    "amountSen" INTEGER NOT NULL,
+    "paymentDate" TIMESTAMP NOT NULL,
+    "method" TEXT NOT NULL,
+    "coverageStartYear" INTEGER NOT NULL,
+    "coverageStartMonth" INTEGER NOT NULL,
+    "coverageEndYear" INTEGER NOT NULL,
+    "coverageEndMonth" INTEGER NOT NULL,
+    "referenceNo" TEXT,
+    "notes" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'PENDING_REVIEW',
+    "reviewReason" TEXT,
+    "reviewedById" TEXT,
+    "reviewedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "PublicPaymentSubmission_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -96,45 +131,11 @@ CREATE TABLE "Upload" (
     "mimeType" TEXT NOT NULL,
     "sizeBytes" INTEGER NOT NULL,
     "storagePath" TEXT NOT NULL,
-    "uploadedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "uploadedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Upload_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Upload_submissionId_fkey" FOREIGN KEY ("submissionId") REFERENCES "PublicPaymentSubmission" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- CreateTable
-CREATE TABLE "PublicPaymentSubmission" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "unitNumber" TEXT NOT NULL,
-    "residentName" TEXT NOT NULL,
-    "phone" TEXT NOT NULL,
-    "paymentType" TEXT NOT NULL,
-    "amountSen" INTEGER NOT NULL,
-    "paymentDate" DATETIME NOT NULL,
-    "method" TEXT NOT NULL,
-    "coverageStartYear" INTEGER NOT NULL,
-    "coverageStartMonth" INTEGER NOT NULL,
-    "coverageEndYear" INTEGER NOT NULL,
-    "coverageEndMonth" INTEGER NOT NULL,
-    "referenceNo" TEXT,
-    "notes" TEXT,
-    "status" TEXT NOT NULL DEFAULT 'PENDING_REVIEW',
-    "reviewReason" TEXT,
-    "reviewedById" TEXT,
-    "reviewedAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "PublicPaymentSubmission_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE
-);
-
--- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "passwordHash" TEXT NOT NULL,
-    "role" TEXT NOT NULL DEFAULT 'AJK',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
-);
 
 -- CreateTable
 CREATE TABLE "AuditLog" (
@@ -146,7 +147,7 @@ CREATE TABLE "AuditLog" (
     "afterJson" TEXT,
     "createdBy" TEXT,
     "ipAddress" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateIndex

@@ -588,6 +588,7 @@ export type UploadCreateOrConnectWithoutPaymentInput = {
 
 export type UploadCreateManyPaymentInputEnvelope = {
   data: Prisma.UploadCreateManyPaymentInput | Prisma.UploadCreateManyPaymentInput[]
+  skipDuplicates?: boolean
 }
 
 export type UploadUpsertWithWhereUniqueWithoutPaymentInput = {
@@ -653,6 +654,7 @@ export type UploadCreateOrConnectWithoutSubmissionInput = {
 
 export type UploadCreateManySubmissionInputEnvelope = {
   data: Prisma.UploadCreateManySubmissionInput | Prisma.UploadCreateManySubmissionInput[]
+  skipDuplicates?: boolean
 }
 
 export type UploadUpsertWithWhereUniqueWithoutSubmissionInput = {
@@ -1527,6 +1529,7 @@ export type UploadCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Uploads.
    */
   data: Prisma.UploadCreateManyInput | Prisma.UploadCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1545,6 +1548,7 @@ export type UploadCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many Uploads.
    */
   data: Prisma.UploadCreateManyInput | Prisma.UploadCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

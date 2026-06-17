@@ -556,6 +556,7 @@ export type SpecialCollectionAssignmentCreateOrConnectWithoutResidentInput = {
 
 export type SpecialCollectionAssignmentCreateManyResidentInputEnvelope = {
   data: Prisma.SpecialCollectionAssignmentCreateManyResidentInput | Prisma.SpecialCollectionAssignmentCreateManyResidentInput[]
+  skipDuplicates?: boolean
 }
 
 export type SpecialCollectionAssignmentUpsertWithWhereUniqueWithoutResidentInput = {
@@ -615,6 +616,7 @@ export type SpecialCollectionAssignmentCreateOrConnectWithoutSpecialCollectionIn
 
 export type SpecialCollectionAssignmentCreateManySpecialCollectionInputEnvelope = {
   data: Prisma.SpecialCollectionAssignmentCreateManySpecialCollectionInput | Prisma.SpecialCollectionAssignmentCreateManySpecialCollectionInput[]
+  skipDuplicates?: boolean
 }
 
 export type SpecialCollectionAssignmentUpsertWithWhereUniqueWithoutSpecialCollectionInput = {
@@ -1461,6 +1463,7 @@ export type SpecialCollectionAssignmentCreateManyArgs<ExtArgs extends runtime.Ty
    * The data used to create many SpecialCollectionAssignments.
    */
   data: Prisma.SpecialCollectionAssignmentCreateManyInput | Prisma.SpecialCollectionAssignmentCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1479,6 +1482,7 @@ export type SpecialCollectionAssignmentCreateManyAndReturnArgs<ExtArgs extends r
    * The data used to create many SpecialCollectionAssignments.
    */
   data: Prisma.SpecialCollectionAssignmentCreateManyInput | Prisma.SpecialCollectionAssignmentCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

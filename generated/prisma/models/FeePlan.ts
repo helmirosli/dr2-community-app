@@ -1316,6 +1316,7 @@ export type FeePlanCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many FeePlans.
    */
   data: Prisma.FeePlanCreateManyInput | Prisma.FeePlanCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1334,6 +1335,7 @@ export type FeePlanCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many FeePlans.
    */
   data: Prisma.FeePlanCreateManyInput | Prisma.FeePlanCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

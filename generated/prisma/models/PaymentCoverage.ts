@@ -632,6 +632,7 @@ export type PaymentCoverageCreateOrConnectWithoutResidentInput = {
 
 export type PaymentCoverageCreateManyResidentInputEnvelope = {
   data: Prisma.PaymentCoverageCreateManyResidentInput | Prisma.PaymentCoverageCreateManyResidentInput[]
+  skipDuplicates?: boolean
 }
 
 export type PaymentCoverageUpsertWithWhereUniqueWithoutResidentInput = {
@@ -694,6 +695,7 @@ export type PaymentCoverageCreateOrConnectWithoutFeePlanInput = {
 
 export type PaymentCoverageCreateManyFeePlanInputEnvelope = {
   data: Prisma.PaymentCoverageCreateManyFeePlanInput | Prisma.PaymentCoverageCreateManyFeePlanInput[]
+  skipDuplicates?: boolean
 }
 
 export type PaymentCoverageUpsertWithWhereUniqueWithoutFeePlanInput = {
@@ -741,6 +743,7 @@ export type PaymentCoverageCreateOrConnectWithoutPaymentInput = {
 
 export type PaymentCoverageCreateManyPaymentInputEnvelope = {
   data: Prisma.PaymentCoverageCreateManyPaymentInput | Prisma.PaymentCoverageCreateManyPaymentInput[]
+  skipDuplicates?: boolean
 }
 
 export type PaymentCoverageUpsertWithWhereUniqueWithoutPaymentInput = {
@@ -1653,6 +1656,7 @@ export type PaymentCoverageCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many PaymentCoverages.
    */
   data: Prisma.PaymentCoverageCreateManyInput | Prisma.PaymentCoverageCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1671,6 +1675,7 @@ export type PaymentCoverageCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many PaymentCoverages.
    */
   data: Prisma.PaymentCoverageCreateManyInput | Prisma.PaymentCoverageCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

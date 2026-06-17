@@ -918,6 +918,7 @@ export type PublicPaymentSubmissionCreateOrConnectWithoutReviewedByInput = {
 
 export type PublicPaymentSubmissionCreateManyReviewedByInputEnvelope = {
   data: Prisma.PublicPaymentSubmissionCreateManyReviewedByInput | Prisma.PublicPaymentSubmissionCreateManyReviewedByInput[]
+  skipDuplicates?: boolean
 }
 
 export type PublicPaymentSubmissionUpsertWithWhereUniqueWithoutReviewedByInput = {
@@ -1888,6 +1889,7 @@ export type PublicPaymentSubmissionCreateManyArgs<ExtArgs extends runtime.Types.
    * The data used to create many PublicPaymentSubmissions.
    */
   data: Prisma.PublicPaymentSubmissionCreateManyInput | Prisma.PublicPaymentSubmissionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1906,6 +1908,7 @@ export type PublicPaymentSubmissionCreateManyAndReturnArgs<ExtArgs extends runti
    * The data used to create many PublicPaymentSubmissions.
    */
   data: Prisma.PublicPaymentSubmissionCreateManyInput | Prisma.PublicPaymentSubmissionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

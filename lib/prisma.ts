@@ -1,6 +1,7 @@
 import { mkdirSync } from "node:fs";
 
 import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -14,10 +15,6 @@ function buildFromKKEnv(): string | null {
   const password = process.env.KK_PASSWORD ?? "";
   const database = process.env.KK_DATABASE ?? "";
   const ssl = process.env.KK_SSL;
-  const schemeEnv = process.env.SCHEME ?? "desarestu_db";
-  // Some deployments use a custom scheme name; map known aliases to a URL scheme.
-  const scheme = schemeEnv === "desarestu_db" ? "postgresql" : schemeEnv;
-
   let auth = "";
   if (username) {
     auth = encodeURIComponent(username);
@@ -26,10 +23,9 @@ function buildFromKKEnv(): string | null {
   }
 
   const portPart = port ? `:${port}` : "";
-  let url = `${scheme}://${auth}${host}${portPart}/${database}`;
+  let url = `postgresql://${auth}${host}${portPart}/${database}`;
   if (ssl && ssl !== "false" && ssl !== "0") {
-    const sslParam = scheme.includes("postgres") || scheme === "postgresql" ? "sslmode=require" : "ssl=true";
-    url += (url.includes("?") ? "&" : "?") + sslParam;
+    url += "&sslmode=require";
   }
   return url;
 }
@@ -40,6 +36,7 @@ if (!databaseUrl) {
   throw new Error(
     "DATABASE_URL or KK_* environment variables must be set to a Postgres connection string.\nSee .env.example for examples."
   );
+}
 
 if (process.env.NODE_ENV !== "production") {
   try {
@@ -53,7 +50,9 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 
-const client = new PrismaClient();
+const client = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: databaseUrl }),
+});
 
 export const prisma = globalForPrisma.prisma ?? client;
 

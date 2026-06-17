@@ -1530,6 +1530,7 @@ export type ResidentCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Residents.
    */
   data: Prisma.ResidentCreateManyInput | Prisma.ResidentCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1548,6 +1549,7 @@ export type ResidentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many Residents.
    */
   data: Prisma.ResidentCreateManyInput | Prisma.ResidentCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
