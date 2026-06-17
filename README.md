@@ -186,3 +186,20 @@ Exact commands may change depending on the selected auth library, UI library, an
 
 - See `plan.md` for the detailed product and technical plan.
 - See `agent.md` for project-specific guidance for future coding agents.
+
+## Database
+
+- **Local Postgres:** For local development, set `DATABASE_URL` to a Postgres connection string in `.env` (see `.env.example`). Example:
+
+  `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/dr2_community"`
+
+- **Prisma migrations:** If you move from SQLite to Postgres, update `prisma/schema.prisma` datasource `provider` to `"postgresql"`, then run:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+- **Vercel / Production:** On Vercel, set the `DATABASE_URL` environment variable to your managed Postgres provider (Supabase, Neon, AWS RDS, etc.). Do not use a file-based `file:` URL in production — serverless platforms are often read-only and ephemeral.
+
+- **Alternate KK_* envs:** The app also supports building the `DATABASE_URL` from individual environment variables named `KK_HOST`, `KK_PORT`, `KK_USERNAME`, `KK_PASSWORD`, `KK_DATABASE`, and `KK_SSL`. If `DATABASE_URL` is not set, these will be used to construct the connection string. You can also set `SCHEME` (defaults to `postgresql`) to control the URL scheme.
+
