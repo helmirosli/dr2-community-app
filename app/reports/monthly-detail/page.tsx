@@ -42,7 +42,7 @@ export default async function MonthlyDetailPage({ searchParams }: Props) {
 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Monthly detail</p>

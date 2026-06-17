@@ -153,3 +153,13 @@ export async function assertDashboardUser() {
 
   return user;
 }
+
+export async function requireDashboardAdmin() {
+  const user = await getCurrentUser();
+
+  if (!user || user.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  return user;
+}

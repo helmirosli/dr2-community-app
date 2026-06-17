@@ -2,23 +2,26 @@ import Link from "next/link";
 import { Edit, Plus } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
+import { getDictionary } from "@/lib/i18n";
 import { formatRM } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-function statusBadge(status: string) {
-  const badges: Record<string, { label: string; className: string }> = {
-    DRAFT: { label: "Draft", className: "bg-slate-50 text-slate-700 ring-slate-100" },
-    ACTIVE: { label: "Active", className: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
-    CLOSED: { label: "Closed", className: "bg-slate-100 text-slate-600 ring-slate-200" },
-  };
-  return badges[status] || badges.DRAFT;
-}
-
 export default async function SpecialCollectionsPage() {
   await requireDashboardUser();
+
+  const t = await getDictionary();
+
+  function statusBadge(status: string) {
+    const badges: Record<string, { label: string; className: string }> = {
+      DRAFT: { label: t.collections.draft, className: "bg-slate-50 text-slate-700 ring-slate-100" },
+      ACTIVE: { label: t.collections.active, className: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
+      CLOSED: { label: t.collections.closed, className: "bg-slate-100 text-slate-600 ring-slate-200" },
+    };
+    return badges[status] || badges.DRAFT;
+  }
 
   const collections = await prisma.specialCollection.findMany({
     orderBy: { createdAt: "desc" },
@@ -46,18 +49,18 @@ export default async function SpecialCollectionsPage() {
 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Extra payments</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Special collections</h1>
+            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.collections.extra}</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.collections.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Track festival guarded service, emergency repairs, and other one-time payments separate from monthly RM50 fees.
+              {t.collections.subtitle}
             </p>
           </div>
           <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/special-collections/new">
             <Plus aria-hidden="true" size={17} />
-            New collection
+            {t.collections.newCollection}
           </Link>
         </header>
 
@@ -66,13 +69,13 @@ export default async function SpecialCollectionsPage() {
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Title</th>
-                  <th className="px-5 py-3 font-semibold">Amount per resident</th>
-                  <th className="px-5 py-3 font-semibold">Households</th>
-                  <th className="px-5 py-3 font-semibold">Amount collected</th>
-                  <th className="px-5 py-3 font-semibold">Due date</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold">Action</th>
+                  <th className="px-5 py-3 font-semibold">{t.collections.collectionTitle}</th>
+                  <th className="px-5 py-3 font-semibold">{t.collections.amountPerResident}</th>
+                  <th className="px-5 py-3 font-semibold">{t.collections.households}</th>
+                  <th className="px-5 py-3 font-semibold">{t.collections.amountCollected}</th>
+                  <th className="px-5 py-3 font-semibold">{t.collections.dueDate}</th>
+                  <th className="px-5 py-3 font-semibold">{t.common.status}</th>
+                  <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -91,7 +94,7 @@ export default async function SpecialCollectionsPage() {
                           {formatRM(collected)} / {formatRM(target)}
                         </td>
                         <td className="px-5 py-4 text-slate-600">
-                          {collection.dueDate ? collection.dueDate.toLocaleDateString("en-MY") : "—"}
+                          {collection.dueDate ? collection.dueDate.toLocaleDateString("en-MY") : "\u2014"}
                         </td>
                         <td className="px-5 py-4">
                           <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.className}`}>
@@ -101,7 +104,7 @@ export default async function SpecialCollectionsPage() {
                         <td className="px-5 py-4">
                           <Link className="inline-flex items-center gap-1.5 font-semibold text-cyan-700 hover:text-cyan-900" href={`/special-collections/${collection.id}/edit`}>
                             <Edit aria-hidden="true" size={14} />
-                            Edit
+                            {t.common.edit}
                           </Link>
                         </td>
                       </tr>
@@ -110,7 +113,7 @@ export default async function SpecialCollectionsPage() {
                 ) : (
                   <tr>
                     <td className="px-5 py-10 text-center text-slate-500" colSpan={7}>
-                      No special collections yet. Create one to track extra payments.
+                      {t.collections.noCollections}
                     </td>
                   </tr>
                 )}

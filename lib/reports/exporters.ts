@@ -208,7 +208,14 @@ export async function buildMonthlyReportPdf(
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer> {
-  const { rows, specialCollections, year } = data;
+  const { rows: unsortedRows, specialCollections, year } = data;
+
+  const rows = [...unsortedRows].sort((a, b) => {
+    const unitA = parseInt(a.unitNumber, 10);
+    const unitB = parseInt(b.unitNumber, 10);
+    return unitA - unitB;
+  });
+
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "DR2 Community";
 
@@ -232,19 +239,21 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
   headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0E7490" } };
   headerRow.alignment = { horizontal: "center", vertical: "middle" };
 
-  for (const row of rows) {
+  for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+    const row = rows[rowIdx];
+    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
     const monthValues: Record<string, string | number> = {};
     for (let i = 0; i < 12; i++) {
       const key = MONTH_ABBR[i];
       const amountSen = row.months[i];
-      monthValues[key] = row.isForSale ? "FOR SALE" : amountSen !== null ? amountSen / 100 : "";
+      monthValues[key] = row.isForSale ? statusText : amountSen !== null ? amountSen / 100 : "";
     }
 
     const extraValues: Record<string, string> = {};
     if (extraHeaders.length > 0) {
       for (const sc of specialCollections) {
         extraValues[`extra_${sc.id}`] = row.isForSale
-          ? "FOR SALE"
+          ? statusText
           : row.extraOutstandingSen > 0
             ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
             : row.extraDueSen > 0
@@ -253,7 +262,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
       }
     } else {
       extraValues["extra"] = row.isForSale
-        ? "FOR SALE"
+        ? statusText
         : row.extraOutstandingSen > 0
           ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
           : row.extraDueSen > 0
@@ -261,7 +270,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
             : "";
     }
 
-    const dataRow = sheet.addRow({ no: row.no, unit: row.unitNumber, name: row.name, ...monthValues, ...extraValues });
+    const dataRow = sheet.addRow({ no: rowIdx + 1, unit: row.unitNumber, name: row.name, ...monthValues, ...extraValues });
 
     if (row.isForSale) {
       dataRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
@@ -291,7 +300,13 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
 export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   configurePdfFonts();
-  const { rows, specialCollections, year } = data;
+  const { rows: unsortedRows, specialCollections, year } = data;
+
+  const rows = [...unsortedRows].sort((a, b) => {
+    const unitA = parseInt(a.unitNumber, 10);
+    const unitB = parseInt(b.unitNumber, 10);
+    return unitA - unitB;
+  });
 
   const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
   const extraColCount = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
@@ -319,9 +334,10 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
     ...extraHeaderCells,
   ];
 
-  const bodyRows = rows.map((row) => {
+  const bodyRows = rows.map((row, idx) => {
+    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
     const monthCells = row.isForSale
-      ? Array(12).fill({ text: "FOR SALE", italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
+      ? Array(12).fill({ text: statusText, italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
       : row.months.map((amountSen) => ({
           text: amountSen !== null ? `RM${(amountSen / 100).toFixed(2)}` : "",
           alignment: "center" as const,
@@ -333,7 +349,7 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
       extraColCount === 0
         ? []
         : row.isForSale
-          ? Array(extraColCount).fill({ text: "FOR SALE", italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
+          ? Array(extraColCount).fill({ text: statusText, italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
           : specialCollections.length > 0
             ? specialCollections.map(() => ({
                 text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "",
@@ -344,7 +360,7 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
             : [{ text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
 
     return [
-      { text: row.no, alignment: "center", fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },
+      { text: idx + 1, alignment: "center", fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },
       { text: row.unitNumber, bold: true, fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },
       { text: row.name, fontSize: 7, italics: row.isForSale, color: row.isForSale ? "#94a3b8" : undefined, fillColor: row.isForSale ? "#e2e8f0" : undefined },
       ...monthCells,

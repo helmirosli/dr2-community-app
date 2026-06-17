@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Home, Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
+import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -13,47 +14,63 @@ type ResidentsPageProps = {
   searchParams: Promise<{
     q?: string;
     status?: string;
+    page?: string;
   }>;
 };
 
-function statusLabel(status: string) {
-  if (status === "FOR_SALE") return "For sale";
-  if (status === "MOVED_OUT") return "Moved out";
-  if (status === "EXEMPT") return "Exempt";
-  return status.charAt(0) + status.slice(1).toLowerCase();
-}
+const ITEMS_PER_PAGE = 20;
 
 export default async function ResidentsPage({ searchParams }: ResidentsPageProps) {
   await requireDashboardUser();
 
+  const t = await getDictionary();
+
+  function statusLabel(status: string) {
+    if (status === "FOR_SALE") return t.residents.forSale;
+    if (status === "MOVED_OUT") return t.residents.movedOut;
+    if (status === "EXEMPT") return t.residents.exempt;
+    return t.residents.active;
+  }
+
   const params = await searchParams;
   const query = params.q?.trim() ?? "";
   const selectedStatus = statuses.includes(params.status as (typeof statuses)[number]) ? params.status : "";
+  const page = Math.max(1, parseInt(params.page || "1", 10));
+  const skip = (page - 1) * ITEMS_PER_PAGE;
 
-  const residents = await prisma.resident.findMany({
-    where: {
-      ...(selectedStatus ? { status: selectedStatus as (typeof statuses)[number] } : {}),
-      ...(query
-        ? {
-            OR: [
-              { unitNumber: { contains: query } },
-              { name: { contains: query } },
-              { phone: { contains: query } },
-              { streetBlock: { contains: query } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: [{ status: "asc" }, { unitNumber: "asc" }],
-    include: {
-      _count: {
-        select: {
-          payments: true,
-          coverages: true,
+  const whereClause = {
+    ...(selectedStatus ? { status: selectedStatus as (typeof statuses)[number] } : {}),
+    ...(query
+      ? {
+          OR: [
+            { unitNumber: { contains: query } },
+            { name: { contains: query } },
+            { phone: { contains: query } },
+            { streetBlock: { contains: query } },
+          ],
+        }
+      : {}),
+  };
+
+  const [residents, totalCount] = await Promise.all([
+    prisma.resident.findMany({
+      where: whereClause,
+      orderBy: [{ status: "asc" }, { unitNumber: "asc" }],
+      skip,
+      take: ITEMS_PER_PAGE,
+      include: {
+        _count: {
+          select: {
+            payments: true,
+            coverages: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.resident.count({ where: whereClause }),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   const counts = await prisma.resident.groupBy({
     by: ["status"],
@@ -64,38 +81,34 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Resident inventory</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Household records</h1>
+            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.residents.inventory}</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.residents.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Manage unit numbers, resident contacts, status, and payment history for DR2 households.
+              {t.residents.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50" href="/dashboard">
-              <Home aria-hidden="true" size={17} />
-              Dashboard
-            </Link>
             <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/residents/new">
               <Plus aria-hidden="true" size={17} />
-              Add resident
+              {t.residents.addResident}
             </Link>
           </div>
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
           <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Total residents</p>
+            <p className="text-sm font-medium text-slate-500">{t.residents.totalResidents}</p>
             <p className="mt-2 text-3xl font-semibold">{totalResidents}</p>
           </div>
           <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Active households</p>
+            <p className="text-sm font-medium text-slate-500">{t.residents.activeHouseholds}</p>
             <p className="mt-2 text-3xl font-semibold">{activeResidents}</p>
           </div>
           <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">Filtered result</p>
+            <p className="text-sm font-medium text-slate-500">{t.residents.filteredResult}</p>
             <p className="mt-2 text-3xl font-semibold">{residents.length}</p>
           </div>
         </section>
@@ -103,17 +116,17 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
         <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
           <form className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row md:items-end" method="get">
             <label className="grid flex-1 gap-2 text-sm font-medium text-slate-700">
-              Search
+              {t.common.search}
               <div className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2">
                 <Search aria-hidden="true" className="text-slate-400" size={16} />
-                <input className="w-full bg-transparent outline-none" defaultValue={query} name="q" placeholder="Unit, name, phone, or block" />
+                <input className="w-full bg-transparent outline-none" defaultValue={query} name="q" placeholder={t.residents.searchPlaceholder} />
               </div>
             </label>
 
             <label className="grid gap-2 text-sm font-medium text-slate-700 md:w-56">
-              Status
+              {t.common.status}
               <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={selectedStatus} name="status">
-                <option value="">All statuses</option>
+                <option value="">{t.residents.allStatuses}</option>
                 {statuses.map((status) => (
                   <option key={status} value={status}>{statusLabel(status)}</option>
                 ))}
@@ -121,7 +134,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             </label>
 
             <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
-              Apply
+              {t.common.apply}
             </button>
           </form>
 
@@ -129,13 +142,13 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Unit</th>
-                  <th className="px-5 py-3 font-semibold">Resident</th>
-                  <th className="px-5 py-3 font-semibold">Contact</th>
-                  <th className="px-5 py-3 font-semibold">Block</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold">Records</th>
-                  <th className="px-5 py-3 font-semibold">Action</th>
+                  <th className="px-5 py-3 font-semibold">{t.residents.unit}</th>
+                  <th className="px-5 py-3 font-semibold">{t.residents.residentName}</th>
+                  <th className="px-5 py-3 font-semibold">{t.residents.contact}</th>
+                  <th className="px-5 py-3 font-semibold">{t.residents.block}</th>
+                  <th className="px-5 py-3 font-semibold">{t.common.status}</th>
+                  <th className="px-5 py-3 font-semibold">{t.residents.records}</th>
+                  <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -158,11 +171,11 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                         </span>
                       </td>
                       <td className="px-5 py-4 text-slate-600">
-                        {resident._count.payments} payments / {resident._count.coverages} months
+                        {resident._count.payments} {t.residents.payments} / {resident._count.coverages} {t.residents.months}
                       </td>
                       <td className="px-5 py-4">
                         <Link className="font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${resident.id}`}>
-                          View
+                          {t.common.view}
                         </Link>
                       </td>
                     </tr>
@@ -170,13 +183,60 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                 ) : (
                   <tr>
                     <td className="px-5 py-8 text-center text-slate-500" colSpan={7}>
-                      No resident records match this filter.
+                      {t.residents.noMatch}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
+              <p className="text-sm text-slate-600">
+                {t.common.showing} <span className="font-semibold">{skip + 1}</span> {t.common.to}{" "}
+                <span className="font-semibold">{Math.min(skip + ITEMS_PER_PAGE, totalCount)}</span> {t.common.of}{" "}
+                <span className="font-semibold">{totalCount}</span> residents
+              </p>
+              <div className="flex gap-2">
+                {page > 1 && (
+                  <Link
+                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    href={`/residents?q=${query}&status=${selectedStatus}&page=${page - 1}`}
+                  >
+                    {t.common.previous}
+                  </Link>
+                )}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <Link
+                        className={`rounded-md px-2.5 py-2 text-sm font-semibold transition ${
+                          pageNum === page
+                            ? "bg-cyan-600 text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                        href={`/residents?q=${query}&status=${selectedStatus}&page=${pageNum}`}
+                        key={pageNum}
+                      >
+                        {pageNum}
+                      </Link>
+                    );
+                  })}
+                </div>
+                {page < totalPages && (
+                  <Link
+                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    href={`/residents?q=${query}&status=${selectedStatus}&page=${page + 1}`}
+                  >
+                    {t.common.next}
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </main>

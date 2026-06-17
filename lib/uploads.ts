@@ -71,8 +71,9 @@ export function getSingleUploadedFile(formData: FormData, fieldName: string) {
   return getUploadedFile(files[0] ?? null);
 }
 
-export async function removeStoredUpload(storagePath: string) {
-  await rm(storagePath, { force: true });
+export async function removeStoredUpload(relativePath: string) {
+  const absolutePath = path.join(getUploadRoot(), relativePath);
+  await rm(absolutePath, { force: true });
 }
 
 export async function storeProofUpload(file: File, uploadScope = "public-submissions"): Promise<StoredUpload> {
@@ -113,11 +114,12 @@ export async function storeProofUpload(file: File, uploadScope = "public-submiss
   const storedExtension = mimeType === "image/jpeg" ? ".jpg" : expectedExtension;
   const storedFilename = `${randomUUID()}${storedExtension}`;
   const uploadDirectory = path.join(getUploadRoot(), uploadScope);
-  const storagePath = path.join(uploadDirectory, storedFilename);
+  const absolutePath = path.join(uploadDirectory, storedFilename);
+  const relativePath = path.join(uploadScope, storedFilename);
   const contentHash = createHash("sha256").update(buffer).digest("hex");
 
   await mkdir(uploadDirectory, { recursive: true });
-  await writeFile(storagePath, buffer, { flag: "wx" });
+  await writeFile(absolutePath, buffer, { flag: "wx" });
 
   return {
     originalFilename,
@@ -125,7 +127,7 @@ export async function storeProofUpload(file: File, uploadScope = "public-submiss
     mimeType,
     sizeBytes,
     contentHash,
-    storagePath,
+    storagePath: relativePath,
   };
 }
 

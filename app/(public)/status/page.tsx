@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Send, ShieldAlert } from "lucide-react";
 
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
+import { getDictionary } from "@/lib/i18n";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 
@@ -20,15 +21,22 @@ function fmtCell(amountSen: number) {
 
 export default async function StatusPage({ searchParams }: StatusPageProps) {
   const params = await searchParams;
+  const t = await getDictionary();
 
   const now = new Date();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  const { rows, specialCollections } = await getYearGridData({
+  const { rows: unsortedRows, specialCollections } = await getYearGridData({
     year: selectedYear,
     includeInactive: true,
+  });
+
+  const rows = [...unsortedRows].sort((a, b) => {
+    const unitA = parseInt(a.unitNumber, 10);
+    const unitB = parseInt(b.unitNumber, 10);
+    return unitA - unitB;
   });
 
   const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
@@ -38,9 +46,9 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       {/* Header section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Payment Status</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{t.publicStatus.title}</h1>
           <p className="mt-3 text-base text-slate-600">
-            View the payment status for all units in {selectedYear}. Marked payments are verified by the AJK team.
+            {t.publicStatus.subtitle.replace("{year}", String(selectedYear))}
           </p>
         </div>
         <Link
@@ -48,7 +56,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
           className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
         >
           <Send size={18} />
-          <span>Submit Payment</span>
+          <span>{t.publicStatus.submitPayment}</span>
         </Link>
       </div>
 
@@ -56,7 +64,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
         <form className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4" method="get">
           <label className="grid gap-2 sm:flex sm:items-end sm:gap-3">
-            <span className="text-sm font-medium text-slate-700">View year:</span>
+            <span className="text-sm font-medium text-slate-700">{t.publicStatus.viewYear}</span>
             <input
               className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:w-32"
               defaultValue={selectedYear}
@@ -70,7 +78,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
             className="rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
             type="submit"
           >
-            Update
+            {t.common.update}
           </button>
         </form>
       </div>
@@ -81,9 +89,9 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
           <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0)}rem` }}>
             <thead>
               <tr className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
-                <th className="sticky left-0 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 text-center font-semibold">No</th>
-                <th className="sticky left-8 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 font-semibold">Unit</th>
-                <th className="sticky left-28 z-10 min-w-32 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 font-semibold">Name</th>
+                <th className="sticky left-0 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 text-center font-semibold">{t.publicStatus.no}</th>
+                <th className="sticky left-8 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 font-semibold">{t.publicStatus.unit}</th>
+                <th className="min-w-32 px-3 py-3 font-semibold">{t.publicStatus.name}</th>
                 {MONTH_LABELS.map((label, i) => (
                   <th
                     className={`px-2 py-3 text-center font-semibold ${
@@ -104,7 +112,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                     </th>
                   ))}
                 {hasExtra && specialCollections.length === 0 && (
-                  <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white">Extra</th>
+                  <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white">{t.publicStatus.extra}</th>
                 )}
               </tr>
             </thead>
@@ -120,7 +128,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                     <td className={`sticky left-8 z-10 ${rowBg} border-b border-slate-100 px-3 py-2.5 font-semibold text-slate-800`}>
                       {row.unitNumber}
                     </td>
-                    <td className={`sticky left-28 z-10 min-w-32 ${rowBg} border-b border-slate-100 px-3 py-2.5 font-medium text-slate-900`}>
+                    <td className={`min-w-32 border-b border-slate-100 px-3 py-2.5 font-medium text-slate-900`}>
                       {row.name}
                     </td>
                     {row.isForSale ? (
@@ -187,7 +195,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
               {rows.length === 0 && (
                 <tr>
                   <td className="border-b border-slate-100 px-5 py-10 text-center text-slate-500" colSpan={16}>
-                    No resident records found.
+                    {t.publicStatus.noRecords}
                   </td>
                 </tr>
               )}
@@ -199,23 +207,23 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       {/* Legend and info */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
-          <h3 className="font-semibold text-slate-900">Payment Status Legend</h3>
+          <h3 className="font-semibold text-slate-900">{t.publicStatus.legendTitle}</h3>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3">
               <span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-300" />
-              <span className="text-sm text-slate-600">Paid (RM50.00 or more)</span>
+              <span className="text-sm text-slate-600">{t.publicStatus.paid}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-300" />
-              <span className="text-sm text-slate-600">Partial payment</span>
+              <span className="text-sm text-slate-600">{t.publicStatus.partial}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-300" />
-              <span className="text-sm text-slate-600">Unpaid (past month)</span>
+              <span className="text-sm text-slate-600">{t.publicStatus.unpaid}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="inline-block size-3 rounded-sm bg-slate-100" />
-              <span className="text-sm text-slate-600">Not applicable (FOR SALE / Exempt)</span>
+              <span className="text-sm text-slate-600">{t.publicStatus.notApplicable}</span>
             </div>
           </div>
         </div>
@@ -224,10 +232,8 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
           <div className="flex items-start gap-3">
             <ShieldAlert className="shrink-0 text-cyan-600" size={20} />
             <div>
-              <h3 className="font-semibold text-cyan-900">Privacy Protection</h3>
-              <p className="mt-2 text-sm text-cyan-800">
-                This report shows payment status only. Bank details, phone numbers, and payment proof files are not displayed here.
-              </p>
+              <h3 className="font-semibold text-cyan-900">{t.publicStatus.privacyTitle}</h3>
+              <p className="mt-2 text-sm text-cyan-800">{t.publicStatus.privacyDesc}</p>
             </div>
           </div>
         </div>

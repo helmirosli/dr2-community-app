@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { login, type AuthFormState } from "@/lib/actions/auth";
+import { useDictionary } from "@/lib/i18n/context";
 
 const initialState: AuthFormState = {
   ok: false,
@@ -11,23 +12,42 @@ const initialState: AuthFormState = {
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(login, initialState);
+  const { t } = useDictionary();
 
   return (
-    <form action={action} className="grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
-        Email
-        <input className="rounded-md border border-slate-300 px-3 py-2" name="email" required type="email" />
+    <form action={action} className="grid gap-7">
+      <label className="grid gap-1">
+        <span className="text-sm font-semibold text-slate-700">{t.login.email}</span>
+        <input
+          className="border-b border-slate-300 bg-transparent pb-2 pt-1 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:outline-none"
+          name="email"
+          placeholder={t.login.emailPlaceholder}
+          required
+          type="email"
+        />
       </label>
 
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
-        Password
-        <input className="rounded-md border border-slate-300 px-3 py-2" name="password" required type="password" />
+      <label className="grid gap-1">
+        <span className="text-sm font-semibold text-slate-700">{t.login.password}</span>
+        <input
+          className="border-b border-slate-300 bg-transparent pb-2 pt-1 text-sm text-slate-900 placeholder:text-slate-400 focus:border-cyan-600 focus:outline-none"
+          name="password"
+          placeholder={t.login.passwordPlaceholder}
+          required
+          type="password"
+        />
       </label>
 
-      {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
+      {state.message ? (
+        <p className="text-sm font-medium text-red-600">{state.message}</p>
+      ) : null}
 
-      <button className="min-h-11 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60" disabled={pending} type="submit">
-        {pending ? "Signing in..." : "Sign in"}
+      <button
+        className="mt-1 min-h-11 rounded-full bg-cyan-700 px-6 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? t.login.submitting : t.login.submit}
       </button>
     </form>
   );

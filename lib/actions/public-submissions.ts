@@ -113,8 +113,8 @@ export async function createPublicSubmission(
     await prisma.publicPaymentSubmission.create({
       data: {
         unitNumber: parsed.data.unitNumber,
-        residentName: parsed.data.residentName,
-        phone: parsed.data.phone,
+        residentName: parsed.data.residentName || "",
+        phone: parsed.data.phone || "",
         paymentType: parsed.data.paymentType,
         amountSen: parsed.data.amountSen,
         paymentDate: new Date(parsed.data.paymentDate),

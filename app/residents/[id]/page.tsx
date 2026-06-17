@@ -6,6 +6,7 @@ import { requireDashboardUser } from "@/lib/auth";
 import { formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
+import { FileViewer } from "@/app/components/file-viewer";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,9 +35,16 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
       },
       payments: {
         orderBy: { paymentDate: "desc" },
-        take: 8,
+        take: 10,
         include: {
-          uploads: true,
+          uploads: {
+            select: {
+              id: true,
+              originalFilename: true,
+              storagePath: true,
+              mimeType: true,
+            },
+          },
           coverages: {
             orderBy: [{ year: "asc" }, { month: "asc" }],
           },
@@ -117,27 +125,36 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
               <ReceiptText aria-hidden="true" className="text-cyan-700" size={19} />
               <h2 className="text-lg font-semibold tracking-tight">Recent payment history</h2>
             </div>
-            <div className="divide-y divide-slate-100">
-              {resident.payments.length > 0 ? (
-                resident.payments.map((payment) => (
-                  <div className="grid gap-3 px-5 py-4 text-sm" key={payment.id}>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-950">{formatRM(payment.amountSen)}</p>
-                        <p className="mt-1 text-slate-500">{payment.paymentType === "MONTHLY_FEE" ? "Monthly fee" : "Special collection"} / {payment.method}</p>
-                      </div>
-                      <p className="font-medium text-slate-600">{payment.paymentDate.toLocaleDateString("en-MY")}</p>
-                    </div>
-                    <p className="text-slate-600">
-                      Coverage: {payment.coverages.length > 0 ? `${monthLabel(payment.coverages[0].year, payment.coverages[0].month)} to ${monthLabel(payment.coverages[payment.coverages.length - 1].year, payment.coverages[payment.coverages.length - 1].month)}` : "Not monthly coverage"}
-                    </p>
-                    {payment.uploads.length > 0 ? <p className="text-slate-500">{payment.uploads.length} upload attached</p> : null}
-                  </div>
-                ))
-              ) : (
-                <p className="px-5 py-8 text-center text-sm text-slate-500">No official payment history yet.</p>
-              )}
-            </div>
+            {resident.payments.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left text-sm">
+                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold">Date</th>
+                      <th className="px-5 py-3 font-semibold">Amount</th>
+                      <th className="px-5 py-3 font-semibold">Coverage</th>
+                      <th className="px-5 py-3 font-semibold">Proof</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {resident.payments.map((payment) => (
+                      <tr className="hover:bg-slate-50" key={payment.id}>
+                        <td className="px-5 py-3 font-medium text-slate-600">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
+                        <td className="px-5 py-3 font-semibold text-slate-950">{formatRM(payment.amountSen)}</td>
+                        <td className="px-5 py-3 text-slate-600">
+                          {payment.coverages.length > 0 ? `${monthLabel(payment.coverages[0].year, payment.coverages[0].month)} – ${monthLabel(payment.coverages[payment.coverages.length - 1].year, payment.coverages[payment.coverages.length - 1].month)}` : "-"}
+                        </td>
+                        <td className="px-5 py-3">
+                          {payment.uploads.length > 0 ? <FileViewer files={payment.uploads} /> : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="px-5 py-8 text-center text-sm text-slate-500">No official payment history yet.</p>
+            )}
           </div>
         </section>
       </div>

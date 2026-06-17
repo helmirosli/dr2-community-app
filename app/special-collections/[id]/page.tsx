@@ -62,7 +62,7 @@ export default async function SpecialCollectionDetailPage({ params }: DetailPage
 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-7xl gap-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
         <Link className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900" href="/special-collections">
           <ArrowLeft aria-hidden="true" size={16} />
           Back to collections

@@ -1,6 +1,21 @@
 import Link from "next/link";
+import { getDictionary } from "@/lib/i18n";
+import { getCurrentUser } from "@/lib/auth";
+import { PublicLayoutClient } from "./public-layout-client";
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  const [t, user] = await Promise.all([getDictionary(), getCurrentUser()]);
+
+  if (user) {
+    return (
+      <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+        <div className="mx-auto grid w-full max-w-4xl gap-6">
+          {children}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
@@ -11,17 +26,18 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               DR2
             </div>
             <div>
-              <p className="text-sm font-bold tracking-tight text-slate-900">DR2 Community</p>
-              <p className="hidden text-xs text-slate-500 sm:block">Resident Portal</p>
+              <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
+              <p className="hidden text-xs text-slate-500 sm:block">{t.publicLayout.residentPortal}</p>
             </div>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-4">
             <Link href="/status" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
-              Status
+              {t.publicLayout.status}
             </Link>
             <Link href="/submit" className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
-              Submit
+              {t.publicLayout.submit}
             </Link>
+            <PublicLayoutClient />
           </nav>
         </div>
       </header>
@@ -31,7 +47,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
-        <p>DR2 Community Resident Fee System © {new Date().getFullYear()}</p>
+        <p>{t.publicLayout.footer} © {new Date().getFullYear()}</p>
       </footer>
     </div>
   );

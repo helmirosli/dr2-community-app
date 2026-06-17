@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { FileSpreadsheet, FileText, Home, LayoutList } from "lucide-react";
+import { FileSpreadsheet, FileText, Home, LayoutList, Upload } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
+import { getDictionary } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
@@ -26,13 +27,22 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   await requireDashboardUser();
   const params = await searchParams;
 
+  const t = await getDictionary();
+
   const now = new Date();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
-  const includeInactive = params.includeInactive === "on";
+  const includeInactive = params.includeInactive !== "off";
 
-  const { rows, specialCollections } = await getYearGridData({
+  const { rows: unsortedRows, specialCollections } = await getYearGridData({
     year: selectedYear,
     includeInactive,
+  });
+
+  // Always sort by unit number
+  const rows = [...unsortedRows].sort((a, b) => {
+    const unitA = parseInt(a.unitNumber, 10);
+    const unitB = parseInt(b.unitNumber, 10);
+    return unitA - unitB;
   });
 
   const currentYear = now.getFullYear();
@@ -53,54 +63,47 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const forSaleCount = rows.filter((r) => r.isForSale).length;
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-full gap-6 xl:max-w-screen-2xl">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <main className="px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
+        <header className="flex flex-col gap-4 sm:gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Resident fee report</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              Payment status — {selectedYear}
+            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.reports.title}</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              {t.reports.heading} — {selectedYear}
             </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Year-by-month grid for all households. Each cell shows the amount paid for that month.
+            <p className="mt-3 text-base text-slate-600">
+              {t.reports.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
-              href="/dashboard"
-            >
-              <Home aria-hidden="true" size={17} />
-              Dashboard
-            </Link>
-            <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-cyan-200 hover:bg-cyan-50"
-              href="/reports/monthly-detail"
-            >
-              <LayoutList aria-hidden="true" size={17} />
-              Monthly detail
-            </Link>
             <a
-              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-emerald-200 hover:bg-emerald-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               href={`/reports/yearly.xlsx?${exportQuery}`}
             >
-              <FileSpreadsheet aria-hidden="true" size={17} />
-              Excel
+              <FileSpreadsheet size={17} />
+              {t.reports.excel}
             </a>
             <a
-              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-red-200 hover:bg-red-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               href={`/reports/yearly.pdf?${exportQuery}`}
             >
-              <FileText aria-hidden="true" size={17} />
-              PDF
+              <FileText size={17} />
+              {t.reports.pdf}
             </a>
+            <Link
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              href="/reports/file-upload"
+            >
+              <Upload size={17} />
+              {t.reports.upload}
+            </Link>
           </div>
         </header>
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
-          <form className="flex flex-wrap items-end gap-4 border-b border-slate-100 px-5 py-4" method="get">
+        <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <form className="flex flex-wrap items-end gap-4 border-b border-slate-100 px-6 py-4" method="get">
             <label className="grid gap-2 text-sm font-medium text-slate-700">
-              Year
+              {t.common.year}
               <input
                 className="w-28 rounded-md border border-slate-300 px-3 py-2"
                 defaultValue={selectedYear}
@@ -112,16 +115,16 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             </label>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
               <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
-              Include FOR SALE / moved-out units
+              {t.reports.includeInactive}
             </label>
             <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
-              Apply
+              {t.common.apply}
             </button>
             <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-600">
-              <span><span className="font-semibold text-slate-900">{rows.length}</span> total units</span>
-              <span><span className="font-semibold text-emerald-700">{paidAll}</span> fully paid</span>
-              <span><span className="font-semibold text-red-600">{hasArrears}</span> have arrears</span>
-              {forSaleCount > 0 && <span><span className="font-semibold text-slate-500">{forSaleCount}</span> for sale</span>}
+              <span><span className="font-semibold text-slate-900">{rows.length}</span> {t.reports.totalUnits}</span>
+              <span><span className="font-semibold text-emerald-700">{paidAll}</span> {t.reports.fullyPaid}</span>
+              <span><span className="font-semibold text-red-600">{hasArrears}</span> {t.reports.haveArrears}</span>
+              {forSaleCount > 0 && <span><span className="font-semibold text-slate-500">{forSaleCount}</span> {t.reports.forSale}</span>}
             </div>
           </form>
 
@@ -202,9 +205,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                                       RM{(row.extraOutstandingSen / 100).toFixed(2)}
                                     </span>
                                   ) : row.extraDueSen > 0 ? (
-                                    <span className="text-emerald-600">✓</span>
+                                    <span className="text-emerald-600">{"\u2713"}</span>
                                   ) : (
-                                    <span className="text-slate-300">—</span>
+                                    <span className="text-slate-300">{"\u2014"}</span>
                                   )}
                                 </td>
                               ))
@@ -215,9 +218,9 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                                       RM{(row.extraOutstandingSen / 100).toFixed(2)}
                                     </span>
                                   ) : row.extraDueSen > 0 ? (
-                                    <span className="text-emerald-600">✓</span>
+                                    <span className="text-emerald-600">{"\u2713"}</span>
                                   ) : (
-                                    <span className="text-slate-300">—</span>
+                                    <span className="text-slate-300">{"\u2014"}</span>
                                   )}
                                 </td>
                               )}
@@ -229,7 +232,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 {rows.length === 0 && (
                   <tr>
                     <td className="px-5 py-10 text-center text-slate-500" colSpan={16}>
-                      No residents found.
+                      {t.reports.noResidents}
                     </td>
                   </tr>
                 )}
@@ -238,12 +241,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-6 border-t border-slate-100 px-5 py-4 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-200" />Paid (RM50.00)</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />Partial payment</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-100" />Unpaid past month</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-slate-100" />FOR SALE / Vacant</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-200" />{t.reports.paid}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.partialPayment}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-100" />{t.reports.unpaidPast}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-slate-100" />{t.reports.forSaleVacant}</span>
             {(hasExtra || specialCollections.length > 0) && (
-              <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />Special collection</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.specialCollectionLegend}</span>
             )}
           </div>
         </section>

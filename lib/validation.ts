@@ -9,8 +9,8 @@ const optionalText = z.string().trim().optional().or(z.literal(""));
 export const publicSubmissionSchema = z
   .object({
     unitNumber: requiredText.max(30),
-    residentName: requiredText.max(120),
-    phone: requiredText.max(40),
+    residentName: optionalText,
+    phone: optionalText,
     paymentType: z.enum(["MONTHLY_FEE", "SPECIAL_COLLECTION"]),
     amount: z.coerce.number().positive().max(100000),
     paymentDate: requiredText,
@@ -57,6 +57,8 @@ export const publicSubmissionSchema = z
   .transform((value) => ({
     ...value,
     amountSen: ringgitToSen(value.amount),
+    residentName: value.residentName || undefined,
+    phone: value.phone || undefined,
     referenceNo: value.referenceNo || undefined,
     notes: value.notes || undefined,
   }));
