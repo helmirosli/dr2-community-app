@@ -118,6 +118,7 @@ export async function storeProofUpload(file: File, uploadScope = "public-submiss
   const relativePath = path.join(uploadScope, storedFilename);
   const contentHash = createHash("sha256").update(buffer).digest("hex");
 
+  await mkdir(getUploadRoot(), { recursive: true });
   await mkdir(uploadDirectory, { recursive: true });
   await writeFile(absolutePath, buffer, { flag: "wx" });
 
