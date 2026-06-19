@@ -24,7 +24,8 @@ const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
 export function SubmitPaymentForm() {
   const [state, action, pending] = useActionState(createPublicSubmission, initialState);
   const { t } = useDictionary();
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const errorDialogRef = useRef<HTMLDialogElement>(null);
+  const successDialogRef = useRef<HTMLDialogElement>(null);
 
   const paymentTypeOptions = [
     { value: "MONTHLY_FEE", label: t.publicSubmit.monthlyFeeOption },
@@ -42,14 +43,21 @@ export function SubmitPaymentForm() {
 
   useEffect(() => {
     if (state.message && !state.ok) {
-      dialogRef.current?.showModal();
+      errorDialogRef.current?.showModal();
+    }
+  }, [state]);
+
+  useEffect(() => {
+    if (state.message && state.ok) {
+      successDialogRef.current?.showModal();
     }
   }, [state]);
 
   return (
     <>
+      {/* Error dialog */}
       <dialog
-        ref={dialogRef}
+        ref={errorDialogRef}
         className="m-auto w-full max-w-md rounded-xl border border-red-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
       >
         <div className="p-6">
@@ -65,7 +73,7 @@ export function SubmitPaymentForm() {
             </div>
             <button
               className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-              onClick={() => dialogRef.current?.close()}
+              onClick={() => errorDialogRef.current?.close()}
               type="button"
             >
               <X size={18} />
@@ -74,7 +82,43 @@ export function SubmitPaymentForm() {
           <div className="mt-6 flex justify-end">
             <button
               className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
-              onClick={() => dialogRef.current?.close()}
+              onClick={() => errorDialogRef.current?.close()}
+              type="button"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </dialog>
+
+      {/* Success dialog */}
+      <dialog
+        ref={successDialogRef}
+        className="m-auto w-full max-w-md rounded-xl border border-emerald-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
+      >
+        <div className="p-6">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+              <CheckCircle className="text-emerald-600" size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-slate-900">
+                Submission Received
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{state.message}</p>
+            </div>
+            <button
+              className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              onClick={() => successDialogRef.current?.close()}
+              type="button"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              onClick={() => successDialogRef.current?.close()}
               type="button"
             >
               OK
@@ -238,14 +282,6 @@ export function SubmitPaymentForm() {
         <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.verification}</h3>
         <TurnstileWidget />
       </div>
-
-      {/* Messages */}
-      {state.message && state.ok && (
-        <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          <CheckCircle className="shrink-0" size={18} />
-          <p>{state.message}</p>
-        </div>
-      )}
 
       {/* Submit button */}
       <button
