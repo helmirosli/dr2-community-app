@@ -18,7 +18,7 @@ Recommended stack:
 - Server logic: Next.js Server Actions and Route Handlers.
 - Database: SQLite with Prisma ORM for schema, migrations, and type-safe queries.
 - Authentication: Auth.js, Lucia, or a simple secure session implementation for admin/AJK login.
-- File uploads: Store PDF/image files on disk for MVP, with metadata in SQLite. Move to S3-compatible storage later if needed.
+- File uploads: Store PDF/image files in Google Cloud Storage, with metadata in SQLite.
 - Reports: Generate Excel with ExcelJS and PDF with a server-side PDF library from Next.js server code.
 - Deployment: Node.js runtime hosting with persistent storage, such as a VPS, Railway persistent volume, Fly.io volume, Render disk, or another host that supports SQLite and uploads.
 
@@ -30,7 +30,7 @@ Future scale option:
 
 - Keep Next.js.
 - Move SQLite to PostgreSQL if concurrent usage, hosting, or backup needs grow.
-- Move uploaded files to S3-compatible object storage.
+- Files are now stored in Google Cloud Storage, eliminating the need for a separate migration.
 - Add Redis or a managed rate limit service if the app is deployed across multiple instances.
 
 ## 3. Main Users

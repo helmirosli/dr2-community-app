@@ -23,7 +23,7 @@ Admin and AJK users are the only logged-in users. Residents do not log in; they 
 - Use Next.js Server Actions and Route Handlers for server-side logic.
 - Use SQLite with Prisma as the source of truth.
 - Do not use Markdown files as the main database.
-- Keep uploaded receipt files on disk for MVP and store metadata in SQLite.
+- Store uploaded receipt files in Google Cloud Storage and store metadata in SQLite.
 - Generate reports from database records, not from manually maintained spreadsheets.
 - If the app grows beyond SQLite, migrate to PostgreSQL while keeping the Next.js architecture.
 

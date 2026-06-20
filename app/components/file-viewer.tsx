@@ -9,6 +9,7 @@ type FileViewerProps = {
     originalFilename: string;
     storagePath: string;
     mimeType: string;
+    url?: string;
   }>;
   triggerLabel?: string;
 };
@@ -87,14 +88,14 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                         <img
                           alt={selectedFile.originalFilename}
                           className="mt-2 max-w-full rounded-lg border border-slate-200"
-                          src={`/api/uploads/${selectedFile.storagePath}`}
+                          src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
                         />
                       </div>
                     ) : selectedFile.mimeType === "application/pdf" ? (
                       <div className="mt-4">
                         <p className="text-xs font-semibold text-slate-600 uppercase">Preview</p>
                         <embed
-                          src={`/api/uploads/${selectedFile.storagePath}`}
+                          src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
                           type="application/pdf"
                           className="w-full h-96 rounded-lg border border-slate-200 mt-2"
                         />
@@ -109,7 +110,7 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 mt-4"
                       onClick={() => {
                         const link = document.createElement("a");
-                        link.href = `/api/uploads/${selectedFile.storagePath}`;
+                        link.href = selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`;
                         link.download = selectedFile.originalFilename;
                         document.body.appendChild(link);
                         link.click();

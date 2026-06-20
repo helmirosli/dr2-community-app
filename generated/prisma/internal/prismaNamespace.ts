@@ -1295,6 +1295,7 @@ export const UploadScalarFieldEnum = {
   sizeBytes: 'sizeBytes',
   contentHash: 'contentHash',
   storagePath: 'storagePath',
+  url: 'url',
   uploadedAt: 'uploadedAt'
 } as const
 

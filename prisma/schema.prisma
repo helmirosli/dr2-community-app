@@ -188,6 +188,7 @@ model Upload {
   sizeBytes        Int
   contentHash      String?
   storagePath      String
+  url              String?
   uploadedAt       DateTime                 @default(now())
 
   @@schema("desarestu_db")

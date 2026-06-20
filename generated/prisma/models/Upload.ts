@@ -44,6 +44,7 @@ export type UploadMinAggregateOutputType = {
   sizeBytes: number | null
   contentHash: string | null
   storagePath: string | null
+  url: string | null
   uploadedAt: Date | null
 }
 
@@ -57,6 +58,7 @@ export type UploadMaxAggregateOutputType = {
   sizeBytes: number | null
   contentHash: string | null
   storagePath: string | null
+  url: string | null
   uploadedAt: Date | null
 }
 
@@ -70,6 +72,7 @@ export type UploadCountAggregateOutputType = {
   sizeBytes: number
   contentHash: number
   storagePath: number
+  url: number
   uploadedAt: number
   _all: number
 }
@@ -93,6 +96,7 @@ export type UploadMinAggregateInputType = {
   sizeBytes?: true
   contentHash?: true
   storagePath?: true
+  url?: true
   uploadedAt?: true
 }
 
@@ -106,6 +110,7 @@ export type UploadMaxAggregateInputType = {
   sizeBytes?: true
   contentHash?: true
   storagePath?: true
+  url?: true
   uploadedAt?: true
 }
 
@@ -119,6 +124,7 @@ export type UploadCountAggregateInputType = {
   sizeBytes?: true
   contentHash?: true
   storagePath?: true
+  url?: true
   uploadedAt?: true
   _all?: true
 }
@@ -219,6 +225,7 @@ export type UploadGroupByOutputType = {
   sizeBytes: number
   contentHash: string | null
   storagePath: string
+  url: string | null
   uploadedAt: Date
   _count: UploadCountAggregateOutputType | null
   _avg: UploadAvgAggregateOutputType | null
@@ -255,6 +262,7 @@ export type UploadWhereInput = {
   sizeBytes?: Prisma.IntFilter<"Upload"> | number
   contentHash?: Prisma.StringNullableFilter<"Upload"> | string | null
   storagePath?: Prisma.StringFilter<"Upload"> | string
+  url?: Prisma.StringNullableFilter<"Upload"> | string | null
   uploadedAt?: Prisma.DateTimeFilter<"Upload"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
   submission?: Prisma.XOR<Prisma.PublicPaymentSubmissionNullableScalarRelationFilter, Prisma.PublicPaymentSubmissionWhereInput> | null
@@ -270,6 +278,7 @@ export type UploadOrderByWithRelationInput = {
   sizeBytes?: Prisma.SortOrder
   contentHash?: Prisma.SortOrderInput | Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
   payment?: Prisma.PaymentOrderByWithRelationInput
   submission?: Prisma.PublicPaymentSubmissionOrderByWithRelationInput
@@ -288,6 +297,7 @@ export type UploadWhereUniqueInput = Prisma.AtLeast<{
   sizeBytes?: Prisma.IntFilter<"Upload"> | number
   contentHash?: Prisma.StringNullableFilter<"Upload"> | string | null
   storagePath?: Prisma.StringFilter<"Upload"> | string
+  url?: Prisma.StringNullableFilter<"Upload"> | string | null
   uploadedAt?: Prisma.DateTimeFilter<"Upload"> | Date | string
   payment?: Prisma.XOR<Prisma.PaymentNullableScalarRelationFilter, Prisma.PaymentWhereInput> | null
   submission?: Prisma.XOR<Prisma.PublicPaymentSubmissionNullableScalarRelationFilter, Prisma.PublicPaymentSubmissionWhereInput> | null
@@ -303,6 +313,7 @@ export type UploadOrderByWithAggregationInput = {
   sizeBytes?: Prisma.SortOrder
   contentHash?: Prisma.SortOrderInput | Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  url?: Prisma.SortOrderInput | Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
   _count?: Prisma.UploadCountOrderByAggregateInput
   _avg?: Prisma.UploadAvgOrderByAggregateInput
@@ -324,6 +335,7 @@ export type UploadScalarWhereWithAggregatesInput = {
   sizeBytes?: Prisma.IntWithAggregatesFilter<"Upload"> | number
   contentHash?: Prisma.StringNullableWithAggregatesFilter<"Upload"> | string | null
   storagePath?: Prisma.StringWithAggregatesFilter<"Upload"> | string
+  url?: Prisma.StringNullableWithAggregatesFilter<"Upload"> | string | null
   uploadedAt?: Prisma.DateTimeWithAggregatesFilter<"Upload"> | Date | string
 }
 
@@ -335,6 +347,7 @@ export type UploadCreateInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
   payment?: Prisma.PaymentCreateNestedOneWithoutUploadsInput
   submission?: Prisma.PublicPaymentSubmissionCreateNestedOneWithoutUploadsInput
@@ -350,6 +363,7 @@ export type UploadUncheckedCreateInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -361,6 +375,7 @@ export type UploadUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payment?: Prisma.PaymentUpdateOneWithoutUploadsNestedInput
   submission?: Prisma.PublicPaymentSubmissionUpdateOneWithoutUploadsNestedInput
@@ -376,6 +391,7 @@ export type UploadUncheckedUpdateInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -389,6 +405,7 @@ export type UploadCreateManyInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -400,6 +417,7 @@ export type UploadUpdateManyMutationInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -413,6 +431,7 @@ export type UploadUncheckedUpdateManyInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -436,6 +455,7 @@ export type UploadCountOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   contentHash?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  url?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
 
@@ -453,6 +473,7 @@ export type UploadMaxOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   contentHash?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  url?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
 
@@ -466,6 +487,7 @@ export type UploadMinOrderByAggregateInput = {
   sizeBytes?: Prisma.SortOrder
   contentHash?: Prisma.SortOrder
   storagePath?: Prisma.SortOrder
+  url?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
 
@@ -565,6 +587,7 @@ export type UploadCreateWithoutPaymentInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
   submission?: Prisma.PublicPaymentSubmissionCreateNestedOneWithoutUploadsInput
 }
@@ -578,6 +601,7 @@ export type UploadUncheckedCreateWithoutPaymentInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -620,6 +644,7 @@ export type UploadScalarWhereInput = {
   sizeBytes?: Prisma.IntFilter<"Upload"> | number
   contentHash?: Prisma.StringNullableFilter<"Upload"> | string | null
   storagePath?: Prisma.StringFilter<"Upload"> | string
+  url?: Prisma.StringNullableFilter<"Upload"> | string | null
   uploadedAt?: Prisma.DateTimeFilter<"Upload"> | Date | string
 }
 
@@ -631,6 +656,7 @@ export type UploadCreateWithoutSubmissionInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
   payment?: Prisma.PaymentCreateNestedOneWithoutUploadsInput
 }
@@ -644,6 +670,7 @@ export type UploadUncheckedCreateWithoutSubmissionInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -682,6 +709,7 @@ export type UploadCreateManyPaymentInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -693,6 +721,7 @@ export type UploadUpdateWithoutPaymentInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submission?: Prisma.PublicPaymentSubmissionUpdateOneWithoutUploadsNestedInput
 }
@@ -706,6 +735,7 @@ export type UploadUncheckedUpdateWithoutPaymentInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -718,6 +748,7 @@ export type UploadUncheckedUpdateManyWithoutPaymentInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -730,6 +761,7 @@ export type UploadCreateManySubmissionInput = {
   sizeBytes: number
   contentHash?: string | null
   storagePath: string
+  url?: string | null
   uploadedAt?: Date | string
 }
 
@@ -741,6 +773,7 @@ export type UploadUpdateWithoutSubmissionInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payment?: Prisma.PaymentUpdateOneWithoutUploadsNestedInput
 }
@@ -754,6 +787,7 @@ export type UploadUncheckedUpdateWithoutSubmissionInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -766,6 +800,7 @@ export type UploadUncheckedUpdateManyWithoutSubmissionInput = {
   sizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
   contentHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   storagePath?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -781,6 +816,7 @@ export type UploadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   sizeBytes?: boolean
   contentHash?: boolean
   storagePath?: boolean
+  url?: boolean
   uploadedAt?: boolean
   payment?: boolean | Prisma.Upload$paymentArgs<ExtArgs>
   submission?: boolean | Prisma.Upload$submissionArgs<ExtArgs>
@@ -796,6 +832,7 @@ export type UploadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sizeBytes?: boolean
   contentHash?: boolean
   storagePath?: boolean
+  url?: boolean
   uploadedAt?: boolean
   payment?: boolean | Prisma.Upload$paymentArgs<ExtArgs>
   submission?: boolean | Prisma.Upload$submissionArgs<ExtArgs>
@@ -811,6 +848,7 @@ export type UploadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   sizeBytes?: boolean
   contentHash?: boolean
   storagePath?: boolean
+  url?: boolean
   uploadedAt?: boolean
   payment?: boolean | Prisma.Upload$paymentArgs<ExtArgs>
   submission?: boolean | Prisma.Upload$submissionArgs<ExtArgs>
@@ -826,10 +864,11 @@ export type UploadSelectScalar = {
   sizeBytes?: boolean
   contentHash?: boolean
   storagePath?: boolean
+  url?: boolean
   uploadedAt?: boolean
 }
 
-export type UploadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentId" | "submissionId" | "originalFilename" | "storedFilename" | "mimeType" | "sizeBytes" | "contentHash" | "storagePath" | "uploadedAt", ExtArgs["result"]["upload"]>
+export type UploadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paymentId" | "submissionId" | "originalFilename" | "storedFilename" | "mimeType" | "sizeBytes" | "contentHash" | "storagePath" | "url" | "uploadedAt", ExtArgs["result"]["upload"]>
 export type UploadInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment?: boolean | Prisma.Upload$paymentArgs<ExtArgs>
   submission?: boolean | Prisma.Upload$submissionArgs<ExtArgs>
@@ -859,6 +898,7 @@ export type $UploadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     sizeBytes: number
     contentHash: string | null
     storagePath: string
+    url: string | null
     uploadedAt: Date
   }, ExtArgs["result"]["upload"]>
   composites: {}
@@ -1294,6 +1334,7 @@ export interface UploadFieldRefs {
   readonly sizeBytes: Prisma.FieldRef<"Upload", 'Int'>
   readonly contentHash: Prisma.FieldRef<"Upload", 'String'>
   readonly storagePath: Prisma.FieldRef<"Upload", 'String'>
+  readonly url: Prisma.FieldRef<"Upload", 'String'>
   readonly uploadedAt: Prisma.FieldRef<"Upload", 'DateTime'>
 }
     

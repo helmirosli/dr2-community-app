@@ -26,13 +26,13 @@ The project will use a full-stack Next.js app with SQLite:
 - SQLite as the first production database.
 - Prisma ORM for schema, migrations, and type-safe database access.
 - Auth.js, Lucia, or secure custom sessions for admin/AJK login.
-- Local disk storage for PDF/image proof uploads in MVP, with metadata stored in SQLite.
+- Google Cloud Storage for PDF/image proof uploads, with metadata stored in SQLite.
 - Excel export using ExcelJS.
 - PDF export using a server-side PDF library.
 
 This is a good fit because the app needs both dashboard UI and secure server-side logic. Residents can access a public no-login form, while validation, anti-spam checks, file upload checks, approval logic, and database writes stay on the Next.js server.
 
-SQLite is suitable for the first version because this is a community-sized system with structured payment records and reports. If the app later needs more concurrent usage or easier cloud scaling, migrate SQLite to PostgreSQL and move uploaded files to S3-compatible storage.
+SQLite is suitable for the first version because this is a community-sized system with structured payment records and reports. If the app later needs more concurrent usage or easier cloud scaling, migrate SQLite to PostgreSQL for scaling.
 
 ## Planned Repository Structure
 
@@ -44,7 +44,7 @@ dr2-community/
   prisma/
     schema.prisma        # SQLite data model
     migrations/
-  uploads/               # Local uploaded proof files, ignored by git
+  # uploads/ directory removed — files now stored in Google Cloud Storage
   docs/
   plan.md
   readme.md

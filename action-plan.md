@@ -31,10 +31,10 @@ Goal: make the public resident form accept one payment proof file safely.
 
 Tasks:
 
-- Confirm `UPLOAD_DIR` and upload size environment defaults.
+- Confirm `GCS_BUCKET_NAME` and upload size environment defaults.
 - Validate file presence for non-cash payments.
 - Validate extension, MIME type, file signature, and file size on the server.
-- Store uploads outside the source/build folders.
+- Store uploads in Google Cloud Storage.
 - Save upload metadata in SQLite through the `Upload` model.
 - Attach the upload to `PublicPaymentSubmission` until approval.
 - Move/link the upload to the official `Payment` when approved.
@@ -45,7 +45,7 @@ Acceptance:
 - Cash submissions can be submitted without a proof file.
 - Bank transfer, DuitNow, e-wallet, cheque, and other non-cash submissions require a proof file.
 - Invalid files are rejected with a clear message.
-- Valid uploads are stored under the configured upload directory and recorded in SQLite.
+- Valid uploads are stored in Google Cloud Storage and recorded in SQLite.
 - `npm run lint` and `npm run build` pass.
 
 ## Next MVP Actions After Uploads

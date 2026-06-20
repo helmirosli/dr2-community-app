@@ -42,5 +42,6 @@ next-env.d.ts
 
 # local app data
 /data/
-# /uploads/ - unignore to track uploads folder
+# /uploads/
+/uploads/
 /reports/
