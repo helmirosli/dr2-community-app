@@ -174,9 +174,8 @@ export async function storeProofUpload(
     resumable: false,
   });
 
-  const gcsBaseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
-  const bucketName = process.env.GCS_BUCKET_NAME ?? "";
-  const url = `${gcsBaseUrl}/${bucketName}/${gcsPath}`;
+  const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
+  const url = `${baseUrl}/${gcsPath}`;
 
   return {
     originalFilename,

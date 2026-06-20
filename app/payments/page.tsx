@@ -47,6 +47,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             originalFilename: true,
             storagePath: true,
             mimeType: true,
+            url: true,
           },
         },
       },

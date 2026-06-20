@@ -43,6 +43,7 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
               originalFilename: true,
               storagePath: true,
               mimeType: true,
+              url: true,
             },
           },
           coverages: {

@@ -9,7 +9,7 @@ type FileViewerProps = {
     originalFilename: string;
     storagePath: string;
     mimeType: string;
-    url?: string;
+    url?: string | null;
   }>;
   triggerLabel?: string;
 };

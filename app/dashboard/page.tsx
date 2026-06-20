@@ -74,6 +74,7 @@ export default async function DashboardPage() {
             originalFilename: true,
             storagePath: true,
             mimeType: true,
+            url: true,
           },
         },
       },
