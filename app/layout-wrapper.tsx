@@ -8,7 +8,7 @@ const allNavItems = [
   { key: "payments" as const, icon: "ReceiptText" as const, href: "/payments", requiredRole: undefined },
   { key: "collections" as const, icon: "Gift" as const, href: "/special-collections", requiredRole: undefined },
   { key: "reports" as const, icon: "FileSpreadsheet" as const, href: "/reports", requiredRole: undefined },
-  { key: "settings" as const, icon: "Settings" as const, href: "/settings", requiredRole: "ADMIN" },
+  { key: "settings" as const, icon: "Settings" as const, href: "/settings" },
 ];
 
 export async function LayoutWrapper({ children }: { children: React.ReactNode }) {

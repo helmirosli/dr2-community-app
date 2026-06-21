@@ -47,6 +47,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             { name: { contains: query } },
             { phone: { contains: query } },
             { streetBlock: { contains: query } },
+            { addressLine1: { contains: query } },
           ],
         }
       : {}),

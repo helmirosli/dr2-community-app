@@ -51,6 +51,12 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
           },
         },
       },
+      tenants: {
+        orderBy: { createdAt: "asc" },
+      },
+      vehicles: {
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -75,6 +81,12 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
             <Link className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50" href={`/payments/new?residentId=${resident.id}`}>
               <ReceiptText aria-hidden="true" size={17} />
               Record payment
+            </Link>
+            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50" href={`/residents/${resident.id}/tenants`}>
+              Manage tenants
+            </Link>
+            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:bg-slate-50" href={`/residents/${resident.id}/vehicles`}>
+              Manage vehicles
             </Link>
             <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" href={`/residents/${resident.id}/edit`}>
               <Edit aria-hidden="true" size={17} />
@@ -119,6 +131,39 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
                 <dd className="mt-1 leading-6 text-slate-700">{resident.notes ?? "No notes recorded."}</dd>
               </div>
             </dl>
+          </div>
+
+          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-semibold tracking-tight">Address</h2>
+            <dl className="mt-4 grid gap-4 text-sm">
+              {resident.addressLine1 && (
+                <>
+                  <div>
+                    <dt className="font-medium text-slate-500">Address</dt>
+                    <dd className="mt-1 text-slate-950">
+                      {resident.addressLine1}
+                      {resident.addressLine2 ? `, ${resident.addressLine2}` : ""}
+                    </dd>
+                  </div>
+                </>
+              )}
+              {resident.city || resident.state || resident.zipCode ? (
+                <div>
+                  <dt className="font-medium text-slate-500">&nbsp;</dt>
+                  <dd className="mt-1 text-slate-950">
+                    {[resident.city, resident.state, resident.zipCode].filter(Boolean).join(", ")}
+                  </dd>
+                </div>
+              ) : (
+                <div>
+                  <dt className="font-medium text-slate-500">&nbsp;</dt>
+                  <dd className="mt-1 text-slate-950">No address recorded.</dd>
+                </div>
+              )}
+            </dl>
+            <Link className="mt-4 inline-block text-sm font-semibold text-cyan-700 hover:text-cyan-800" href={`/residents/${resident.id}/edit`}>
+              Edit address →
+            </Link>
           </div>
 
           <div className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">

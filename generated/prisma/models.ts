@@ -9,6 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Resident'
+export type * from './models/Tenant'
+export type * from './models/ResidentVehicle'
+export type * from './models/TenantVehicle'
 export type * from './models/FeePlan'
 export type * from './models/Payment'
 export type * from './models/PaymentCoverage'

@@ -1,3 +1,0 @@
--- ResidentStatus: add FOR_SALE value
--- SQLite stores enums as TEXT; no column change needed.
--- Prisma client regeneration picks up the new allowed value.

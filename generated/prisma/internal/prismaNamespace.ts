@@ -385,6 +385,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Resident: 'Resident',
+  Tenant: 'Tenant',
+  ResidentVehicle: 'ResidentVehicle',
+  TenantVehicle: 'TenantVehicle',
   FeePlan: 'FeePlan',
   Payment: 'Payment',
   PaymentCoverage: 'PaymentCoverage',
@@ -409,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "resident" | "feePlan" | "payment" | "paymentCoverage" | "specialCollection" | "specialCollectionAssignment" | "upload" | "publicPaymentSubmission" | "user" | "auditLog"
+    modelProps: "resident" | "tenant" | "residentVehicle" | "tenantVehicle" | "feePlan" | "payment" | "paymentCoverage" | "specialCollection" | "specialCollectionAssignment" | "upload" | "publicPaymentSubmission" | "user" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -484,6 +487,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ResidentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ResidentCountAggregateOutputType> | number
+        }
+      }
+    }
+    Tenant: {
+      payload: Prisma.$TenantPayload<ExtArgs>
+      fields: Prisma.TenantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findMany: {
+          args: Prisma.TenantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        create: {
+          args: Prisma.TenantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        createMany: {
+          args: Prisma.TenantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        update: {
+          args: Prisma.TenantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenant>
+        }
+        groupBy: {
+          args: Prisma.TenantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    ResidentVehicle: {
+      payload: Prisma.$ResidentVehiclePayload<ExtArgs>
+      fields: Prisma.ResidentVehicleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ResidentVehicleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ResidentVehicleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        findFirst: {
+          args: Prisma.ResidentVehicleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ResidentVehicleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        findMany: {
+          args: Prisma.ResidentVehicleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>[]
+        }
+        create: {
+          args: Prisma.ResidentVehicleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        createMany: {
+          args: Prisma.ResidentVehicleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ResidentVehicleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>[]
+        }
+        delete: {
+          args: Prisma.ResidentVehicleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        update: {
+          args: Prisma.ResidentVehicleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        deleteMany: {
+          args: Prisma.ResidentVehicleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ResidentVehicleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ResidentVehicleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>[]
+        }
+        upsert: {
+          args: Prisma.ResidentVehicleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResidentVehiclePayload>
+        }
+        aggregate: {
+          args: Prisma.ResidentVehicleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateResidentVehicle>
+        }
+        groupBy: {
+          args: Prisma.ResidentVehicleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResidentVehicleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ResidentVehicleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResidentVehicleCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantVehicle: {
+      payload: Prisma.$TenantVehiclePayload<ExtArgs>
+      fields: Prisma.TenantVehicleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantVehicleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantVehicleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        findFirst: {
+          args: Prisma.TenantVehicleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantVehicleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        findMany: {
+          args: Prisma.TenantVehicleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>[]
+        }
+        create: {
+          args: Prisma.TenantVehicleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        createMany: {
+          args: Prisma.TenantVehicleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantVehicleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>[]
+        }
+        delete: {
+          args: Prisma.TenantVehicleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        update: {
+          args: Prisma.TenantVehicleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantVehicleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantVehicleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantVehicleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantVehicleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantVehiclePayload>
+        }
+        aggregate: {
+          args: Prisma.TenantVehicleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantVehicle>
+        }
+        groupBy: {
+          args: Prisma.TenantVehicleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantVehicleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantVehicleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantVehicleCountAggregateOutputType> | number
         }
       }
     }
@@ -1199,6 +1424,11 @@ export const ResidentScalarFieldEnum = {
   phone: 'phone',
   email: 'email',
   streetBlock: 'streetBlock',
+  addressLine1: 'addressLine1',
+  addressLine2: 'addressLine2',
+  city: 'city',
+  state: 'state',
+  zipCode: 'zipCode',
   status: 'status',
   notes: 'notes',
   createdAt: 'createdAt',
@@ -1206,6 +1436,45 @@ export const ResidentScalarFieldEnum = {
 } as const
 
 export type ResidentScalarFieldEnum = (typeof ResidentScalarFieldEnum)[keyof typeof ResidentScalarFieldEnum]
+
+
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  residentId: 'residentId',
+  name: 'name',
+  phone: 'phone',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const ResidentVehicleScalarFieldEnum = {
+  id: 'id',
+  residentId: 'residentId',
+  make: 'make',
+  model: 'model',
+  plateNumber: 'plateNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResidentVehicleScalarFieldEnum = (typeof ResidentVehicleScalarFieldEnum)[keyof typeof ResidentVehicleScalarFieldEnum]
+
+
+export const TenantVehicleScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  make: 'make',
+  model: 'model',
+  plateNumber: 'plateNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantVehicleScalarFieldEnum = (typeof TenantVehicleScalarFieldEnum)[keyof typeof TenantVehicleScalarFieldEnum]
 
 
 export const FeePlanScalarFieldEnum = {
@@ -1656,6 +1925,9 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   resident?: Prisma.ResidentOmit
+  tenant?: Prisma.TenantOmit
+  residentVehicle?: Prisma.ResidentVehicleOmit
+  tenantVehicle?: Prisma.TenantVehicleOmit
   feePlan?: Prisma.FeePlanOmit
   payment?: Prisma.PaymentOmit
   paymentCoverage?: Prisma.PaymentCoverageOmit

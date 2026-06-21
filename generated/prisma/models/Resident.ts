@@ -31,6 +31,11 @@ export type ResidentMinAggregateOutputType = {
   phone: string | null
   email: string | null
   streetBlock: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
   status: $Enums.ResidentStatus | null
   notes: string | null
   createdAt: Date | null
@@ -44,6 +49,11 @@ export type ResidentMaxAggregateOutputType = {
   phone: string | null
   email: string | null
   streetBlock: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
   status: $Enums.ResidentStatus | null
   notes: string | null
   createdAt: Date | null
@@ -57,6 +67,11 @@ export type ResidentCountAggregateOutputType = {
   phone: number
   email: number
   streetBlock: number
+  addressLine1: number
+  addressLine2: number
+  city: number
+  state: number
+  zipCode: number
   status: number
   notes: number
   createdAt: number
@@ -72,6 +87,11 @@ export type ResidentMinAggregateInputType = {
   phone?: true
   email?: true
   streetBlock?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  state?: true
+  zipCode?: true
   status?: true
   notes?: true
   createdAt?: true
@@ -85,6 +105,11 @@ export type ResidentMaxAggregateInputType = {
   phone?: true
   email?: true
   streetBlock?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  state?: true
+  zipCode?: true
   status?: true
   notes?: true
   createdAt?: true
@@ -98,6 +123,11 @@ export type ResidentCountAggregateInputType = {
   phone?: true
   email?: true
   streetBlock?: true
+  addressLine1?: true
+  addressLine2?: true
+  city?: true
+  state?: true
+  zipCode?: true
   status?: true
   notes?: true
   createdAt?: true
@@ -184,6 +214,11 @@ export type ResidentGroupByOutputType = {
   phone: string | null
   email: string | null
   streetBlock: string | null
+  addressLine1: string | null
+  addressLine2: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
   status: $Enums.ResidentStatus
   notes: string | null
   createdAt: Date
@@ -218,6 +253,11 @@ export type ResidentWhereInput = {
   phone?: Prisma.StringNullableFilter<"Resident"> | string | null
   email?: Prisma.StringNullableFilter<"Resident"> | string | null
   streetBlock?: Prisma.StringNullableFilter<"Resident"> | string | null
+  addressLine1?: Prisma.StringNullableFilter<"Resident"> | string | null
+  addressLine2?: Prisma.StringNullableFilter<"Resident"> | string | null
+  city?: Prisma.StringNullableFilter<"Resident"> | string | null
+  state?: Prisma.StringNullableFilter<"Resident"> | string | null
+  zipCode?: Prisma.StringNullableFilter<"Resident"> | string | null
   status?: Prisma.EnumResidentStatusFilter<"Resident"> | $Enums.ResidentStatus
   notes?: Prisma.StringNullableFilter<"Resident"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Resident"> | Date | string
@@ -225,6 +265,8 @@ export type ResidentWhereInput = {
   payments?: Prisma.PaymentListRelationFilter
   coverages?: Prisma.PaymentCoverageListRelationFilter
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
+  tenants?: Prisma.TenantListRelationFilter
+  vehicles?: Prisma.ResidentVehicleListRelationFilter
 }
 
 export type ResidentOrderByWithRelationInput = {
@@ -234,6 +276,11 @@ export type ResidentOrderByWithRelationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   streetBlock?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  zipCode?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -241,6 +288,8 @@ export type ResidentOrderByWithRelationInput = {
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   coverages?: Prisma.PaymentCoverageOrderByRelationAggregateInput
   assignments?: Prisma.SpecialCollectionAssignmentOrderByRelationAggregateInput
+  tenants?: Prisma.TenantOrderByRelationAggregateInput
+  vehicles?: Prisma.ResidentVehicleOrderByRelationAggregateInput
 }
 
 export type ResidentWhereUniqueInput = Prisma.AtLeast<{
@@ -253,6 +302,11 @@ export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringNullableFilter<"Resident"> | string | null
   email?: Prisma.StringNullableFilter<"Resident"> | string | null
   streetBlock?: Prisma.StringNullableFilter<"Resident"> | string | null
+  addressLine1?: Prisma.StringNullableFilter<"Resident"> | string | null
+  addressLine2?: Prisma.StringNullableFilter<"Resident"> | string | null
+  city?: Prisma.StringNullableFilter<"Resident"> | string | null
+  state?: Prisma.StringNullableFilter<"Resident"> | string | null
+  zipCode?: Prisma.StringNullableFilter<"Resident"> | string | null
   status?: Prisma.EnumResidentStatusFilter<"Resident"> | $Enums.ResidentStatus
   notes?: Prisma.StringNullableFilter<"Resident"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Resident"> | Date | string
@@ -260,6 +314,8 @@ export type ResidentWhereUniqueInput = Prisma.AtLeast<{
   payments?: Prisma.PaymentListRelationFilter
   coverages?: Prisma.PaymentCoverageListRelationFilter
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
+  tenants?: Prisma.TenantListRelationFilter
+  vehicles?: Prisma.ResidentVehicleListRelationFilter
 }, "id" | "unitNumber">
 
 export type ResidentOrderByWithAggregationInput = {
@@ -269,6 +325,11 @@ export type ResidentOrderByWithAggregationInput = {
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   streetBlock?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine1?: Prisma.SortOrderInput | Prisma.SortOrder
+  addressLine2?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  state?: Prisma.SortOrderInput | Prisma.SortOrder
+  zipCode?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -288,6 +349,11 @@ export type ResidentScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
   streetBlock?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
+  addressLine1?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
+  addressLine2?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
+  state?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
+  zipCode?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
   status?: Prisma.EnumResidentStatusWithAggregatesFilter<"Resident"> | $Enums.ResidentStatus
   notes?: Prisma.StringNullableWithAggregatesFilter<"Resident"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Resident"> | Date | string
@@ -301,6 +367,11 @@ export type ResidentCreateInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
@@ -308,6 +379,8 @@ export type ResidentCreateInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateInput = {
@@ -317,6 +390,11 @@ export type ResidentUncheckedCreateInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
@@ -324,6 +402,8 @@ export type ResidentUncheckedCreateInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUpdateInput = {
@@ -333,6 +413,11 @@ export type ResidentUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -340,6 +425,8 @@ export type ResidentUpdateInput = {
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateInput = {
@@ -349,6 +436,11 @@ export type ResidentUncheckedUpdateInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -356,6 +448,8 @@ export type ResidentUncheckedUpdateInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateManyInput = {
@@ -365,6 +459,11 @@ export type ResidentCreateManyInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
@@ -378,6 +477,11 @@ export type ResidentUpdateManyMutationInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -391,6 +495,11 @@ export type ResidentUncheckedUpdateManyInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -404,6 +513,11 @@ export type ResidentCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   streetBlock?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -417,6 +531,11 @@ export type ResidentMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   streetBlock?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -430,6 +549,11 @@ export type ResidentMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
   streetBlock?: Prisma.SortOrder
+  addressLine1?: Prisma.SortOrder
+  addressLine2?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -455,6 +579,34 @@ export type EnumResidentStatusFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type ResidentCreateNestedOneWithoutTenantsInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutTenantsInput, Prisma.ResidentUncheckedCreateWithoutTenantsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutTenantsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneRequiredWithoutTenantsNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutTenantsInput, Prisma.ResidentUncheckedCreateWithoutTenantsInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutTenantsInput
+  upsert?: Prisma.ResidentUpsertWithoutTenantsInput
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutTenantsInput, Prisma.ResidentUpdateWithoutTenantsInput>, Prisma.ResidentUncheckedUpdateWithoutTenantsInput>
+}
+
+export type ResidentCreateNestedOneWithoutVehiclesInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutVehiclesInput, Prisma.ResidentUncheckedCreateWithoutVehiclesInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutVehiclesInput
+  connect?: Prisma.ResidentWhereUniqueInput
+}
+
+export type ResidentUpdateOneRequiredWithoutVehiclesNestedInput = {
+  create?: Prisma.XOR<Prisma.ResidentCreateWithoutVehiclesInput, Prisma.ResidentUncheckedCreateWithoutVehiclesInput>
+  connectOrCreate?: Prisma.ResidentCreateOrConnectWithoutVehiclesInput
+  upsert?: Prisma.ResidentUpsertWithoutVehiclesInput
+  connect?: Prisma.ResidentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutVehiclesInput, Prisma.ResidentUpdateWithoutVehiclesInput>, Prisma.ResidentUncheckedUpdateWithoutVehiclesInput>
 }
 
 export type ResidentCreateNestedOneWithoutPaymentsInput = {
@@ -499,6 +651,214 @@ export type ResidentUpdateOneRequiredWithoutAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ResidentUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.ResidentUpdateWithoutAssignmentsInput>, Prisma.ResidentUncheckedUpdateWithoutAssignmentsInput>
 }
 
+export type ResidentCreateWithoutTenantsInput = {
+  id?: string
+  unitNumber: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  status?: $Enums.ResidentStatus
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutTenantsInput = {
+  id?: string
+  unitNumber: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  status?: $Enums.ResidentStatus
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutTenantsInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutTenantsInput, Prisma.ResidentUncheckedCreateWithoutTenantsInput>
+}
+
+export type ResidentUpsertWithoutTenantsInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutTenantsInput, Prisma.ResidentUncheckedUpdateWithoutTenantsInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutTenantsInput, Prisma.ResidentUncheckedCreateWithoutTenantsInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutTenantsInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutTenantsInput, Prisma.ResidentUncheckedUpdateWithoutTenantsInput>
+}
+
+export type ResidentUpdateWithoutTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  coverages?: Prisma.PaymentCoverageUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutTenantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
+  coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUncheckedUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentCreateWithoutVehiclesInput = {
+  id?: string
+  unitNumber: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  status?: $Enums.ResidentStatus
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
+  coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentUncheckedCreateWithoutVehiclesInput = {
+  id?: string
+  unitNumber: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
+  status?: $Enums.ResidentStatus
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
+  coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutResidentInput
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutResidentInput
+}
+
+export type ResidentCreateOrConnectWithoutVehiclesInput = {
+  where: Prisma.ResidentWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutVehiclesInput, Prisma.ResidentUncheckedCreateWithoutVehiclesInput>
+}
+
+export type ResidentUpsertWithoutVehiclesInput = {
+  update: Prisma.XOR<Prisma.ResidentUpdateWithoutVehiclesInput, Prisma.ResidentUncheckedUpdateWithoutVehiclesInput>
+  create: Prisma.XOR<Prisma.ResidentCreateWithoutVehiclesInput, Prisma.ResidentUncheckedCreateWithoutVehiclesInput>
+  where?: Prisma.ResidentWhereInput
+}
+
+export type ResidentUpdateToOneWithWhereWithoutVehiclesInput = {
+  where?: Prisma.ResidentWhereInput
+  data: Prisma.XOR<Prisma.ResidentUpdateWithoutVehiclesInput, Prisma.ResidentUncheckedUpdateWithoutVehiclesInput>
+}
+
+export type ResidentUpdateWithoutVehiclesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
+  coverages?: Prisma.PaymentCoverageUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutResidentNestedInput
+}
+
+export type ResidentUncheckedUpdateWithoutVehiclesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
+  coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutResidentNestedInput
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutResidentNestedInput
+}
+
 export type ResidentCreateWithoutPaymentsInput = {
   id?: string
   unitNumber: string
@@ -506,12 +866,19 @@ export type ResidentCreateWithoutPaymentsInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutPaymentsInput = {
@@ -521,12 +888,19 @@ export type ResidentUncheckedCreateWithoutPaymentsInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutPaymentsInput = {
@@ -552,12 +926,19 @@ export type ResidentUpdateWithoutPaymentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutPaymentsInput = {
@@ -567,12 +948,19 @@ export type ResidentUncheckedUpdateWithoutPaymentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutCoveragesInput = {
@@ -582,12 +970,19 @@ export type ResidentCreateWithoutCoveragesInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutCoveragesInput = {
@@ -597,12 +992,19 @@ export type ResidentUncheckedCreateWithoutCoveragesInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutCoveragesInput = {
@@ -628,12 +1030,19 @@ export type ResidentUpdateWithoutCoveragesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutCoveragesInput = {
@@ -643,12 +1052,19 @@ export type ResidentUncheckedUpdateWithoutCoveragesInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentCreateWithoutAssignmentsInput = {
@@ -658,12 +1074,19 @@ export type ResidentCreateWithoutAssignmentsInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentCreateNestedManyWithoutResidentInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentUncheckedCreateWithoutAssignmentsInput = {
@@ -673,12 +1096,19 @@ export type ResidentUncheckedCreateWithoutAssignmentsInput = {
   phone?: string | null
   email?: string | null
   streetBlock?: string | null
+  addressLine1?: string | null
+  addressLine2?: string | null
+  city?: string | null
+  state?: string | null
+  zipCode?: string | null
   status?: $Enums.ResidentStatus
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutResidentInput
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutResidentInput
+  tenants?: Prisma.TenantUncheckedCreateNestedManyWithoutResidentInput
+  vehicles?: Prisma.ResidentVehicleUncheckedCreateNestedManyWithoutResidentInput
 }
 
 export type ResidentCreateOrConnectWithoutAssignmentsInput = {
@@ -704,12 +1134,19 @@ export type ResidentUpdateWithoutAssignmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUpdateManyWithoutResidentNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUpdateManyWithoutResidentNestedInput
 }
 
 export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
@@ -719,12 +1156,19 @@ export type ResidentUncheckedUpdateWithoutAssignmentsInput = {
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   streetBlock?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  addressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  state?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  zipCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumResidentStatusFieldUpdateOperationsInput | $Enums.ResidentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutResidentNestedInput
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutResidentNestedInput
+  tenants?: Prisma.TenantUncheckedUpdateManyWithoutResidentNestedInput
+  vehicles?: Prisma.ResidentVehicleUncheckedUpdateManyWithoutResidentNestedInput
 }
 
 
@@ -736,12 +1180,16 @@ export type ResidentCountOutputType = {
   payments: number
   coverages: number
   assignments: number
+  tenants: number
+  vehicles: number
 }
 
 export type ResidentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payments?: boolean | ResidentCountOutputTypeCountPaymentsArgs
   coverages?: boolean | ResidentCountOutputTypeCountCoveragesArgs
   assignments?: boolean | ResidentCountOutputTypeCountAssignmentsArgs
+  tenants?: boolean | ResidentCountOutputTypeCountTenantsArgs
+  vehicles?: boolean | ResidentCountOutputTypeCountVehiclesArgs
 }
 
 /**
@@ -775,6 +1223,20 @@ export type ResidentCountOutputTypeCountAssignmentsArgs<ExtArgs extends runtime.
   where?: Prisma.SpecialCollectionAssignmentWhereInput
 }
 
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountTenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantWhereInput
+}
+
+/**
+ * ResidentCountOutputType without action
+ */
+export type ResidentCountOutputTypeCountVehiclesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ResidentVehicleWhereInput
+}
+
 
 export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -783,6 +1245,11 @@ export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   phone?: boolean
   email?: boolean
   streetBlock?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  state?: boolean
+  zipCode?: boolean
   status?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -790,6 +1257,8 @@ export type ResidentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   payments?: boolean | Prisma.Resident$paymentsArgs<ExtArgs>
   coverages?: boolean | Prisma.Resident$coveragesArgs<ExtArgs>
   assignments?: boolean | Prisma.Resident$assignmentsArgs<ExtArgs>
+  tenants?: boolean | Prisma.Resident$tenantsArgs<ExtArgs>
+  vehicles?: boolean | Prisma.Resident$vehiclesArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["resident"]>
 
@@ -800,6 +1269,11 @@ export type ResidentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   email?: boolean
   streetBlock?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  state?: boolean
+  zipCode?: boolean
   status?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -813,6 +1287,11 @@ export type ResidentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   phone?: boolean
   email?: boolean
   streetBlock?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  state?: boolean
+  zipCode?: boolean
   status?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -826,17 +1305,24 @@ export type ResidentSelectScalar = {
   phone?: boolean
   email?: boolean
   streetBlock?: boolean
+  addressLine1?: boolean
+  addressLine2?: boolean
+  city?: boolean
+  state?: boolean
+  zipCode?: boolean
   status?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ResidentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "unitNumber" | "name" | "phone" | "email" | "streetBlock" | "status" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["resident"]>
+export type ResidentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "unitNumber" | "name" | "phone" | "email" | "streetBlock" | "addressLine1" | "addressLine2" | "city" | "state" | "zipCode" | "status" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["resident"]>
 export type ResidentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payments?: boolean | Prisma.Resident$paymentsArgs<ExtArgs>
   coverages?: boolean | Prisma.Resident$coveragesArgs<ExtArgs>
   assignments?: boolean | Prisma.Resident$assignmentsArgs<ExtArgs>
+  tenants?: boolean | Prisma.Resident$tenantsArgs<ExtArgs>
+  vehicles?: boolean | Prisma.Resident$vehiclesArgs<ExtArgs>
   _count?: boolean | Prisma.ResidentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ResidentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -848,6 +1334,8 @@ export type $ResidentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     coverages: Prisma.$PaymentCoveragePayload<ExtArgs>[]
     assignments: Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>[]
+    tenants: Prisma.$TenantPayload<ExtArgs>[]
+    vehicles: Prisma.$ResidentVehiclePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -856,6 +1344,11 @@ export type $ResidentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     phone: string | null
     email: string | null
     streetBlock: string | null
+    addressLine1: string | null
+    addressLine2: string | null
+    city: string | null
+    state: string | null
+    zipCode: string | null
     status: $Enums.ResidentStatus
     notes: string | null
     createdAt: Date
@@ -1257,6 +1750,8 @@ export interface Prisma__ResidentClient<T, Null = never, ExtArgs extends runtime
   payments<T extends Prisma.Resident$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   coverages<T extends Prisma.Resident$coveragesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$coveragesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentCoveragePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignments<T extends Prisma.Resident$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tenants<T extends Prisma.Resident$tenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$tenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  vehicles<T extends Prisma.Resident$vehiclesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Resident$vehiclesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResidentVehiclePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1292,6 +1787,11 @@ export interface ResidentFieldRefs {
   readonly phone: Prisma.FieldRef<"Resident", 'String'>
   readonly email: Prisma.FieldRef<"Resident", 'String'>
   readonly streetBlock: Prisma.FieldRef<"Resident", 'String'>
+  readonly addressLine1: Prisma.FieldRef<"Resident", 'String'>
+  readonly addressLine2: Prisma.FieldRef<"Resident", 'String'>
+  readonly city: Prisma.FieldRef<"Resident", 'String'>
+  readonly state: Prisma.FieldRef<"Resident", 'String'>
+  readonly zipCode: Prisma.FieldRef<"Resident", 'String'>
   readonly status: Prisma.FieldRef<"Resident", 'ResidentStatus'>
   readonly notes: Prisma.FieldRef<"Resident", 'String'>
   readonly createdAt: Prisma.FieldRef<"Resident", 'DateTime'>
@@ -1758,6 +2258,54 @@ export type Resident$assignmentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.SpecialCollectionAssignmentScalarFieldEnum | Prisma.SpecialCollectionAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Resident.tenants
+ */
+export type Resident$tenantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Tenant
+   */
+  select?: Prisma.TenantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Tenant
+   */
+  omit?: Prisma.TenantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantInclude<ExtArgs> | null
+  where?: Prisma.TenantWhereInput
+  orderBy?: Prisma.TenantOrderByWithRelationInput | Prisma.TenantOrderByWithRelationInput[]
+  cursor?: Prisma.TenantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantScalarFieldEnum | Prisma.TenantScalarFieldEnum[]
+}
+
+/**
+ * Resident.vehicles
+ */
+export type Resident$vehiclesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ResidentVehicle
+   */
+  select?: Prisma.ResidentVehicleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ResidentVehicle
+   */
+  omit?: Prisma.ResidentVehicleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ResidentVehicleInclude<ExtArgs> | null
+  where?: Prisma.ResidentVehicleWhereInput
+  orderBy?: Prisma.ResidentVehicleOrderByWithRelationInput | Prisma.ResidentVehicleOrderByWithRelationInput[]
+  cursor?: Prisma.ResidentVehicleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ResidentVehicleScalarFieldEnum | Prisma.ResidentVehicleScalarFieldEnum[]
 }
 
 /**

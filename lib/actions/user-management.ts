@@ -100,3 +100,53 @@ export async function updateUserRole(
     };
   }
 }
+
+export async function changePassword(
+  _previousState: unknown,
+  formData: FormData
+): Promise<{ ok: boolean; message: string }> {
+  try {
+    const userId = formData.get("userId") as string;
+    const currentPassword = formData.get("currentPassword") as string;
+    const newPassword = formData.get("newPassword") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (!userId || !currentPassword || !newPassword || !confirmPassword) {
+      return { ok: false, message: "All fields are required" };
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { ok: false, message: "Passwords do not match" };
+    }
+
+    if (newPassword.length < 8) {
+      return { ok: false, message: "Password must be at least 8 characters" };
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      return { ok: false, message: "User not found" };
+    }
+
+    const passwordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+
+    if (!passwordMatches) {
+      return { ok: false, message: "Current password is incorrect" };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    return { ok: true, message: "Password updated successfully" };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Failed to update password",
+    };
+  }
+}

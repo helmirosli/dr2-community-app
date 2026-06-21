@@ -52,6 +52,9 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Resident: 'Resident',
+  Tenant: 'Tenant',
+  ResidentVehicle: 'ResidentVehicle',
+  TenantVehicle: 'TenantVehicle',
   FeePlan: 'FeePlan',
   Payment: 'Payment',
   PaymentCoverage: 'PaymentCoverage',
@@ -86,6 +89,11 @@ export const ResidentScalarFieldEnum = {
   phone: 'phone',
   email: 'email',
   streetBlock: 'streetBlock',
+  addressLine1: 'addressLine1',
+  addressLine2: 'addressLine2',
+  city: 'city',
+  state: 'state',
+  zipCode: 'zipCode',
   status: 'status',
   notes: 'notes',
   createdAt: 'createdAt',
@@ -93,6 +101,45 @@ export const ResidentScalarFieldEnum = {
 } as const
 
 export type ResidentScalarFieldEnum = (typeof ResidentScalarFieldEnum)[keyof typeof ResidentScalarFieldEnum]
+
+
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  residentId: 'residentId',
+  name: 'name',
+  phone: 'phone',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const ResidentVehicleScalarFieldEnum = {
+  id: 'id',
+  residentId: 'residentId',
+  make: 'make',
+  model: 'model',
+  plateNumber: 'plateNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResidentVehicleScalarFieldEnum = (typeof ResidentVehicleScalarFieldEnum)[keyof typeof ResidentVehicleScalarFieldEnum]
+
+
+export const TenantVehicleScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  make: 'make',
+  model: 'model',
+  plateNumber: 'plateNumber',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantVehicleScalarFieldEnum = (typeof TenantVehicleScalarFieldEnum)[keyof typeof TenantVehicleScalarFieldEnum]
 
 
 export const FeePlanScalarFieldEnum = {

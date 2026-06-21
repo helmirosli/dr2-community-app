@@ -23,6 +23,21 @@ export * from './enums';
  */
 export type Resident = Prisma.ResidentModel
 /**
+ * Model Tenant
+ * 
+ */
+export type Tenant = Prisma.TenantModel
+/**
+ * Model ResidentVehicle
+ * 
+ */
+export type ResidentVehicle = Prisma.ResidentVehicleModel
+/**
+ * Model TenantVehicle
+ * 
+ */
+export type TenantVehicle = Prisma.TenantVehicleModel
+/**
  * Model FeePlan
  * 
  */

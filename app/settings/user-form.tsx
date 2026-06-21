@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 import { createUser } from "@/lib/actions/user-management";
+import { SearchableDropdown } from "@/app/components/searchable-dropdown";
 
 type FormState = {
   ok: boolean;
@@ -69,15 +70,16 @@ export function UserForm() {
 
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Role
-          <select
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          <SearchableDropdown
             name="role"
+            options={[
+              { value: "AJK", label: "AJK (Committee member)" },
+              { value: "ADMIN", label: "Admin (Can manage users)" },
+              { value: "VIEWER", label: "Viewer (Read-only access)" },
+            ]}
             defaultValue="AJK"
-          >
-            <option value="AJK">AJK (Committee member)</option>
-            <option value="ADMIN">Admin (Can manage users)</option>
-            <option value="VIEWER">Viewer (Read-only access)</option>
-          </select>
+            required
+          />
         </label>
 
         {state.message && (

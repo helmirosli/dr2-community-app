@@ -69,24 +69,72 @@ enum SpecialCollectionStatus {
 }
 
 model Resident {
-  id          String           @id @default(cuid())
-  unitNumber  String           @unique
+  id          String            @id @default(cuid())
+  unitNumber  String            @unique
   name        String
   phone       String?
   email       String?
   streetBlock String?
-  status      ResidentStatus   @default(ACTIVE)
+  addressLine1 String?
+  addressLine2 String?
+  city        String?
+  state       String?
+  zipCode     String?
+  status      ResidentStatus    @default(ACTIVE)
   notes       String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   payments    Payment[]
   coverages   PaymentCoverage[]
   assignments SpecialCollectionAssignment[]
+  tenants     Tenant[]
+  vehicles    ResidentVehicle[]
 
   @@index([status])
   @@index([streetBlock])
   @@schema("desarestu_db")
 }
+
+model Tenant {
+  id           String          @id @default(cuid())
+  residentId   String
+  resident     Resident        @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String?
+  email        String?
+  vehicles     TenantVehicle[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@schema("desarestu_db")
+}
+
+model ResidentVehicle {
+  id          String    @id @default(cuid())
+  residentId  String
+  resident    Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  make        String
+  model       String?
+  plateNumber String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@schema("desarestu_db")
+}
+
+model TenantVehicle {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  make        String
+  model       String?
+  plateNumber String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("desarestu_db")
+}
+
 
 model FeePlan {
   id            String            @id @default(cuid())

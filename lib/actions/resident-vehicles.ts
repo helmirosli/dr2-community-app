@@ -1,0 +1,182 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+
+import { assertDashboardUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+export type VehicleFormState = {
+  ok: boolean;
+  message: string;
+};
+
+const vehicleSchema = z.object({
+  make: z.string().trim().min(1, "Make is required.").max(60),
+  model: z.string().trim().max(60).optional().or(z.literal("")),
+  plateNumber: z
+    .string()
+    .trim()
+    .min(1, "Plate number is required.")
+    .max(20)
+    .toUpperCase(),
+});
+
+function normalizeVehicleInput(formData: FormData) {
+  const parsed = vehicleSchema.safeParse(Object.fromEntries(formData));
+
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      message: parsed.error.issues[0]?.message ?? "Please check the vehicle details.",
+    };
+  }
+
+  return {
+    ok: true as const,
+    data: {
+      make: parsed.data.make,
+      model: parsed.data.model || null,
+      plateNumber: parsed.data.plateNumber,
+    },
+  };
+}
+
+export async function createResidentVehicle(
+  residentId: string,
+  _previousState: VehicleFormState,
+  formData: FormData,
+): Promise<VehicleFormState> {
+  const user = await assertDashboardUser();
+  const normalized = normalizeVehicleInput(formData);
+
+  if (!normalized.ok) {
+    return normalized;
+  }
+
+  try {
+    const vehicle = await prisma.residentVehicle.create({
+      data: {
+        ...normalized.data,
+        residentId,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        entityType: "ResidentVehicle",
+        entityId: vehicle.id,
+        action: "CREATE",
+        afterJson: JSON.stringify(normalized.data),
+        createdBy: user.id,
+      },
+    });
+  } catch {
+    return {
+      ok: false,
+      message: "Unable to create vehicle.",
+    };
+  }
+
+  revalidatePath(`/residents/${residentId}`);
+  revalidatePath(`/residents/${residentId}/vehicles`);
+  redirect(`/residents/${residentId}/vehicles`);
+}
+
+export async function updateResidentVehicle(
+  vehicleId: string,
+  _previousState: VehicleFormState,
+  formData: FormData,
+): Promise<VehicleFormState> {
+  const user = await assertDashboardUser();
+  const normalized = normalizeVehicleInput(formData);
+
+  if (!normalized.ok) {
+    return normalized;
+  }
+
+  try {
+    const existingVehicle = await prisma.residentVehicle.findUnique({
+      where: { id: vehicleId },
+    });
+
+    if (!existingVehicle) {
+      return {
+        ok: false,
+        message: "Vehicle not found.",
+      };
+    }
+
+    const vehicle = await prisma.residentVehicle.update({
+      where: { id: vehicleId },
+      data: normalized.data,
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        entityType: "ResidentVehicle",
+        entityId: vehicleId,
+        action: "UPDATE",
+        beforeJson: JSON.stringify(existingVehicle),
+        afterJson: JSON.stringify(normalized.data),
+        createdBy: user.id,
+      },
+    });
+
+    revalidatePath(`/residents/${existingVehicle.residentId}`);
+    revalidatePath(`/residents/${existingVehicle.residentId}/vehicles`);
+    redirect(`/residents/${existingVehicle.residentId}/vehicles`);
+  } catch {
+    return {
+      ok: false,
+      message: "Unable to update vehicle.",
+    };
+  }
+}
+
+export async function deleteResidentVehicle(
+  vehicleId: string,
+): Promise<VehicleFormState> {
+  const user = await assertDashboardUser();
+
+  const vehicle = await prisma.residentVehicle.findUnique({
+    where: { id: vehicleId },
+  });
+
+  try {
+
+    if (!vehicle) {
+      return {
+        ok: false,
+        message: "Vehicle not found.",
+      };
+    }
+
+    await prisma.residentVehicle.delete({
+      where: { id: vehicleId },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        entityType: "ResidentVehicle",
+        entityId: vehicleId,
+        action: "DELETE",
+        beforeJson: JSON.stringify(vehicle),
+        createdBy: user.id,
+      },
+    });
+  } catch {
+    return {
+      ok: false,
+      message: "Unable to delete vehicle.",
+    };
+  }
+
+  revalidatePath(
+    vehicle ? `/residents/${vehicle.residentId}/vehicles` : "/residents",
+  );
+  redirect(
+    vehicle ? `/residents/${vehicle.residentId}/vehicles` : "/residents",
+  );
+}

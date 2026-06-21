@@ -1,8 +1,9 @@
 import { ArrowRight, Shield, Trash2 } from "lucide-react";
 
-import { requireDashboardAdmin } from "@/lib/auth";
+import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { ChangePasswordForm } from "./change-password-form";
 import { UserForm } from "./user-form";
 import { UserRoleSelect } from "./user-role-select";
 import { DeleteUserButton } from "./delete-user-button";
@@ -11,9 +12,15 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function SettingsPage() {
-  const currentUser = await requireDashboardAdmin();
+  const currentUser = await requireDashboardUser();
 
   const t = await getDictionary();
+
+  const userResult = await prisma.user.findUnique({
+    where: { id: currentUser.id },
+    select: { passwordHash: true },
+  });
+  const currentUserPasswordHash = userResult?.passwordHash ?? "";
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -46,22 +53,26 @@ export default async function SettingsPage() {
         </header>
 
         <div className="grid gap-8">
+          {/* Change password section */}
+          <ChangePasswordForm userId={currentUser.id} passwordHash={currentUserPasswordHash} />
+
           {/* User management section */}
-          <section className="grid gap-6">
-            <div>
-              <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
-                <Shield size={24} />
-                {t.settings.userManagement}
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                {t.settings.userManagementSubtitle}
-              </p>
-            </div>
+          {currentUser.role === "ADMIN" ? (
+            <section className="grid gap-6">
+              <div>
+                <h2 className="flex items-center gap-2 text-xl font-semibold text-slate-900">
+                  <Shield size={24} />
+                  {t.settings.userManagement}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  {t.settings.userManagementSubtitle}
+                </p>
+              </div>
 
-            {/* Add user form */}
-            <UserForm />
+              {/* Add user form */}
+              <UserForm />
 
-            {/* Users list */}
+              {/* Users list */}
             <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-100 px-6 py-4">
                 <h3 className="font-semibold text-slate-900">{t.settings.existingUsers} ({users.length})</h3>
@@ -114,7 +125,8 @@ export default async function SettingsPage() {
                 </table>
               </div>
             </div>
-          </section>
+            </section>
+          ) : null}
 
           {/* Info cards */}
           <section className="grid gap-4 sm:grid-cols-2">

@@ -20,6 +20,11 @@ type ResidentFormValues = {
   phone?: string | null;
   email?: string | null;
   streetBlock?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zipCode?: string | null;
   status?: "ACTIVE" | "EXEMPT" | "FOR_SALE" | "MOVED_OUT";
   notes?: string | null;
 };
@@ -64,6 +69,37 @@ export function ResidentForm({ resident }: ResidentFormProps) {
           <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.streetBlock ?? ""} name="streetBlock" />
         </label>
 
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
+          Address line 1
+          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.addressLine1 ?? ""} name="addressLine1" />
+        </label>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
+          Address line 2
+          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.addressLine2 ?? ""} name="addressLine2" />
+        </label>
+
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
+          City
+          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.city ?? ""} name="city" />
+        </label>
+
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
+          State
+          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.state ?? ""} name="state" />
+        </label>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
+          Zip code
+          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.zipCode ?? ""} name="zipCode" />
+        </label>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Status
           <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.status ?? "ACTIVE"} name="status">

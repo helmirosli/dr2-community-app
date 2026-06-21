@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState, useActionState, useEffect, useRef } from "react";
+import { useState, useActionState, useEffect, useRef, useMemo } from "react";
 import { AlertCircle, CheckCircle, X } from "lucide-react";
 
 import { createPayment, type PaymentFormState } from "@/lib/actions/payments";
-import { SearchableSelect } from "@/app/components/searchable-select";
+import { SearchableDropdown } from "@/app/components/searchable-dropdown";
 
 const initialState: PaymentFormState = {
   ok: false,
@@ -123,7 +123,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
           <h3 className="mb-4 font-semibold text-slate-900">Resident</h3>
           <div className="grid gap-2 text-sm font-medium text-slate-700">
             Select resident
-            <SearchableSelect
+            <SearchableDropdown
               name="residentId"
               options={residentOptions}
               defaultValue={selectedResidentId}
@@ -139,7 +139,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="grid gap-2 text-sm font-medium text-slate-700">
               Payment type
-              <SearchableSelect
+              <SearchableDropdown
                 name="paymentType"
                 options={PAYMENT_TYPE_OPTIONS}
                 value={paymentType}
@@ -179,7 +179,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2 text-sm font-medium text-slate-700">
               Method
-              <SearchableSelect
+              <SearchableDropdown
                 name="method"
                 options={PAYMENT_METHOD_OPTIONS}
                 defaultValue="BANK_TRANSFER"
@@ -203,7 +203,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
           <div className="grid gap-4 sm:grid-cols-4">
             <div className="grid gap-2 text-sm font-medium text-slate-700">
               Start month
-              <SearchableSelect
+              <SearchableDropdown
                 name="coverageStartMonth"
                 options={MONTH_OPTIONS}
                 value={String(startMonth)}
@@ -224,7 +224,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
             </label>
             <div className="grid gap-2 text-sm font-medium text-slate-700">
               End month
-              <SearchableSelect
+              <SearchableDropdown
                 name="coverageEndMonth"
                 options={MONTH_OPTIONS}
                 value={String(endMonth)}
