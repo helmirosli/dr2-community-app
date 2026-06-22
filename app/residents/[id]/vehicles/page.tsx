@@ -73,11 +73,7 @@ export default async function ResidentVehicleListPage({ params }: ResidentVehicl
                         <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/vehicles/${vehicle.id}/edit`}>
                           <Edit size={16} />
                         </Link>
-                        <form action={deleteResidentVehicleAndRedirect.bind(null, vehicle.id)}>
-                          <button type="submit" className="text-sm font-semibold text-red-700 hover:text-red-900" title="Delete vehicle">
-                            <Trash2 size={16} />
-                          </button>
-                        </form>
+                        <DeleteVehicleForm vehicleId={vehicle.id} />
                       </div>
                     </td>
                   </tr>

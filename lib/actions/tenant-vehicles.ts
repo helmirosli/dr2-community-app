@@ -72,24 +72,23 @@ export async function createTenantVehicle(
         createdBy: user.id,
       },
     });
+
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+    });
+
+    if (tenant) {
+      revalidatePath(`/residents/${tenant.residentId}`);
+      redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/`);
+    }
+
+    return { ok: false, message: "Unable to redirect." };
   } catch {
     return {
       ok: false,
       message: "Unable to create vehicle.",
     };
   }
-
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: tenantId },
-  });
-
-  if (tenant) {
-    revalidatePath(`/residents/${tenant.residentId}`);
-    revalidatePath(`/residents/${tenant.residentId}/tenants`);
-    redirect(`/residents/${tenant.residentId}/tenants`);
-  }
-
-  return { ok: false, message: "Unable to redirect." };
 }
 
 export async function updateTenantVehicle(
@@ -104,8 +103,9 @@ export async function updateTenantVehicle(
     return normalized;
   }
 
+  let existingVehicle: { tenantId: string } | null = null;
   try {
-    const existingVehicle = await prisma.tenantVehicle.findUnique({
+    existingVehicle = await prisma.tenantVehicle.findUnique({
       where: { id: vehicleId },
     });
 
@@ -116,7 +116,7 @@ export async function updateTenantVehicle(
       };
     }
 
-    const vehicle = await prisma.tenantVehicle.update({
+    await prisma.tenantVehicle.update({
       where: { id: vehicleId },
       data: normalized.data,
     });
@@ -131,24 +131,25 @@ export async function updateTenantVehicle(
         createdBy: user.id,
       },
     });
-
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: existingVehicle.tenantId },
-    });
-
-    if (tenant) {
-      revalidatePath(`/residents/${tenant.residentId}`);
-      revalidatePath(`/residents/${tenant.residentId}/tenants`);
-      redirect(`/residents/${tenant.residentId}/tenants`);
-    }
-
-    return { ok: false, message: "Unable to redirect." };
   } catch {
     return {
       ok: false,
       message: "Unable to update vehicle.",
     };
   }
+
+  if (existingVehicle) {
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: existingVehicle.tenantId },
+    });
+
+    if (tenant) {
+      revalidatePath(`/residents/${tenant.residentId}`);
+      redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles`);
+    }
+  }
+
+  redirect("/residents");
 }
 
 export async function deleteTenantVehicle(
@@ -193,7 +194,7 @@ export async function deleteTenantVehicle(
     revalidatePath(
       `/residents/${vehicle.tenant.residentId}/tenants`,
     );
-    redirect(`/residents/${vehicle.tenant.residentId}/tenants`);
+    redirect(`/residents/${vehicle.tenant.residentId}/tenant/${vehicle.tenant.id}/vehicles/`);
   }
 
   redirect("/residents");

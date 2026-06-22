@@ -40,7 +40,7 @@ export default async function EditTenantVehiclePage({ params }: EditTenantVehicl
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
         <header className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants/${tenantId}/vehicles`}>
+          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenant/${tenantId}/vehicles`}>
             Back to vehicles
           </Link>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Edit vehicle</h1>

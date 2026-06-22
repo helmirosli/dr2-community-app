@@ -22,6 +22,7 @@ import { formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { FileViewer } from "@/app/components/file-viewer";
+import { ApproveRejectButton } from "./approve-reject-button";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -258,18 +259,26 @@ export default async function DashboardPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <form action={approveSubmission.bind(null, submission.id)}>
-                              <button className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700" type="submit">
-                                <CheckCircle2 size={14} />
-                                {t.common.approve}
-                              </button>
-                            </form>
-                            <form action={rejectSubmission.bind(null, submission.id)}>
-                              <button className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700" type="submit">
-                                <XCircle size={14} />
-                                {t.common.reject}
-                              </button>
-                            </form>
+                            <ApproveRejectButton
+                              action={approveSubmission.bind(null, submission.id)}
+                              label={
+                                <>
+                                  <CheckCircle2 size={14} />
+                                  {t.common.approve}
+                                </>
+                              }
+                              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                            />
+                            <ApproveRejectButton
+                              action={rejectSubmission.bind(null, submission.id)}
+                              label={
+                                <>
+                                  <XCircle size={14} />
+                                  {t.common.reject}
+                                </>
+                              }
+                              className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-60"
+                            />
                           </div>
                         </td>
                       </tr>

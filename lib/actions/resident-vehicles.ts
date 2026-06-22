@@ -96,8 +96,9 @@ export async function updateResidentVehicle(
     return normalized;
   }
 
+  let existingVehicle: { residentId: string } | null = null;
   try {
-    const existingVehicle = await prisma.residentVehicle.findUnique({
+    existingVehicle = await prisma.residentVehicle.findUnique({
       where: { id: vehicleId },
     });
 
@@ -108,7 +109,7 @@ export async function updateResidentVehicle(
       };
     }
 
-    const vehicle = await prisma.residentVehicle.update({
+    await prisma.residentVehicle.update({
       where: { id: vehicleId },
       data: normalized.data,
     });
@@ -123,16 +124,20 @@ export async function updateResidentVehicle(
         createdBy: user.id,
       },
     });
-
-    revalidatePath(`/residents/${existingVehicle.residentId}`);
-    revalidatePath(`/residents/${existingVehicle.residentId}/vehicles`);
-    redirect(`/residents/${existingVehicle.residentId}/vehicles`);
   } catch {
     return {
       ok: false,
       message: "Unable to update vehicle.",
     };
   }
+
+  if (existingVehicle) {
+    revalidatePath(`/residents/${existingVehicle.residentId}`);
+    revalidatePath(`/residents/${existingVehicle.residentId}/vehicles`);
+    redirect(`/residents/${existingVehicle.residentId}/vehicles`);
+  }
+
+  redirect("/residents");
 }
 
 export async function deleteResidentVehicle(

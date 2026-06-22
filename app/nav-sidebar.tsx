@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useFormStatus } from "react-dom";
 import { useState } from "react";
 import {
   FileSpreadsheet,
@@ -31,6 +32,21 @@ type User = {
   name: string;
   role: string;
 };
+
+function LogoutButton() {
+  const { pending } = useFormStatus();
+  const { t } = useDictionary();
+  return (
+    <button
+      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60"
+      disabled={pending}
+      type="submit"
+    >
+      <LogOut size={16} />
+      {pending ? "Signing out..." : t.common.signOut}
+    </button>
+  );
+}
 
 export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User }) {
   const pathname = usePathname();
@@ -86,13 +102,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
           </div>
           <div className="mt-4 flex items-center gap-2">
             <form action={logout} className="flex-1">
-              <button
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                type="submit"
-              >
-                <LogOut size={16} />
-                {t.common.signOut}
-              </button>
+              <LogoutButton />
             </form>
             <LocaleToggle />
           </div>
@@ -130,13 +140,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
                 <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
               </div>
               <form action={logout} className="mt-3">
-                <button
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                  type="submit"
-                >
-                  <LogOut size={16} />
-                  {t.common.signOut}
-                </button>
+                <LogoutButton />
               </form>
             </div>
           </div>

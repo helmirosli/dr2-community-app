@@ -69,16 +69,15 @@ export async function createTenant(
         createdBy: user.id,
       },
     });
+
+    revalidatePath(`/residents/${residentId}`);
+    redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/`);
   } catch {
     return {
       ok: false,
       message: "Unable to create tenant.",
     };
   }
-
-  revalidatePath(`/residents/${residentId}`);
-  revalidatePath(`/residents/${residentId}/tenants`);
-  redirect(`/residents/${residentId}/tenants`);
 }
 
 export async function updateTenant(
@@ -93,8 +92,9 @@ export async function updateTenant(
     return normalized;
   }
 
+  let existingTenant: { residentId: string; id: string } | null = null;
   try {
-    const existingTenant = await prisma.tenant.findUnique({
+    existingTenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
     });
 
@@ -105,7 +105,7 @@ export async function updateTenant(
       };
     }
 
-    const tenant = await prisma.tenant.update({
+    await prisma.tenant.update({
       where: { id: tenantId },
       data: normalized.data,
     });
@@ -120,16 +120,19 @@ export async function updateTenant(
         createdBy: user.id,
       },
     });
-
-    revalidatePath(`/residents/${existingTenant.residentId}`);
-    revalidatePath(`/residents/${existingTenant.residentId}/tenants`);
-    redirect(`/residents/${existingTenant.residentId}/tenants`);
   } catch {
     return {
       ok: false,
       message: "Unable to update tenant.",
     };
   }
+
+  if (existingTenant) {
+    revalidatePath(`/residents/${existingTenant.residentId}`);
+    redirect(`/residents/${existingTenant.residentId}/tenant/${existingTenant.id}/vehicles`);
+  }
+
+  redirect("/residents");
 }
 
 export async function deleteTenant(tenantId: string): Promise<TenantFormState> {
@@ -169,9 +172,8 @@ export async function deleteTenant(tenantId: string): Promise<TenantFormState> {
   }
 
   revalidatePath(`/residents/${tenant ? tenant.residentId : ""}`);
-  revalidatePath(`/residents/${tenant ? tenant.residentId : ""}/tenants`);
   redirect(
-    tenant ? `/residents/${tenant.residentId}/tenants` : `/residents`,
+    tenant ? `/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/` : `/residents`,
   );
 }
 

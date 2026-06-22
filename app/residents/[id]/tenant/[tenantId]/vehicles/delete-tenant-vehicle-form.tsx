@@ -2,14 +2,16 @@
 
 import { Trash2 } from "lucide-react";
 
+import { PendingIconButton } from "@/app/components/pending-icon-button";
 import { deleteTenantVehicleAndRedirect } from "@/lib/actions/tenant-vehicles";
 
 export function DeleteTenantVehicleForm({ vehicleId }: { vehicleId: string }) {
   return (
-    <form action={deleteTenantVehicleAndRedirect.bind(null, vehicleId)}>
-      <button type="submit" className="text-sm font-semibold text-red-700 hover:text-red-900" title="Delete vehicle">
-        <Trash2 size={16} />
-      </button>
-    </form>
+    <PendingIconButton
+      action={deleteTenantVehicleAndRedirect.bind(null, vehicleId)}
+      className="inline-flex items-center justify-center rounded text-red-700 hover:text-red-900 disabled:opacity-50"
+    >
+      <Trash2 size={16} />
+    </PendingIconButton>
   );
 }

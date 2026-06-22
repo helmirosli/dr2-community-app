@@ -38,7 +38,7 @@ export default async function TenantVehicleListPage({ params }: TenantVehicleLis
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants`}>
+            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenant`}>
               Back to tenants
             </Link>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">Vehicles</h1>
@@ -46,7 +46,7 @@ export default async function TenantVehicleListPage({ params }: TenantVehicleLis
               {tenant.vehicles.length} vehicle{tenant.vehicles.length !== 1 ? "s" : ""} for {tenant.name}
             </p>
           </div>
-          <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" href={`/residents/${residentId}/tenants/${tenantId}/vehicles/new`}>
+          <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" href={`/residents/${residentId}/tenant/${tenantId}/vehicles/new`}>
             <Plus aria-hidden="true" size={17} />
             Add vehicle
           </Link>
@@ -75,7 +75,7 @@ export default async function TenantVehicleListPage({ params }: TenantVehicleLis
                     <td className="px-5 py-4 text-slate-600">{vehicle.plateNumber}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants/${tenantId}/vehicles/${vehicle.id}/edit`}>
+                        <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenant/${tenantId}/vehicles/${vehicle.id}/edit`}>
                           <Edit size={16} />
                         </Link>
                         <DeleteTenantVehicleForm vehicleId={vehicle.id} />

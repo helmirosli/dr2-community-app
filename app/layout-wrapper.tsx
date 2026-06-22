@@ -1,5 +1,6 @@
 import { getDictionary } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/auth";
+import { LoadingOverlay } from "./components/loading-overlay";
 import { NavSidebar } from "./nav-sidebar";
 
 const allNavItems = [
@@ -25,9 +26,12 @@ export async function LayoutWrapper({ children }: { children: React.ReactNode })
     .map(({ key, icon, href }) => ({ label: t.nav[key], icon, href }));
 
   return (
-    <div className="min-h-screen max-w-full overflow-x-hidden lg:grid lg:grid-cols-[280px_1fr] bg-slate-50">
-      <NavSidebar navItems={navItems} user={{ name: user.name, role: user.role }} />
-      <div className="min-w-0 w-full overflow-x-hidden overflow-y-auto">{children}</div>
-    </div>
+    <>
+      <div className="min-h-screen max-w-full overflow-x-hidden lg:grid lg:grid-cols-[280px_1fr] bg-slate-50">
+        <NavSidebar navItems={navItems} user={{ name: user.name, role: user.role }} />
+        <div className="min-w-0 w-full overflow-x-hidden overflow-y-auto">{children}</div>
+      </div>
+      <LoadingOverlay />
+    </>
   );
 }
