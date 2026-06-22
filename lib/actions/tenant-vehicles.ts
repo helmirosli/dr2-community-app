@@ -198,3 +198,10 @@ export async function deleteTenantVehicle(
 
   redirect("/residents");
 }
+
+export async function deleteTenantVehicleAndRedirect(
+  vehicleId: string,
+): Promise<void> {
+  await deleteTenantVehicle(vehicleId);
+  return undefined;
+}

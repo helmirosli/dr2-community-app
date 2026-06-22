@@ -180,3 +180,11 @@ export async function deleteResidentVehicle(
     vehicle ? `/residents/${vehicle.residentId}/vehicles` : "/residents",
   );
 }
+
+export async function deleteResidentVehicleAndRedirect(
+  vehicleId: string,
+): Promise<void> {
+  await deleteResidentVehicle(vehicleId);
+  // redirect() throws, but mark unreachable as never for TS
+  return void 0;
+}

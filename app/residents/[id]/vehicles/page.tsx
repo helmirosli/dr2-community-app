@@ -4,7 +4,8 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteResidentVehicle } from "@/lib/actions/resident-vehicles";
+import { deleteResidentVehicleAndRedirect } from "@/lib/actions/resident-vehicles";
+import { DeleteVehicleForm } from "./delete-form";
 
 type ResidentVehicleListPageProps = {
   params: Promise<{ id: string }>;
@@ -72,9 +73,7 @@ export default async function ResidentVehicleListPage({ params }: ResidentVehicl
                         <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/vehicles/${vehicle.id}/edit`}>
                           <Edit size={16} />
                         </Link>
-                        <form action={async () => {
-                          await deleteResidentVehicle(vehicle.id);
-                        }}>
+                        <form action={deleteResidentVehicleAndRedirect.bind(null, vehicle.id)}>
                           <button type="submit" className="text-sm font-semibold text-red-700 hover:text-red-900" title="Delete vehicle">
                             <Trash2 size={16} />
                           </button>

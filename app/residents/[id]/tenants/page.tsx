@@ -4,7 +4,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteTenant } from "@/lib/actions/tenants";
+import { DeleteTenantForm } from "./delete-tenant-form";
 
 type TenantListPageProps = {
   params: Promise<{ id: string }>;
@@ -81,13 +81,7 @@ export default async function TenantListPage({ params, searchParams }: TenantLis
                         <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants/${tenant.id}/edit`}>
                           <Edit size={16} />
                         </Link>
-                        <form action={async () => {
-                          await deleteTenant(tenant.id);
-                        }}>
-                          <button type="submit" className="text-sm font-semibold text-red-700 hover:text-red-900" title="Delete tenant">
-                            <Trash2 size={16} />
-                          </button>
-                        </form>
+                        <DeleteTenantForm tenantId={tenant.id} />
                       </div>
                     </td>
                   </tr>

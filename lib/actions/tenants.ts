@@ -174,3 +174,8 @@ export async function deleteTenant(tenantId: string): Promise<TenantFormState> {
     tenant ? `/residents/${tenant.residentId}/tenants` : `/residents`,
   );
 }
+
+export async function deleteTenantAndRedirect(tenantId: string): Promise<void> {
+  await deleteTenant(tenantId);
+  return undefined;
+}
