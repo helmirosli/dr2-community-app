@@ -33,12 +33,12 @@ export function SubmitPaymentForm() {
   ];
 
   const paymentMethodOptions = [
-    { value: "CASH", label: t.publicSubmit.cash },
+    // { value: "CASH", label: t.publicSubmit.cash },
     { value: "BANK_TRANSFER", label: t.publicSubmit.bankTransfer },
     { value: "DUITNOW_QR", label: t.publicSubmit.duitnowQr },
-    { value: "EWALLET", label: t.publicSubmit.ewallet },
-    { value: "CHEQUE", label: t.publicSubmit.cheque },
-    { value: "OTHER", label: t.publicSubmit.other },
+    // { value: "EWALLET", label: t.publicSubmit.ewallet },
+    // { value: "CHEQUE", label: t.publicSubmit.cheque },
+    // { value: "OTHER", label: t.publicSubmit.other },
   ];
 
   useEffect(() => {

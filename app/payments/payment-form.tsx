@@ -33,12 +33,12 @@ const PAYMENT_TYPE_OPTIONS = [
 ];
 
 const PAYMENT_METHOD_OPTIONS = [
-  { value: "CASH", label: "Cash" },
+  // { value: "CASH", label: "Cash" },
   { value: "BANK_TRANSFER", label: "Bank transfer" },
   { value: "DUITNOW_QR", label: "DuitNow / QR" },
-  { value: "EWALLET", label: "E-wallet" },
-  { value: "CHEQUE", label: "Cheque" },
-  { value: "OTHER", label: "Other" },
+  // { value: "EWALLET", label: "E-wallet" },
+  // { value: "CHEQUE", label: "Cheque" },
+  // { value: "OTHER", label: "Other" },
 ];
 
 function monthCount(startYear: number, startMonth: number, endYear: number, endMonth: number) {

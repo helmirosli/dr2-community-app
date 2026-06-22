@@ -65,6 +65,18 @@ export async function createPublicSubmission(
     };
   }
 
+  // Verify the unit number exists in our resident database
+  const resident = await prisma.resident.findUnique({
+    where: { unitNumber: parsed.data.unitNumber },
+  });
+
+  if (!resident) {
+    return {
+      ok: false,
+      message: "Your unit could not be found in our system. This may be due to missing or incorrect data. Please contact the Admin / AJK for assistance.",
+    };
+  }
+
   const duplicateSubmission = await findDuplicatePublicSubmission({
     unitNumber: parsed.data.unitNumber,
     paymentType: parsed.data.paymentType,
