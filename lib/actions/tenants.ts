@@ -18,6 +18,7 @@ const tenantSchema = z.object({
   name: z.string().trim().min(1, "Tenant name is required.").max(120),
   phone: optionalText,
   email: z.email("Please enter a valid email.").optional().or(z.literal("")),
+  vehicles: z.string().optional().or(z.literal("")),
 });
 
 function normalizeTenantInput(formData: FormData) {
@@ -30,12 +31,22 @@ function normalizeTenantInput(formData: FormData) {
     };
   }
 
+  let vehicles: Array<{ make: string; model?: string; plateNumber: string }> = [];
+  if (parsed.data.vehicles) {
+    try {
+      vehicles = JSON.parse(parsed.data.vehicles);
+    } catch {
+      // Invalid JSON, ignore
+    }
+  }
+
   return {
     ok: true as const,
     data: {
       name: parsed.data.name,
       phone: parsed.data.phone || null,
       email: parsed.data.email || null,
+      vehicles,
     },
   };
 }
@@ -52,11 +63,15 @@ export async function createTenant(
     return normalized;
   }
 
+  const { name, phone, email, vehicles } = normalized.data;
+
   try {
     const tenant = await prisma.tenant.create({
       data: {
-        ...normalized.data,
         residentId,
+        name,
+        phone,
+        email,
       },
     });
 
@@ -70,8 +85,22 @@ export async function createTenant(
       },
     });
 
-    revalidatePath(`/residents/${residentId}`);
-    redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/`);
+    // Create vehicles
+    if (vehicles.length) {
+      for (const v of vehicles) {
+        await prisma.tenantVehicle.create({
+          data: {
+            tenantId: tenant.id,
+            make: v.make,
+            model: v.model ?? null,
+            plateNumber: v.plateNumber,
+          },
+        });
+      }
+    }
+
+    revalidatePath(`/residents/${residentId}/tenants`);
+    redirect(`/residents/${residentId}/tenants`);
   } catch {
     return {
       ok: false,
@@ -107,8 +136,29 @@ export async function updateTenant(
 
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: normalized.data,
+      data: {
+        name: normalized.data.name,
+        phone: normalized.data.phone,
+        email: normalized.data.email,
+      },
     });
+
+    if (normalized.data.vehicles.length) {
+      await prisma.tenantVehicle.deleteMany({
+        where: { tenantId },
+      });
+
+      for (const v of normalized.data.vehicles) {
+        await prisma.tenantVehicle.create({
+          data: {
+            tenantId,
+            make: v.make,
+            model: v.model || null,
+            plateNumber: v.plateNumber,
+          },
+        });
+      }
+    }
 
     await prisma.auditLog.create({
       data: {
@@ -128,8 +178,8 @@ export async function updateTenant(
   }
 
   if (existingTenant) {
-    revalidatePath(`/residents/${existingTenant.residentId}`);
-    redirect(`/residents/${existingTenant.residentId}/tenant/${existingTenant.id}/vehicles`);
+    revalidatePath(`/residents/${existingTenant.residentId}/tenants`);
+    redirect(`/residents/${existingTenant.residentId}/tenants`);
   }
 
   redirect("/residents");
@@ -171,10 +221,8 @@ export async function deleteTenant(tenantId: string): Promise<TenantFormState> {
     };
   }
 
-  revalidatePath(`/residents/${tenant ? tenant.residentId : ""}`);
-  redirect(
-    tenant ? `/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/` : `/residents`,
-  );
+  revalidatePath(`/residents/${tenant?.residentId}/tenants`);
+  redirect(tenant ? `/residents/${tenant.residentId}/tenants` : `/residents`);
 }
 
 export async function deleteTenantAndRedirect(tenantId: string): Promise<void> {

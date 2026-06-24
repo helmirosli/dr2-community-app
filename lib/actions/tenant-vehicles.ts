@@ -78,8 +78,8 @@ export async function createTenantVehicle(
     });
 
     if (tenant) {
-      revalidatePath(`/residents/${tenant.residentId}`);
-      redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles/`);
+      revalidatePath(`/residents/${tenant.residentId}/tenants`);
+      redirect(`/residents/${tenant.residentId}/tenants`);
     }
 
     return { ok: false, message: "Unable to redirect." };
@@ -144,8 +144,8 @@ export async function updateTenantVehicle(
     });
 
     if (tenant) {
-      revalidatePath(`/residents/${tenant.residentId}`);
-      redirect(`/residents/${tenant.residentId}/tenant/${tenant.id}/vehicles`);
+      revalidatePath(`/residents/${tenant.residentId}/tenants`);
+      redirect(`/residents/${tenant.residentId}/tenants`);
     }
   }
 
@@ -194,7 +194,7 @@ export async function deleteTenantVehicle(
     revalidatePath(
       `/residents/${vehicle.tenant.residentId}/tenants`,
     );
-    redirect(`/residents/${vehicle.tenant.residentId}/tenant/${vehicle.tenant.id}/vehicles/`);
+    redirect(`/residents/${vehicle.tenant.residentId}/tenants`);
   }
 
   redirect("/residents");

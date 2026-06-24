@@ -15,6 +15,16 @@ export default async function EditTenantPage({ params }: EditTenantPageProps) {
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
+    include: {
+      vehicles: {
+        select: {
+          id: true,
+          make: true,
+          model: true,
+          plateNumber: true,
+        },
+      },
+    },
   });
 
   if (!tenant) {

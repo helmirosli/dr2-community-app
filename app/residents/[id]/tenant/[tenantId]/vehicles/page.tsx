@@ -38,7 +38,7 @@ export default async function TenantVehicleListPage({ params }: TenantVehicleLis
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenant`}>
+            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants`}>
               Back to tenants
             </Link>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">Vehicles</h1>
