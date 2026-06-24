@@ -23,9 +23,9 @@ export default async function LoginPage() {
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
       {/* Left — branding panel */}
-      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-500 to-cyan-900 px-10 py-16 text-white md:w-1/2">
+      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-500 to-cyan-900 px-10 py-16 text-white md:w-1/2 shadow-lg">
         {/* Logo circle */}
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 shadow-sm ring-4 ring-white/30">
           <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
@@ -48,7 +48,7 @@ export default async function LoginPage() {
       </div>
 
       {/* Right — form panel */}
-      <div className="flex flex-col items-center justify-center bg-white px-8 py-16 md:w-1/2">
+      <div className="flex flex-col items-center justify-center bg-white px-8 py-16 md:w-1/2 shadow-lg">
         <div className="w-full max-w-sm">
           <h2 className="text-2xl font-semibold text-slate-900">{t.login.title}</h2>
           <p className="mt-1 text-sm text-slate-500">{t.login.subtitle}</p>

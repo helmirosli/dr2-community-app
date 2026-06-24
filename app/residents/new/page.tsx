@@ -13,7 +13,7 @@ export default async function NewResidentPage() {
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-3xl gap-6">
         <header>
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href="/residents">
+          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900 transition-colors" href="/residents">
             Back to residents
           </Link>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Add resident</h1>

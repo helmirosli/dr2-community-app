@@ -27,7 +27,7 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
   return (
     <>
       <button
-        className="inline-flex items-center gap-1.5 rounded-md bg-cyan-50 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-200 transition hover:bg-cyan-100"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-50 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-200/50 shadow-sm transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
         onClick={() => setIsOpen(true)}
         type="button"
       >
@@ -36,8 +36,8 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
-          <div className="w-full max-h-[90vh] rounded-t-lg bg-white shadow-lg sm:rounded-lg sm:max-w-2xl overflow-hidden flex flex-col sm:w-auto">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center">
+          <div className="w-full max-h-[90vh] rounded-xl bg-white shadow-xl sm:max-w-2xl overflow-hidden flex flex-col sm:w-auto">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
               <h3 className="text-lg font-semibold text-slate-900">
@@ -87,7 +87,7 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                         <p className="text-xs font-semibold text-slate-600 uppercase">Preview</p>
                         <img
                           alt={selectedFile.originalFilename}
-                          className="mt-2 max-w-full rounded-lg border border-slate-200"
+                          className="mt-2 max-w-full rounded-xl border border-border-subtle"
                           src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
                         />
                       </div>
@@ -97,17 +97,17 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                         <embed
                           src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
                           type="application/pdf"
-                          className="w-full h-96 rounded-lg border border-slate-200 mt-2"
+                          className="w-full h-96 rounded-xl border border-border-subtle mt-2"
                         />
                       </div>
                     ) : (
-                      <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 text-center">
+                      <div className="mt-4 rounded-xl border border-border-subtle bg-white p-4 text-center">
                         <p className="text-sm text-slate-600">Preview not available for this file type</p>
                       </div>
                     )}
 
                     <button
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 mt-4"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 mt-4 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
                       onClick={() => {
                         const link = document.createElement("a");
                         link.href = selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`;

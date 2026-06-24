@@ -42,19 +42,20 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
   const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
 
   return (
-    <div className="grid gap-8">
-      {/* Header section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{t.publicStatus.title}</h1>
-          <p className="mt-3 text-base text-slate-600">
-            {t.publicStatus.subtitle.replace("{year}", String(selectedYear))}
-          </p>
-        </div>
-        <Link
-          href="/submit"
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-        >
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8 sm:px-6">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 [&>*]:min-w-0">
+        {/* Header section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{t.publicStatus.title}</h1>
+            <p className="mt-3 text-base text-slate-600">
+              {t.publicStatus.subtitle.replace("{year}", String(selectedYear))}
+            </p>
+          </div>
+          <Link
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            href="/submit"
+          >
           <Send size={18} />
           <span>{t.publicStatus.submitPayment}</span>
         </Link>
@@ -75,7 +76,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
             />
           </label>
           <button
-            className="rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60"
             type="submit"
           >
             {t.common.update}
@@ -84,7 +85,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       </div>
 
       {/* Status table */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-border-subtle bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0)}rem` }}>
             <thead>
@@ -205,8 +206,8 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       </div>
 
       {/* Legend and info */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
+        <div className="rounded-xl border border-border-subtle bg-white p-4 sm:p-5 shadow-sm">
           <h3 className="font-semibold text-slate-900">{t.publicStatus.legendTitle}</h3>
           <div className="mt-4 space-y-3">
             <div className="flex items-center gap-3">
@@ -228,7 +229,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
           </div>
         </div>
 
-        <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-4 sm:p-5">
+        <div className="rounded-xl border border-border-accent bg-cyan-50 p-4 sm:p-5 shadow-sm">
           <div className="flex items-start gap-3">
             <ShieldAlert className="shrink-0 text-cyan-600" size={20} />
             <div>
@@ -238,6 +239,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

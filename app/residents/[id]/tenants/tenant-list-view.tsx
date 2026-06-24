@@ -39,9 +39,9 @@ export function TenantListView({ resident, residentId, query }: TenantListViewPr
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-4 rounded-xl border border-border-subtle bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}`}>
+            <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900 transition-colors" href={`/residents/${residentId}`}>
               Back to {resident.unitNumber}
             </Link>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight">Tenants</h1>
@@ -49,18 +49,18 @@ export function TenantListView({ resident, residentId, query }: TenantListViewPr
               {resident.tenants.length} tenant{resident.tenants.length !== 1 ? "s" : ""} for {resident.name}
             </p>
           </div>
-          <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" href={`/residents/${residentId}/tenants/new`}>
+          <Link className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60" href={`/residents/${residentId}/tenants/new`}>
             <Plus aria-hidden="true" size={17} />
             Add tenant
           </Link>
         </header>
 
         {resident.tenants.length === 0 ? (
-          <p className="mt-8 rounded-lg border border-cyan-950/10 bg-white p-8 text-center text-sm text-slate-500">
+          <p className="mt-8 rounded-xl border border-border-subtle bg-white p-8 text-center text-sm text-slate-500">
             No tenants recorded for this resident.
           </p>
         ) : (
-          <div className="mt-6 rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+          <div className="mt-6 rounded-xl border border-border-subtle bg-white shadow-sm">
             <form className="border-b border-slate-100 p-5" method="get">
               <div className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2">
                 <input className="w-full bg-transparent outline-none" defaultValue={query} name="q" placeholder="Search tenant name..." />
@@ -78,7 +78,7 @@ export function TenantListView({ resident, residentId, query }: TenantListViewPr
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {resident.tenants.map((tenant) => (
-                  <tr key={tenant.id} className="hover:bg-slate-50">
+                  <tr key={tenant.id} className="transition-colors duration-150 hover:bg-slate-50/60">
                     <td className="px-5 py-4 font-medium text-slate-950">{tenant.name}</td>
                     <td className="px-5 py-4 text-slate-600">{tenant.phone ?? "-"}</td>
                     <td className="px-5 py-4 text-slate-600">{tenant.email ?? "-"}</td>
@@ -121,14 +121,14 @@ export function TenantListView({ resident, residentId, query }: TenantListViewPr
         {/* View Tenant Modal */}
         {viewTenant && (
           <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
             onClick={() => setViewTenant(null)}
           >
             <div
-              className="w-full max-h-[90vh] sm:max-w-md bg-white shadow-lg rounded-lg sm:rounded-xl overflow-hidden"
+              className="w-full max-h-[90vh] sm:max-w-md bg-white shadow-xl rounded-xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
                 <h3 className="text-lg font-semibold text-slate-900">Tenant Details</h3>
                 <button
                   type="button"

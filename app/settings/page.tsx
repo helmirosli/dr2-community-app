@@ -40,8 +40,8 @@ export default async function SettingsPage() {
   };
 
   return (
-    <main className="px-6 py-8 sm:px-8">
-      <div className="mx-auto grid max-w-4xl gap-8">
+    <main className="min-h-screen bg-[#f6fafb] px-6 py-8 sm:px-8">
+      <div className="mx-auto grid max-w-4xl gap-8 [&>*]:min-w-0">
         <header>
           <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.settings.administration}</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -73,7 +73,7 @@ export default async function SettingsPage() {
               <UserForm />
 
               {/* Users list */}
-            <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <section className="rounded-xl border border-border-subtle bg-white shadow-sm overflow-hidden">
               <div className="border-b border-slate-100 px-6 py-4">
                 <h3 className="font-semibold text-slate-900">{t.settings.existingUsers} ({users.length})</h3>
               </div>
@@ -90,12 +90,12 @@ export default async function SettingsPage() {
                   <tbody className="divide-y divide-slate-100">
                     {users.length > 0 ? (
                       users.map((user) => (
-                        <tr className="transition hover:bg-slate-50" key={user.id}>
+                        <tr className="transition-colors duration-150 hover:bg-slate-50/60" key={user.id}>
                           <td className="px-6 py-4 font-semibold text-slate-900">{user.name}</td>
                           <td className="px-6 py-4 text-slate-600">{user.email}</td>
                           <td className="px-6 py-4">
                             {user.id === currentUser.id ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-100">
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-600/20">
                                 {roleLabels[user.role] || user.role}
                               </span>
                             ) : (
@@ -124,13 +124,13 @@ export default async function SettingsPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
             </section>
+          </section>
           ) : null}
 
           {/* Info cards */}
           <section className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="rounded-xl border border-border-subtle bg-white p-5 transition hover:shadow-md">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-base font-semibold text-slate-900">{t.settings.rolesExplained}</h3>
@@ -144,7 +144,7 @@ export default async function SettingsPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="rounded-xl border border-border-subtle bg-white p-5 shadow-sm transition hover:shadow-md">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-base font-semibold text-slate-900">{t.settings.securityNote}</h3>

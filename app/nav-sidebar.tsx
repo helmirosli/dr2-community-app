@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   FileSpreadsheet,
   Gift,
@@ -51,7 +51,22 @@ function LogoutButton() {
 export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const { t } = useDictionary();
+
+  useEffect(() => {
+    if (open) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => {
+        const focusable = mobileNavRef.current?.querySelector<HTMLElement>("a,button,[tabindex]:not([tabindex='-1'])");
+        focusable?.focus();
+      });
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [open]);
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <nav aria-label="Main navigation" className="grid gap-1">
@@ -60,10 +75,10 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
         const active = pathname === item.href || pathname.startsWith(item.href + "/");
         return (
           <Link
-            className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+            className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
               active
-                ? "bg-cyan-50 text-cyan-700"
-                : "text-slate-700 hover:bg-slate-100"
+                ? "bg-cyan-50/80 ring-1 ring-cyan-500/10 text-cyan-700"
+                : "text-slate-700 hover:bg-slate-50"
             }`}
             href={item.href}
             key={item.label}
@@ -82,7 +97,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white lg:overflow-y-auto">
         <div className="flex items-center gap-3 px-5 pb-6 pt-5">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-cyan-700 text-sm font-bold text-white">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-cyan-700 text-sm font-bold text-white shadow-sm">
             DR2
           </div>
           <div>
@@ -96,7 +111,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
         </div>
 
         <div className="border-t border-slate-100 px-5 py-5">
-          <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-4 text-sm">
+          <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-4 text-sm shadow-sm ring-1 ring-slate-200/50">
             <p className="font-semibold text-slate-900">{user.name}</p>
             <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
           </div>
@@ -111,7 +126,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
 
       {/* Mobile top bar */}
       <div className="lg:hidden">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+        <div className="flex items-center justify-between border-b border-border-subtle bg-white px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-cyan-700 text-xs font-bold text-white">
               DR2
@@ -132,16 +147,25 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
         </div>
 
         {open && (
-          <div className="border-b border-slate-200 bg-white px-4 py-3 shadow-md">
-            <NavLinks onClick={() => setOpen(false)} />
-            <div className="mt-4 border-t border-slate-100 pt-4">
-              <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-3 text-sm">
-                <p className="font-semibold text-slate-900">{user.name}</p>
-                <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
+          <div
+            ref={mobileNavRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.nav.brandName + " navigation"}
+            className="fixed inset-0 z-50 flex"
+          >
+            <div className="fixed inset-0 bg-black/40" onClick={() => setOpen(false)} aria-hidden="true" />
+            <div className="relative ml-auto w-3/4 max-w-xs transform overflow-y-auto bg-white p-4 shadow-lg transition">
+              <NavLinks onClick={() => setOpen(false)} />
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-3 text-sm shadow-sm ring-1 ring-slate-200/50">
+                  <p className="font-semibold text-slate-900">{user.name}</p>
+                  <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
+                </div>
+                <form action={logout} className="mt-3">
+                  <LogoutButton />
+                </form>
               </div>
-              <form action={logout} className="mt-3">
-                <LogoutButton />
-              </form>
             </div>
           </div>
         )}

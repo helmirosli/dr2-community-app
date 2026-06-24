@@ -61,27 +61,27 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
   };
 
   return (
-    <form action={formAction} className="mt-6 grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
+    <form action={formAction} className="mt-6 grid gap-5 rounded-xl border border-border-subtle bg-white p-6 shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Tenant name
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={tenant?.name ?? ""} name="name" required />
+          <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" defaultValue={tenant?.name ?? ""} name="name" required />
         </label>
 
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Phone
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={tenant?.phone ?? ""} name="phone" />
+          <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" defaultValue={tenant?.phone ?? ""} name="phone" />
         </label>
       </div>
 
       <label className="grid gap-2 text-sm font-medium text-slate-700">
         Email
-        <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={tenant?.email ?? ""} name="email" type="email" />
+        <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" defaultValue={tenant?.email ?? ""} name="email" type="email" />
       </label>
 
       <input type="hidden" name="vehicles" value={hiddenValue} />
 
-      {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
+      {state.message ? <p className="text-sm text-red-600">{state.message}</p> : null}
 
       {/* Vehicle section */}
       <div>
@@ -89,7 +89,7 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
         {vehicles.length === 0 ? (
           <p className="text-sm text-slate-500">No vehicles added yet. Add a vehicle below to register one for this tenant.</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-subtle">
             <table className="w-full border-collapse text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
@@ -104,7 +104,7 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
                   <tr key={index}>
                     <td className="p-2">
                       <input
-                        className="w-full rounded-md border border-slate-300 px-2 py-1"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                         value={v.make}
                         onChange={(e) => updateVehicle(index, "make", e.target.value)}
                         required
@@ -112,7 +112,7 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
                     </td>
                     <td className="p-2">
                       <input
-                        className="w-full rounded-md border border-slate-300 px-2 py-1"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                         value={v.model}
                         onChange={(e) => updateVehicle(index, "model", e.target.value)}
                       />
@@ -143,14 +143,14 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
         <button
           type="button"
           onClick={addVehicle}
-          className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-md bg-cyan-50 px-3 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100"
+          className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-lg bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-700 shadow-sm transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
         >
           <Plus size={16} />
           Add vehicle
         </button>
       </div>
 
-      <button className="min-h-11 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60" disabled={pending} type="submit">
+      <button className="min-h-11 rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60" disabled={pending} type="submit">
         {pending ? "Saving..." : tenant?.id ? "Save tenant" : "Create tenant"}
       </button>
     </form>

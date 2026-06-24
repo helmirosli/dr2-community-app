@@ -27,9 +27,9 @@ export async function LayoutWrapper({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <div className="min-h-screen max-w-full overflow-x-hidden lg:grid lg:grid-cols-[280px_1fr] bg-slate-50">
+      <div className="min-h-screen max-w-full overflow-x-hidden lg:grid lg:grid-cols-[280px_1fr] bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100">
         <NavSidebar navItems={navItems} user={{ name: user.name, role: user.role }} />
-        <div className="min-w-0 w-full overflow-x-hidden overflow-y-auto">{children}</div>
+        <div className="min-w-0 w-full overflow-x-hidden overflow-y-auto bg-white min-h-screen">{children}</div>
       </div>
       <LoadingOverlay />
     </>

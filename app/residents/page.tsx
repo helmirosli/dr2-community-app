@@ -83,7 +83,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <header className="flex flex-col gap-4 rounded-xl border border-border-subtle bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.residents.inventory}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.residents.title}</h1>
@@ -92,7 +92,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/residents/new">
+            <Link className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60" href="/residents/new">
               <Plus aria-hidden="true" size={17} />
               {t.residents.addResident}
             </Link>
@@ -100,21 +100,21 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-border-subtle bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">{t.residents.totalResidents}</p>
             <p className="mt-2 text-3xl font-semibold">{totalResidents}</p>
           </div>
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-border-subtle bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">{t.residents.activeHouseholds}</p>
             <p className="mt-2 text-3xl font-semibold">{activeResidents}</p>
           </div>
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-border-subtle bg-white p-5 shadow-sm">
             <p className="text-sm font-medium text-slate-500">{t.residents.filteredResult}</p>
             <p className="mt-2 text-3xl font-semibold">{residents.length}</p>
           </div>
         </section>
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="rounded-xl border border-border-subtle bg-white shadow-sm">
           <form className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row md:items-end" method="get">
             <label className="grid flex-1 gap-2 text-sm font-medium text-slate-700">
               {t.common.search}
@@ -134,7 +134,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               </select>
             </label>
 
-            <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
+            <button className="rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60" type="submit">
               {t.common.apply}
             </button>
           </form>
@@ -155,7 +155,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               <tbody className="divide-y divide-slate-100">
                 {residents.length > 0 ? (
                   residents.map((resident) => (
-                    <tr className="transition hover:bg-cyan-50/40" key={resident.id}>
+                    <tr className="transition-colors duration-150 hover:bg-slate-50/60" key={resident.id}>
                       <td className="px-5 py-4 font-semibold text-slate-950">{resident.unitNumber}</td>
                       <td className="px-5 py-4">
                         <p className="font-medium text-slate-950">{resident.name}</p>
@@ -167,7 +167,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                       </td>
                       <td className="px-5 py-4 text-slate-600">{resident.streetBlock ?? "-"}</td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-800 ring-1 ring-cyan-100">
+                        <span className="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-800 ring-1 ring-cyan-600/20">
                           {statusLabel(resident.status)}
                         </span>
                       </td>
@@ -203,7 +203,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               <div className="flex gap-2">
                 {page > 1 && (
                   <Link
-                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-lg border border-border-subtle bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
                     href={`/residents?q=${query}&status=${selectedStatus}&page=${page - 1}`}
                   >
                     {t.common.previous}
@@ -214,10 +214,10 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                     const pageNum = i + 1;
                     return (
                       <Link
-                        className={`rounded-md px-2.5 py-2 text-sm font-semibold transition ${
+                        className={`rounded-lg px-2.5 py-2 text-sm font-semibold transition ${
                           pageNum === page
-                            ? "bg-cyan-600 text-white"
-                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            ? "bg-cyan-600 text-white shadow-sm"
+                            : "border border-border-subtle bg-white text-slate-700 shadow-sm hover:bg-slate-50"
                         }`}
                         href={`/residents?q=${query}&status=${selectedStatus}&page=${pageNum}`}
                         key={pageNum}
@@ -229,7 +229,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                 </div>
                 {page < totalPages && (
                   <Link
-                    className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-lg border border-border-subtle bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
                     href={`/residents?q=${query}&status=${selectedStatus}&page=${page + 1}`}
                   >
                     {t.common.next}

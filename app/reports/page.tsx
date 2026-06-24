@@ -77,21 +77,21 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
               href={`/reports/yearly.xlsx?${exportQuery}`}
             >
               <FileSpreadsheet size={17} />
               {t.reports.excel}
             </a>
             <a
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
               href={`/reports/yearly.pdf?${exportQuery}`}
             >
               <FileText size={17} />
               {t.reports.pdf}
             </a>
             <Link
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
               href="/reports/file-upload"
             >
               <Upload size={17} />
@@ -105,7 +105,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             <label className="grid gap-2 text-sm font-medium text-slate-700">
               {t.common.year}
               <input
-                className="w-28 rounded-md border border-slate-300 px-3 py-2"
+                className="w-28 rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 defaultValue={selectedYear}
                 max={2100}
                 min={2020}
@@ -117,7 +117,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
               {t.reports.includeInactive}
             </label>
-            <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
+            <button className="min-h-10 rounded-lg bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60" type="submit">
               {t.common.apply}
             </button>
             <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-600">
@@ -162,7 +162,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   const rowBg = rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60";
 
                   return (
-                    <tr className={`${rowBg} hover:bg-cyan-50/40`} key={row.unitNumber}>
+                    <tr className={`${rowBg} transition-colors duration-150 hover:bg-slate-50/60`} key={row.unitNumber}>
                       <td className={`sticky left-0 z-10 ${rowBg} border-b border-slate-100 px-3 py-2 text-center font-medium text-slate-500`}>
                         {row.no}
                       </td>

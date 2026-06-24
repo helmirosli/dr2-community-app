@@ -13,30 +13,30 @@ export function SetupForm() {
   const [state, action, pending] = useActionState(createFirstAdmin, initialState);
 
   return (
-    <form action={action} className="grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
+    <form action={action} className="grid gap-5 rounded-xl border border-border-subtle bg-white p-6 shadow-sm">
       <label className="grid gap-2 text-sm font-medium text-slate-700">
         Name
-        <input className="rounded-md border border-slate-300 px-3 py-2" name="name" required />
+        <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" name="name" required />
       </label>
 
       <label className="grid gap-2 text-sm font-medium text-slate-700">
         Email
-        <input className="rounded-md border border-slate-300 px-3 py-2" name="email" required type="email" />
+        <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" name="email" required type="email" />
       </label>
 
       <label className="grid gap-2 text-sm font-medium text-slate-700">
         Password
-        <input className="rounded-md border border-slate-300 px-3 py-2" minLength={8} name="password" required type="password" />
+        <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" minLength={8} name="password" required type="password" />
       </label>
 
       <label className="grid gap-2 text-sm font-medium text-slate-700">
         Confirm password
-        <input className="rounded-md border border-slate-300 px-3 py-2" minLength={8} name="confirmPassword" required type="password" />
+        <input className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm transition focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500" minLength={8} name="confirmPassword" required type="password" />
       </label>
 
-      {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
+      {state.message ? <p className="text-sm text-red-600">{state.message}</p> : null}
 
-      <button className="min-h-11 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60" disabled={pending} type="submit">
+      <button className="min-h-11 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60" disabled={pending} type="submit">
         {pending ? "Creating admin..." : "Create first admin"}
       </button>
     </form>

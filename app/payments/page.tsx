@@ -60,14 +60,14 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <header className="flex flex-col gap-4 rounded-xl border border-border-subtle bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.payments.ledger}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.payments.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">{t.payments.subtitle}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/payments/new">
+            <Link className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60" href="/payments/new">
               <Plus aria-hidden="true" size={17} />
               {t.payments.recordPayment}
             </Link>
@@ -75,12 +75,12 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         </header>
 
         {params.created ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+          <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
             {t.payments.recordedSuccess}
           </div>
         ) : null}
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="rounded-xl border border-border-subtle bg-white shadow-sm">
           <div className="flex items-center gap-3 border-b border-slate-100 p-5">
             <ReceiptText aria-hidden="true" className="text-cyan-700" size={20} />
             <h2 className="text-lg font-semibold tracking-tight">{t.payments.recentPayments}</h2>
@@ -103,7 +103,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                   const lastCoverage = payment.coverages[payment.coverages.length - 1];
 
                   return (
-                    <tr className="transition hover:bg-cyan-50/40" key={payment.id}>
+                    <tr className="transition-colors duration-150 hover:bg-slate-50/60" key={payment.id}>
                       <td className="px-5 py-4">
                         <p className="font-semibold text-slate-950">{payment.resident.unitNumber}</p>
                         <p className="mt-1 text-slate-500">{payment.resident.name}</p>

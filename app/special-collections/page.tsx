@@ -50,7 +50,7 @@ export default async function SpecialCollectionsPage() {
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <header className="flex flex-col gap-4 rounded-xl border border-border-subtle bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.collections.extra}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.collections.title}</h1>
@@ -58,13 +58,13 @@ export default async function SpecialCollectionsPage() {
               {t.collections.subtitle}
             </p>
           </div>
-          <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/special-collections/new">
+          <Link className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60" href="/special-collections/new">
             <Plus aria-hidden="true" size={17} />
             {t.collections.newCollection}
           </Link>
         </header>
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="rounded-xl border border-border-subtle bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -86,7 +86,7 @@ export default async function SpecialCollectionsPage() {
                     const target = collection.amountPerResident * collection._count.assignments;
 
                     return (
-                      <tr className="transition hover:bg-cyan-50/40" key={collection.id}>
+                      <tr className="transition-colors duration-150 hover:bg-slate-50/60" key={collection.id}>
                         <td className="px-5 py-4 font-semibold text-slate-950">{collection.title}</td>
                         <td className="px-5 py-4 text-slate-600">{formatRM(collection.amountPerResident)}</td>
                         <td className="px-5 py-4 text-slate-600">{collection._count.assignments}</td>
@@ -97,7 +97,7 @@ export default async function SpecialCollectionsPage() {
                           {collection.dueDate ? collection.dueDate.toLocaleDateString("en-MY") : "\u2014"}
                         </td>
                         <td className="px-5 py-4">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${badge.className}`}>
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${badge.className}`}>
                             {badge.label}
                           </span>
                         </td>
