@@ -246,7 +246,18 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
     for (let i = 0; i < 12; i++) {
       const key = MONTH_ABBR[i];
       const amountSen = row.months[i];
-      monthValues[key] = row.isForSale ? statusText : amountSen !== null ? amountSen / 100 : "";
+      const monthOverride = row.monthStatusOverrides[i];
+      monthValues[key] = row.isForSale
+        ? statusText
+        : amountSen !== null
+          ? amountSen / 100
+          : monthOverride === "FOR_SALE"
+            ? "FOR SALE"
+            : monthOverride === "MOVED_OUT"
+              ? "MOVED OUT"
+          : row.status === "EXEMPT"
+            ? "EXEMPT"
+            : "";
     }
 
     const extraValues: Record<string, string> = {};
@@ -337,9 +348,24 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   const bodyRows = rows.map((row, idx) => {
     const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
     const monthCells = row.isForSale
-      ? Array(12).fill({ text: statusText, italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
-      : row.months.map((amountSen) => ({
-          text: amountSen !== null ? `RM${(amountSen / 100).toFixed(2)}` : "",
+      ? Array.from({ length: 12 }, () => ({
+          text: statusText,
+          italics: true,
+          color: "#94a3b8",
+          alignment: "center" as const,
+          fontSize: 7,
+        }))
+      : row.months.map((amountSen, i) => ({
+          text:
+            amountSen !== null
+              ? `RM${(amountSen / 100).toFixed(2)}`
+              : row.monthStatusOverrides[i] === "FOR_SALE"
+                ? "FOR SALE"
+                : row.monthStatusOverrides[i] === "MOVED_OUT"
+                  ? "MOVED OUT"
+                  : row.status === "EXEMPT"
+                    ? "EXEMPT"
+                    : "",
           alignment: "center" as const,
           fontSize: 7,
           fillColor: amountSen !== null && amountSen < DEFAULT_MONTHLY_FEE_SEN && amountSen > 0 ? "#fef3c7" : undefined,
@@ -349,7 +375,13 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
       extraColCount === 0
         ? []
         : row.isForSale
-          ? Array(extraColCount).fill({ text: statusText, italics: true, color: "#94a3b8", alignment: "center", fontSize: 7 })
+          ? Array.from({ length: extraColCount }, () => ({
+              text: statusText,
+              italics: true,
+              color: "#94a3b8",
+              alignment: "center" as const,
+              fontSize: 7,
+            }))
           : specialCollections.length > 0
             ? specialCollections.map(() => ({
                 text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "",

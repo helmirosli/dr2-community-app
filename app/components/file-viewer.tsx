@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Download, Eye, EyeOff, X } from "lucide-react";
+import { useId, useState } from "react";
+import { Download, Eye, X } from "lucide-react";
 
 type FileViewerProps = {
   files: Array<{
@@ -17,6 +17,7 @@ type FileViewerProps = {
 export function FileViewer({ files, triggerLabel = "View files" }: FileViewerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(files[0]?.id || null);
+  const dialogTitleId = useId();
 
   if (files.length === 0) {
     return <span className="text-slate-500">No files</span>;
@@ -32,21 +33,27 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
         type="button"
       >
         <Eye size={14} />
-        {files.length} {files.length === 1 ? "file" : "files"}
+        {triggerLabel} ({files.length})
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
-          <div className="w-full max-h-[90vh] rounded-t-lg bg-white shadow-lg sm:rounded-lg sm:max-w-2xl overflow-hidden flex flex-col sm:w-auto">
+          <div
+            className="w-full max-h-[90vh] rounded-t-lg bg-white shadow-lg sm:rounded-lg sm:max-w-2xl overflow-hidden flex flex-col sm:w-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={dialogTitleId}
+          >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-lg font-semibold text-slate-900" id={dialogTitleId}>
                 Attached files ({files.length})
               </h3>
               <button
                 className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"
                 onClick={() => setIsOpen(false)}
                 type="button"
+                aria-label="Close file viewer"
               >
                 <X size={20} />
               </button>
@@ -85,6 +92,7 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                     {selectedFile.mimeType.startsWith("image/") ? (
                       <div className="mt-4">
                         <p className="text-xs font-semibold text-slate-600 uppercase">Preview</p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           alt={selectedFile.originalFilename}
                           className="mt-2 max-w-full rounded-lg border border-slate-200"

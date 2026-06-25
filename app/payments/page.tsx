@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, ReceiptText } from "lucide-react";
+import { ChevronRight, Plus, ReceiptText } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -58,16 +58,21 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Operations</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{t.payments.title}</span>
+        </nav>
+        <header className="ui-card flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.payments.ledger}</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.payments.ledger}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.payments.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">{t.payments.subtitle}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/payments/new">
+            <Link className="ui-button-primary" href="/payments/new">
               <Plus aria-hidden="true" size={17} />
               {t.payments.recordPayment}
             </Link>
@@ -80,7 +85,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           </div>
         ) : null}
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="ui-card overflow-hidden">
           <div className="flex items-center gap-3 border-b border-slate-100 p-5">
             <ReceiptText aria-hidden="true" className="text-cyan-700" size={20} />
             <h2 className="text-lg font-semibold tracking-tight">{t.payments.recentPayments}</h2>
@@ -89,12 +94,12 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.resident}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.date}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.type}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.coverage}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.amount}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.proof}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.dashboard.resident}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.payments.date}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.payments.type}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.payments.coverage}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.payments.amount}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.payments.proof}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

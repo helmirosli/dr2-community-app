@@ -1,4 +1,4 @@
-import { ArrowRight, Shield, Trash2 } from "lucide-react";
+import { ArrowRight, ChevronRight, Shield } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -42,8 +42,13 @@ export default async function SettingsPage() {
   return (
     <main className="px-6 py-8 sm:px-8">
       <div className="mx-auto grid max-w-4xl gap-8">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Administration</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{t.settings.title}</span>
+        </nav>
         <header>
-          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.settings.administration}</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.settings.administration}</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             {t.settings.title}
           </h1>
@@ -73,7 +78,7 @@ export default async function SettingsPage() {
               <UserForm />
 
               {/* Users list */}
-            <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="ui-card overflow-hidden">
               <div className="border-b border-slate-100 px-6 py-4">
                 <h3 className="font-semibold text-slate-900">{t.settings.existingUsers} ({users.length})</h3>
               </div>
@@ -81,10 +86,10 @@ export default async function SettingsPage() {
                 <table className="w-full border-collapse text-left text-sm">
                   <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                     <tr>
-                      <th className="px-6 py-3 font-semibold">{t.settings.name}</th>
-                      <th className="px-6 py-3 font-semibold">{t.settings.email}</th>
-                      <th className="px-6 py-3 font-semibold">{t.settings.role}</th>
-                      <th className="px-6 py-3 font-semibold">{t.common.actions}</th>
+                      <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.settings.name}</th>
+                      <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.settings.email}</th>
+                      <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.settings.role}</th>
+                      <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.common.actions}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -130,7 +135,7 @@ export default async function SettingsPage() {
 
           {/* Info cards */}
           <section className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="ui-card p-5 transition hover:shadow-md">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-base font-semibold text-slate-900">{t.settings.rolesExplained}</h3>
@@ -140,11 +145,11 @@ export default async function SettingsPage() {
                     <li><span className="font-semibold text-slate-900">Viewer</span> — {t.settings.viewerDesc}</li>
                   </ul>
                 </div>
-                <ArrowRight className="shrink-0 text-cyan-600" size={18} />
+                <ArrowRight className="shrink-0 text-brand-700" size={18} />
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="ui-card p-5 transition hover:shadow-md">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-base font-semibold text-slate-900">{t.settings.securityNote}</h3>
@@ -152,7 +157,7 @@ export default async function SettingsPage() {
                     {t.settings.securityNoteDesc}
                   </p>
                 </div>
-                <ArrowRight className="shrink-0 text-cyan-600" size={18} />
+                <ArrowRight className="shrink-0 text-brand-700" size={18} />
               </div>
             </div>
           </section>

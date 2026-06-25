@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Banknote,
   CalendarClock,
+  ChevronRight,
   CheckCircle2,
   Download,
   FileSpreadsheet,
@@ -28,7 +29,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function DashboardPage() {
-  const currentUser = await requireDashboardUser();
+  await requireDashboardUser();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -147,9 +148,14 @@ export default async function DashboardPage() {
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-8 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 sm:gap-6">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Overview</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">Dashboard</span>
+        </nav>
+        <header className="ui-card flex flex-col gap-4 p-5 sm:gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">
               {monthLabel(now.getFullYear(), now.getMonth() + 1)} {t.dashboard.operations}
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -161,21 +167,21 @@ export default async function DashboardPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="ui-button-secondary"
               href="/submit"
             >
               <FileText size={17} />
               <span>{t.dashboard.publicForm}</span>
             </Link>
             <Link
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="ui-button-secondary"
               href="/reports"
             >
               <FileSpreadsheet size={17} />
               <span>{t.dashboard.reports}</span>
             </Link>
             <Link
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="ui-button-primary"
               href="/payments"
             >
               <ReceiptText size={17} />
@@ -189,7 +195,7 @@ export default async function DashboardPage() {
           {metrics.map((metric) => {
             const Icon = metric.icon;
             return (
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm" key={metric.label}>
+              <div className="ui-card p-5" key={metric.label}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-500">{metric.label}</p>
@@ -208,13 +214,13 @@ export default async function DashboardPage() {
         {/* Main content grid */}
         <section className="grid gap-8 xl:grid-cols-[1fr_320px]">
           {/* Left: Submissions queue */}
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="ui-card overflow-hidden">
             <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.submissionQueue}</h2>
                 <p className="mt-1 text-sm text-slate-500">{t.dashboard.submissionQueueSubtitle}</p>
               </div>
-              <button className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50" type="button">
+              <button className="ui-button-secondary" type="button">
                 <Search size={16} />
                 {t.common.filter}
               </button>
@@ -224,13 +230,13 @@ export default async function DashboardPage() {
               <table className="w-full min-w-220 border-collapse text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
                   <tr>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.resident}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.coverage}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.type}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.amount}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.proof}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.status}</th>
-                    <th className="px-6 py-3 font-semibold">{t.dashboard.action}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.resident}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.coverage}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.type}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.amount}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.proof}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.status}</th>
+                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.action}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -297,7 +303,7 @@ export default async function DashboardPage() {
 
           {/* Right: Collection health + workflow */}
           <div className="grid gap-6">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="ui-card p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.collectionHealth}</h2>
@@ -328,7 +334,7 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="ui-card p-6">
               <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.workflow}</h2>
               <div className="mt-4 space-y-3">
                 {workflowItems.map((item) => {
@@ -345,6 +351,18 @@ export default async function DashboardPage() {
                     </Link>
                   );
                 })}
+              </div>
+            </div>
+            <div className="ui-card p-6">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Recent activity</h2>
+              <div className="mt-4 space-y-3 text-sm text-slate-600">
+                {recentSubmissions.slice(0, 3).map((item) => (
+                  <p key={`activity-${item.id}`}>
+                    <span className="font-semibold text-slate-900">{item.unitNumber}</span>{" "}
+                    submitted {formatRM(item.amountSen)} ({monthLabel(item.coverageStartYear, item.coverageStartMonth)} – {monthLabel(item.coverageEndYear, item.coverageEndMonth)})
+                  </p>
+                ))}
+                {recentSubmissions.length === 0 ? <p>No recent submission activity.</p> : null}
               </div>
             </div>
           </div>

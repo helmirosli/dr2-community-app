@@ -102,9 +102,10 @@ async function parseExcelFile(buffer: Buffer): Promise<ParsedPayment[]> {
 }
 
 async function findDuplicatePayment(payment: ParsedPayment): Promise<boolean> {
-  const validMethods = ["CASH", "BANK_TRANSFER", "DUITNOW_QR", "EWALLET", "CHEQUE", "OTHER"];
-  const method = validMethods.includes(payment.method.toUpperCase())
-    ? payment.method.toUpperCase()
+  const validMethods = ["CASH", "BANK_TRANSFER", "DUITNOW_QR", "EWALLET", "CHEQUE", "OTHER"] as const;
+  const normalizedMethod = payment.method.toUpperCase();
+  const method = (validMethods as readonly string[]).includes(normalizedMethod)
+    ? (normalizedMethod as (typeof validMethods)[number])
     : "OTHER";
 
   const existing = await prisma.payment.findFirst({
@@ -114,7 +115,7 @@ async function findDuplicatePayment(payment: ParsedPayment): Promise<boolean> {
       },
       amountSen: payment.amountSen,
       paymentDate: new Date(payment.paymentDate),
-      method: method as any,
+      method,
     },
   });
 

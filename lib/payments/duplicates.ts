@@ -1,4 +1,5 @@
 import { areMonthRangesOverlapping, expandMonthRange } from "@/lib/months";
+import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 
 type PublicDuplicateInput = {
@@ -79,7 +80,7 @@ export async function findExistingOfficialCoverage(
     return null;
   }
 
-  return prisma.paymentCoverage.findFirst({
+  const coverages = await prisma.paymentCoverage.findMany({
     where: {
       residentId,
       OR: months.map((coverage) => ({
@@ -91,9 +92,28 @@ export async function findExistingOfficialCoverage(
     select: {
       year: true,
       month: true,
-      status: true,
+      amountApplied: true,
     },
   });
+
+  const totalsByMonth = new Map<number, number>();
+  for (const coverage of coverages) {
+    const key = coverage.year * 100 + coverage.month;
+    totalsByMonth.set(key, (totalsByMonth.get(key) ?? 0) + coverage.amountApplied);
+  }
+
+  for (const month of months) {
+    const key = month.year * 100 + month.month;
+    if ((totalsByMonth.get(key) ?? 0) >= DEFAULT_MONTHLY_FEE_SEN) {
+      return {
+        year: month.year,
+        month: month.month,
+        status: "PAID" as const,
+      };
+    }
+  }
+
+  return null;
 }
 
 export async function findExistingOfficialCoverageByUnitNumber(

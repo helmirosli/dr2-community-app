@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 
 type Option = { value: string; label: string };
@@ -14,6 +14,7 @@ type SearchableDropdownProps = {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  ariaLabel?: string;
 };
 
 export function SearchableDropdown({
@@ -25,18 +26,18 @@ export function SearchableDropdown({
   placeholder = "Search...",
   required,
   className,
+  ariaLabel,
 }: SearchableDropdownProps) {
   const controlled = value !== undefined;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [selectedValue, setSelectedValue] = useState(
-    controlled ? value : defaultValue ?? ""
-  );
+  const [selectedValue, setSelectedValue] = useState(defaultValue ?? "");
   const [selectedLabel, setSelectedLabel] = useState(
-    options.find((o) => o.value === (controlled ? value : defaultValue))?.label ?? ""
+    options.find((o) => o.value === defaultValue)?.label ?? "",
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
 
   const filtered = query
     ? options.filter((o) =>
@@ -64,39 +65,35 @@ export function SearchableDropdown({
       document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (controlled && value !== selectedValue) {
-      setSelectedValue(value);
-      setSelectedLabel(
-        options.find((o) => o.value === value)?.label ?? ""
-      );
-    }
-  }, [controlled, value, selectedValue, options]);
+  const currentValue = controlled ? (value ?? "") : selectedValue;
+  const currentLabel = controlled
+    ? options.find((o) => o.value === value)?.label ?? ""
+    : selectedLabel;
 
   function handleSelect(option: Option) {
     setSelectedValue(option.value);
     setSelectedLabel(option.label);
-    if (!controlled) onChange?.(option.value);
+    onChange?.(option.value);
     setOpen(false);
     setQuery("");
   }
 
   function handleClear() {
-    const current = controlled ? value : selectedValue;
+    const current = currentValue;
     if (!current) return;
     setSelectedValue("");
     setSelectedLabel("");
-    if (!controlled) onChange?.("");
+    onChange?.("");
   }
 
-  const hasValue = Boolean(controlled ? value : selectedValue);
+  const hasValue = Boolean(currentValue);
 
   return (
     <div ref={containerRef} className={`relative ${className ?? ""}`}>
       <input
         type="hidden"
         name={name}
-        value={controlled ? value : selectedValue}
+        value={currentValue}
       />
       {required && !hasValue && (
         <input
@@ -108,11 +105,15 @@ export function SearchableDropdown({
       )}
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-left text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+        className="flex w-full items-center justify-between ui-input text-left text-sm"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-label={ariaLabel ?? `${name} selector`}
       >
         <span className={hasValue ? "text-slate-900" : "text-slate-400"}>
-          {selectedLabel ?? placeholder}
+          {currentLabel || placeholder}
         </span>
         <ChevronDown
           size={16}
@@ -134,12 +135,14 @@ export function SearchableDropdown({
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label={`Search ${ariaLabel ?? name} options`}
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
                 className="shrink-0 text-slate-400 hover:text-slate-600"
+                aria-label="Clear search query"
               >
                 <X size={14} />
               </button>
@@ -147,22 +150,24 @@ export function SearchableDropdown({
           </div>
 
           {/* Options */}
-          <ul className="max-h-60 overflow-y-auto py-1">
+          <ul className="max-h-60 overflow-y-auto py-1" role="listbox" id={listboxId}>
             {filtered.length > 0 ? (
               filtered.map((option) => (
                 <li key={option.value}>
                   <button
                     type="button"
-                    className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-cyan-50 ${
-                      (controlled ? value : selectedValue) === option.value
-                        ? "bg-cyan-50 font-medium text-cyan-700"
+                    className={`flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-brand-50 ${
+                      currentValue === option.value
+                          ? "bg-brand-50 font-medium text-brand-700"
                         : "text-slate-700"
                     }`}
                     onClick={() => handleSelect(option)}
+                    role="option"
+                    aria-selected={currentValue === option.value}
                   >
                     <span className="min-w-0 truncate">{option.label}</span>
-                    {(controlled ? value : selectedValue) === option.value && (
-                      <span className="shrink-0 text-cyan-600">{"✓"}</span>
+                    {currentValue === option.value && (
+                      <span className="shrink-0 text-brand-700">{"✓"}</span>
                     )}
                   </button>
                 </li>
@@ -177,12 +182,13 @@ export function SearchableDropdown({
           {/* Selected indicator */}
           {hasValue && (
             <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2 text-xs text-slate-500">
-              <span>{selectedLabel}</span>
-              {!controlled && (
+              <span>{currentLabel}</span>
+              {(!controlled || onChange) && (
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="font-medium text-cyan-600 hover:text-cyan-700"
+                  className="font-medium text-brand-700 hover:opacity-90"
+                  aria-label="Clear selected option"
                 >
                   Clear
                 </button>

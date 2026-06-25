@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 import { deleteUser } from "@/lib/actions/user-management";
 

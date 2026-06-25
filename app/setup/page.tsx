@@ -22,7 +22,7 @@ export default async function SetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-6 py-10 text-slate-950">
+    <main className="min-h-screen bg-[var(--background)] px-6 py-10 text-slate-950">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-md content-center gap-6">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">First run setup</p>

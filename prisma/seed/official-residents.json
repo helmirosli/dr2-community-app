@@ -1,0 +1,30 @@
+[
+  {
+    "unitNumber": "101",
+    "name": "Example Resident One",
+    "phone": "60112222333",
+    "email": "resident101@example.com",
+    "streetBlock": "A",
+    "addressLine1": "Lot 101, Jalan Komuniti",
+    "addressLine2": "",
+    "city": "Shah Alam",
+    "state": "Selangor",
+    "zipCode": "40100",
+    "status": "ACTIVE",
+    "notes": "Replace this file with your official resident data."
+  },
+  {
+    "unitNumber": "102",
+    "name": "Example Resident Two",
+    "phone": "60113333444",
+    "email": "resident102@example.com",
+    "streetBlock": "A",
+    "addressLine1": "Lot 102, Jalan Komuniti",
+    "addressLine2": "",
+    "city": "Shah Alam",
+    "state": "Selangor",
+    "zipCode": "40100",
+    "status": "EXEMPT",
+    "notes": "Delete sample rows after adding real data."
+  }
+]

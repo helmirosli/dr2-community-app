@@ -28,7 +28,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
 
   if (!passwordHash) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="ui-card p-6">
         <h3 className="text-lg font-semibold text-slate-900">Change password</h3>
         <p className="mt-1 text-sm text-slate-600">
           Password reset is available to logged-in users.
@@ -38,7 +38,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
   }
 
   return (
-    <form action={action} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <form action={action} className="ui-card p-6">
       <h3 className="text-lg font-semibold text-slate-900">Change password</h3>
       <p className="mt-1 text-sm text-slate-600">
         Update your dashboard account password.
@@ -47,11 +47,11 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
       <input type="hidden" name="userId" value={userId} />
 
       <div className="mt-6 grid gap-4">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Current password
           <div className="relative">
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 pr-10"
+              className="ui-input w-full pr-10 text-sm"
               name="currentPassword"
               placeholder="Enter your current password"
               required
@@ -67,11 +67,11 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
           </div>
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           New password
           <div className="relative">
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 pr-10"
+              className="ui-input w-full pr-10 text-sm"
               name="newPassword"
               placeholder="At least 8 characters"
               required
@@ -87,11 +87,11 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
           </div>
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Confirm new password
           <div className="relative">
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 pr-10"
+              className="ui-input w-full pr-10 text-sm"
               name="confirmPassword"
               placeholder="Re-enter your new password"
               required
@@ -108,10 +108,10 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
         </label>
 
         {state.message && (
-          <div className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
+          <div className={`flex items-start gap-3 ${
             state.ok
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-red-200 bg-red-50 text-red-800"
+              ? "ui-alert-success"
+              : "ui-alert-error"
           }`}>
             {state.ok ? (
               <CheckCircle2 className="shrink-0" size={18} />
@@ -122,11 +122,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
           </div>
         )}
 
-        <button
-          className="self-start rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60"
-          disabled={pending}
-          type="submit"
-        >
+        <button className="ui-button-primary self-start" disabled={pending} type="submit">
           {pending ? "Updating..." : "Update password"}
         </button>
       </div>

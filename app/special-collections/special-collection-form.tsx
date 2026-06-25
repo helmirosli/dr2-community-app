@@ -60,44 +60,44 @@ export function SpecialCollectionForm({
   };
 
   return (
-    <form action={formAction} className="grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
+    <form action={formAction} className="ui-card grid gap-5 p-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Title
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.title ?? ""} name="title" required />
+          <input className="ui-input" defaultValue={collection?.title ?? ""} name="title" required />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Amount per resident (RM)
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.amountPerResident ? (collection.amountPerResident / 100).toFixed(2) : ""} name="amountPerResident" required step="0.01" type="number" />
+          <input className="ui-input" defaultValue={collection?.amountPerResident ? (collection.amountPerResident / 100).toFixed(2) : ""} name="amountPerResident" required step="0.01" type="number" />
         </label>
       </div>
 
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
+      <label className="ui-label">
         Description
-        <textarea className="min-h-20 rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.description ?? ""} name="description" />
+        <textarea className="ui-textarea min-h-20" defaultValue={collection?.description ?? ""} name="description" />
       </label>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Due date
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.dueDate ? new Date(collection.dueDate).toISOString().split("T")[0] : ""} name="dueDate" type="date" />
+          <input className="ui-input" defaultValue={collection?.dueDate ? new Date(collection.dueDate).toISOString().split("T")[0] : ""} name="dueDate" type="date" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Event start date
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.eventStartDate ? new Date(collection.eventStartDate).toISOString().split("T")[0] : ""} name="eventStartDate" type="date" />
+          <input className="ui-input" defaultValue={collection?.eventStartDate ? new Date(collection.eventStartDate).toISOString().split("T")[0] : ""} name="eventStartDate" type="date" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Event end date
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.eventEndDate ? new Date(collection.eventEndDate).toISOString().split("T")[0] : ""} name="eventEndDate" type="date" />
+          <input className="ui-input" defaultValue={collection?.eventEndDate ? new Date(collection.eventEndDate).toISOString().split("T")[0] : ""} name="eventEndDate" type="date" />
         </label>
       </div>
 
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
+      <label className="ui-label">
         Status
-        <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={collection?.status ?? "DRAFT"} name="status">
+        <select className="ui-select" defaultValue={collection?.status ?? "DRAFT"} name="status">
           <option value="DRAFT">Draft — not yet active</option>
           <option value="ACTIVE">Active — collecting payments</option>
           <option value="CLOSED">Closed — collection ended</option>
@@ -146,7 +146,7 @@ export function SpecialCollectionForm({
 
       {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
 
-      <button className="min-h-11 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60" disabled={pending} type="submit">
+      <button className="ui-button-primary" disabled={pending} type="submit">
         {pending ? "Saving..." : collection?.id ? "Save collection" : "Create collection"}
       </button>
     </form>

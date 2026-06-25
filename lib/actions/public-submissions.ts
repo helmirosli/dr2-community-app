@@ -116,7 +116,7 @@ export async function createPublicSubmission(
 
       return {
         ok: false,
-        message: `This unit already has payment coverage for ${existingCoverage.month}/${existingCoverage.year}. Please submit only unpaid months or contact AJK.`,
+        message: `This unit already has full payment coverage for ${existingCoverage.month}/${existingCoverage.year}. Please submit only unpaid months or contact AJK.`,
       };
     }
   }

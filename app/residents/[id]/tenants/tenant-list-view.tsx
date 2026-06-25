@@ -5,13 +5,6 @@ import { Plus, Edit, Eye, X } from "lucide-react";
 import Link from "next/link";
 import { DeleteTenantForm } from "./delete-tenant-form";
 
-type Vehicle = {
-  id: string;
-  make: string;
-  model: string | null;
-  plateNumber: string;
-};
-
 type Tenant = {
   id: string;
   name: string;

@@ -38,7 +38,7 @@ export function ComparisonResults({ analysis }: ComparisonResultsProps) {
       } else {
         setImportMessage(`✗ Import failed: ${result.message}`);
       }
-    } catch (error) {
+    } catch {
       setImportMessage("Import failed. Please try again.");
     } finally {
       setImporting(false);

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -28,6 +29,13 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-4xl gap-6">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <Link href="/payments" className="transition-colors hover:text-slate-700">
+            Operations
+          </Link>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">Record Payment</span>
+        </nav>
         <header>
           <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href="/payments">Payment records</Link>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Record official payment</h1>

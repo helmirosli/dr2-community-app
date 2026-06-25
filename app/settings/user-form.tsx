@@ -21,15 +21,15 @@ export function UserForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={action} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <form action={action} className="ui-card p-6">
       <h3 className="text-lg font-semibold text-slate-900">Add new user</h3>
       <p className="mt-1 text-sm text-slate-600">Create a new dashboard account with a specific role.</p>
 
       <div className="mt-6 grid gap-4">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Name
           <input
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="ui-input text-sm"
             name="name"
             placeholder="Full name"
             required
@@ -37,10 +37,10 @@ export function UserForm() {
           />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Email
           <input
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="ui-input text-sm"
             name="email"
             placeholder="email@example.com"
             required
@@ -48,11 +48,11 @@ export function UserForm() {
           />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Password
           <div className="relative">
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 pr-10"
+              className="ui-input w-full pr-10 text-sm"
               name="password"
               placeholder="Strong password"
               required
@@ -68,7 +68,7 @@ export function UserForm() {
           </div>
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Role
           <SearchableDropdown
             name="role"
@@ -83,10 +83,10 @@ export function UserForm() {
         </label>
 
         {state.message && (
-          <div className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
+          <div className={`flex items-start gap-3 ${
             state.ok
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-red-200 bg-red-50 text-red-800"
+              ? "ui-alert-success"
+              : "ui-alert-error"
           }`}>
             {state.ok ? (
               <CheckCircle2 className="shrink-0" size={18} />
@@ -97,11 +97,7 @@ export function UserForm() {
           </div>
         )}
 
-        <button
-          className="rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60"
-          disabled={pending}
-          type="submit"
-        >
+        <button className="ui-button-primary" disabled={pending} type="submit">
           {pending ? "Creating..." : "Create user"}
         </button>
       </div>

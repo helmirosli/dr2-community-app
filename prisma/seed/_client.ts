@@ -1,11 +1,8 @@
-import { mkdirSync } from "node:fs";
+import "dotenv/config";
 
-import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
+import { PrismaClient } from "../../generated/prisma/client";
 
 function buildFromKKEnv(): string | null {
   const host = process.env.KK_HOST;
@@ -33,28 +30,27 @@ function buildFromKKEnv(): string | null {
 const databaseUrl = process.env.DATABASE_URL ?? buildFromKKEnv();
 
 if (!databaseUrl) {
-  throw new Error(
-    "DATABASE_URL or KK_* environment variables must be set to a Postgres connection string.\nSee .env.example for examples."
-  );
+  throw new Error("DATABASE_URL or KK_* environment variables must be set.");
 }
 
-if (process.env.NODE_ENV !== "production") {
-  try {
-    mkdirSync("uploads", { recursive: true });
-  } catch (err) {
-    // Best-effort in dev: don't crash if the directory can't be created
-    // (e.g. unusual permission issues).
-    console.warn("Could not create local uploads directory:", err);
-  }
-}
-
-
-const client = new PrismaClient({
+export const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
 
-export const prisma = globalForPrisma.prisma ?? client;
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+export async function clearCoreData() {
+  await prisma.$transaction([
+    prisma.upload.deleteMany(),
+    prisma.paymentCoverage.deleteMany(),
+    prisma.payment.deleteMany(),
+    prisma.publicPaymentSubmission.deleteMany(),
+    prisma.specialCollectionAssignment.deleteMany(),
+    prisma.specialCollection.deleteMany(),
+    prisma.tenantVehicle.deleteMany(),
+    prisma.residentVehicle.deleteMany(),
+    prisma.tenant.deleteMany(),
+    prisma.auditLog.deleteMany(),
+    prisma.resident.deleteMany(),
+    prisma.feePlan.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 }

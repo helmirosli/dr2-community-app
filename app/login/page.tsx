@@ -23,7 +23,7 @@ export default async function LoginPage() {
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
       {/* Left — branding panel */}
-      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-500 to-cyan-900 px-10 py-16 text-white md:w-1/2">
+      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-brand-gradient px-10 py-16 text-white md:w-1/2">
         {/* Logo circle */}
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
           <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export default async function LoginPage() {
           </div>
 
           <Link
-            className="mt-6 block text-sm font-medium text-cyan-700 hover:text-cyan-900"
+            className="mt-6 block text-sm font-medium text-brand-700 hover:opacity-90"
             href="/submit"
           >
             {t.login.publicFormLink}

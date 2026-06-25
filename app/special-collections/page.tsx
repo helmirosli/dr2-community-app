@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Edit, Plus } from "lucide-react";
+import { ChevronRight, Edit, Plus } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -48,34 +48,39 @@ export default async function SpecialCollectionsPage() {
   const statsMap = Object.fromEntries(stats.map((s) => [s.id, s.paidSen]));
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Operations</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{t.collections.title}</span>
+        </nav>
+        <header className="ui-card flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.collections.extra}</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.collections.extra}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.collections.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {t.collections.subtitle}
             </p>
           </div>
-          <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/special-collections/new">
+          <Link className="ui-button-primary" href="/special-collections/new">
             <Plus aria-hidden="true" size={17} />
             {t.collections.newCollection}
           </Link>
         </header>
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="ui-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">{t.collections.collectionTitle}</th>
-                  <th className="px-5 py-3 font-semibold">{t.collections.amountPerResident}</th>
-                  <th className="px-5 py-3 font-semibold">{t.collections.households}</th>
-                  <th className="px-5 py-3 font-semibold">{t.collections.amountCollected}</th>
-                  <th className="px-5 py-3 font-semibold">{t.collections.dueDate}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.status}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.collections.collectionTitle}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.collections.amountPerResident}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.collections.households}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.collections.amountCollected}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.collections.dueDate}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.common.status}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.common.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { FileUploadForm } from "./file-upload-form";
@@ -12,10 +12,17 @@ export default async function FileUploadPage() {
   return (
     <main className="px-6 py-8">
       <div className="mx-auto grid max-w-4xl gap-8">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <Link href="/reports" className="transition-colors hover:text-slate-700">
+            Reporting
+          </Link>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">File Upload</span>
+        </nav>
         <div className="flex items-center gap-3">
           <Link
             href="/reports"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="ui-button-secondary"
           >
             <ArrowLeft size={16} />
             Back
@@ -33,7 +40,7 @@ export default async function FileUploadPage() {
 
         <div className="grid gap-6">
           {/* Instructions */}
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-6">
+          <div className="ui-card bg-slate-50 p-6">
             <h2 className="font-semibold text-slate-900">File Format</h2>
             <p className="mt-2 text-sm text-slate-600">
               Your CSV or Excel file should have columns: Unit Number, Resident Name, Amount (RM), Payment Date, Method
@@ -51,10 +58,10 @@ export default async function FileUploadPage() {
           <FileUploadForm />
 
           {/* Info */}
-          <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-6">
-            <h3 className="font-semibold text-cyan-900">What Happens Next</h3>
-            <ol className="mt-3 space-y-2 text-sm text-cyan-800">
-              <li>1. Upload your file and click "Analyze"</li>
+          <div className="ui-card bg-brand-50 p-6">
+            <h3 className="font-semibold text-slate-900">What Happens Next</h3>
+            <ol className="mt-3 space-y-2 text-sm text-slate-700">
+              <li>1. Upload your file and click &quot;Analyze&quot;</li>
               <li>2. Review the comparison showing new payments, existing matches, and conflicts</li>
               <li>3. Accept new payments or reject duplicates</li>
               <li>4. Confirmed payments will be recorded in the system</li>
