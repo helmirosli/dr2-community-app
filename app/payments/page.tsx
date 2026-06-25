@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Plus, ReceiptText } from "lucide-react";
+import { ChevronRight, Plus, ReceiptText, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type PaymentsPageProps = {
-  searchParams: Promise<{ created?: string; page?: string }>;
+  searchParams: Promise<{ created?: string; page?: string; q?: string }>;
 };
 
 const ITEMS_PER_PAGE = 25;
@@ -23,11 +23,31 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
   const t = await getDictionary();
 
+  const query = params.q?.trim() ?? "";
   const page = Math.max(1, parseInt(params.page || "1", 10));
   const skip = (page - 1) * ITEMS_PER_PAGE;
 
+  const whereClause = query
+    ? {
+        OR: [
+          { referenceNo: { contains: query, mode: "insensitive" as const } },
+          { notes: { contains: query, mode: "insensitive" as const } },
+          {
+            resident: {
+              OR: [
+                { unitNumber: { contains: query, mode: "insensitive" as const } },
+                { name: { contains: query, mode: "insensitive" as const } },
+                { phone: { contains: query, mode: "insensitive" as const } },
+              ],
+            },
+          },
+        ],
+      }
+    : undefined;
+
   const [payments, totalCount] = await Promise.all([
     prisma.payment.findMany({
+      where: whereClause,
       orderBy: { paymentDate: "desc" },
       skip,
       take: ITEMS_PER_PAGE,
@@ -52,7 +72,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         },
       },
     }),
-    prisma.payment.count(),
+    prisma.payment.count({ where: whereClause }),
   ]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
@@ -86,10 +106,20 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         ) : null}
 
         <section className="ui-card overflow-hidden">
-          <div className="flex items-center gap-3 border-b border-slate-100 p-5">
-            <ReceiptText aria-hidden="true" className="text-cyan-700" size={20} />
-            <h2 className="text-lg font-semibold tracking-tight">{t.payments.recentPayments}</h2>
-          </div>
+          <form className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row md:items-end" method="get">
+            <div className="flex items-center gap-3">
+              <ReceiptText aria-hidden="true" className="text-cyan-700" size={20} />
+              <h2 className="text-lg font-semibold tracking-tight">{t.payments.recentPayments}</h2>
+            </div>
+            <label className="grid flex-1 gap-2 text-sm font-medium text-slate-700 md:max-w-md md:ml-auto">
+              Search
+              <div className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2">
+                <Search aria-hidden="true" className="text-slate-400" size={16} />
+                <input className="w-full bg-transparent outline-none" defaultValue={query} name="q" placeholder="Search unit, resident, reference..." />
+              </div>
+            </label>
+            <button className="ui-button-primary" type="submit">Apply</button>
+          </form>
           <div className="overflow-x-auto">
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
@@ -145,7 +175,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 {page > 1 && (
                   <Link
                     className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                    href={`/payments?page=${page - 1}`}
+                    href={`/payments?page=${page - 1}&q=${encodeURIComponent(query)}`}
                   >
                     {t.common.previous}
                   </Link>
@@ -160,7 +190,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                             ? "bg-cyan-600 text-white"
                             : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
-                        href={`/payments?page=${pageNum}`}
+                        href={`/payments?page=${pageNum}&q=${encodeURIComponent(query)}`}
                         key={pageNum}
                       >
                         {pageNum}
@@ -171,7 +201,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 {page < totalPages && (
                   <Link
                     className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                    href={`/payments?page=${page + 1}`}
+                    href={`/payments?page=${page + 1}&q=${encodeURIComponent(query)}`}
                   >
                     {t.common.next}
                   </Link>
