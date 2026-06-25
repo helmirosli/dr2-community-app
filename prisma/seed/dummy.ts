@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { hashSync } from "bcryptjs";
 
 import { clearCoreData, prisma } from "./_client";
@@ -14,6 +15,96 @@ type ResidentSeed = {
   status: "ACTIVE" | "EXEMPT" | "FOR_SALE" | "MOVED_OUT";
   notes: string;
 };
+
+let hasLegacyCoverageRelationColumns: boolean | null = null;
+let hasLegacyAssignmentRelationColumns: boolean | null = null;
+
+async function detectLegacyCoverageRelationColumns() {
+  if (hasLegacyCoverageRelationColumns !== null) {
+    return hasLegacyCoverageRelationColumns;
+  }
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
+    `select column_name
+     from information_schema.columns
+     where table_schema = 'desarestu_db'
+       and table_name = 'PaymentCoverage'`,
+  );
+
+  const columnSet = new Set(rows.map((row) => row.column_name));
+  hasLegacyCoverageRelationColumns =
+    columnSet.has("payment") && columnSet.has("resident");
+
+  return hasLegacyCoverageRelationColumns;
+}
+
+async function detectLegacyAssignmentRelationColumns() {
+  if (hasLegacyAssignmentRelationColumns !== null) {
+    return hasLegacyAssignmentRelationColumns;
+  }
+
+  const rows = await prisma.$queryRawUnsafe<Array<{ column_name: string }>>(
+    `select column_name
+     from information_schema.columns
+     where table_schema = 'desarestu_db'
+       and table_name = 'SpecialCollectionAssignment'`,
+  );
+
+  const columnSet = new Set(rows.map((row) => row.column_name));
+  hasLegacyAssignmentRelationColumns =
+    columnSet.has("specialCollection") && columnSet.has("resident");
+
+  return hasLegacyAssignmentRelationColumns;
+}
+
+async function insertSpecialCollectionAssignments(
+  rows: Array<{
+    specialCollectionId: string;
+    residentId: string;
+    amountDue: number;
+    amountPaid: number;
+    status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "QUARANTINED";
+  }>,
+) {
+  const now = new Date();
+  const legacyColumns = await detectLegacyAssignmentRelationColumns();
+
+  for (const row of rows) {
+    if (legacyColumns) {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."SpecialCollectionAssignment"
+          ("id","specialCollectionId","specialCollection","residentId","resident","amountDue","amountPaid","status","createdAt","updatedAt")
+         values
+          ($1,$2,$3,$4,$5,$6,$7,$8::desarestu_db."SubmissionStatus",$9,$10)`,
+        randomUUID(),
+        row.specialCollectionId,
+        row.specialCollectionId,
+        row.residentId,
+        row.residentId,
+        row.amountDue,
+        row.amountPaid,
+        row.status,
+        now,
+        now,
+      );
+    } else {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."SpecialCollectionAssignment"
+          ("id","specialCollectionId","residentId","amountDue","amountPaid","status","createdAt","updatedAt")
+         values
+          ($1,$2,$3,$4,$5,$6::desarestu_db."SubmissionStatus",$7,$8)`,
+        randomUUID(),
+        row.specialCollectionId,
+        row.residentId,
+        row.amountDue,
+        row.amountPaid,
+        row.status,
+        now,
+        now,
+      );
+    }
+  }
+}
 
 function monthRange(startYear: number, startMonth: number, endYear: number, endMonth: number) {
   const months: MonthPoint[] = [];
@@ -44,28 +135,67 @@ async function createCoveragePayment(input: {
 }) {
   const amountSen = input.coverages.reduce((sum, coverage) => sum + coverage.amountApplied, 0);
   if (amountSen <= 0) return;
+  const paymentId = randomUUID();
+  const now = new Date();
 
-  await prisma.payment.create({
-    data: {
-      residentId: input.residentId,
-      paymentType: "MONTHLY_FEE",
-      amountSen,
-      paymentDate: input.paymentDate,
-      method: input.method ?? "BANK_TRANSFER",
-      notes: input.note ?? null,
-      createdById: input.createdById,
-      referenceNo: `DMY-${input.residentId.slice(-6)}-${input.paymentDate.getTime()}`,
-      coverages: {
-        create: input.coverages.map((coverage) => ({
-          residentId: input.residentId,
-          year: coverage.year,
-          month: coverage.month,
-          amountApplied: coverage.amountApplied,
-          status: coverage.amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? "PAID" : "PARTIAL",
-        })),
-      },
-    },
-  });
+  await prisma.$executeRawUnsafe(
+    `insert into desarestu_db."Payment"
+      ("id","residentId","paymentType","amountSen","paymentDate","method","referenceNo","notes","createdById","createdAt","updatedAt")
+     values
+      ($1,$2,$3::desarestu_db."PaymentType",$4,$5,$6::desarestu_db."PaymentMethod",$7,$8,$9,$10,$11)`,
+    paymentId,
+    input.residentId,
+    "MONTHLY_FEE",
+    amountSen,
+    input.paymentDate,
+    input.method ?? "BANK_TRANSFER",
+    `DMY-${input.residentId.slice(-6)}-${input.paymentDate.getTime()}`,
+    input.note ?? null,
+    input.createdById,
+    now,
+    now,
+  );
+
+  const legacyColumns = await detectLegacyCoverageRelationColumns();
+
+  for (const coverage of input.coverages) {
+    const status = coverage.amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? "PAID" : "PARTIAL";
+    const coverageId = randomUUID();
+
+    if (legacyColumns) {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."PaymentCoverage"
+          ("id","paymentId","payment","residentId","resident","year","month","amountApplied","status","createdAt")
+         values
+          ($1,$2,$3,$4,$5,$6,$7,$8,$9::desarestu_db."CoverageStatus",$10)`,
+        coverageId,
+        paymentId,
+        paymentId,
+        input.residentId,
+        input.residentId,
+        coverage.year,
+        coverage.month,
+        coverage.amountApplied,
+        status,
+        now,
+      );
+    } else {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."PaymentCoverage"
+          ("id","paymentId","residentId","year","month","amountApplied","status","createdAt")
+         values
+          ($1,$2,$3,$4,$5,$6,$7::desarestu_db."CoverageStatus",$8)`,
+        coverageId,
+        paymentId,
+        input.residentId,
+        coverage.year,
+        coverage.month,
+        coverage.amountApplied,
+        status,
+        now,
+      );
+    }
+  }
 }
 
 async function seedResidentMonthlyPattern(input: {
@@ -320,25 +450,25 @@ async function main() {
     },
   });
 
-  await prisma.specialCollectionAssignment.createMany({
-    data: residents.slice(0, 20).map((resident, idx) => ({
+  await insertSpecialCollectionAssignments(
+    residents.slice(0, 20).map((resident, idx) => ({
       specialCollectionId: activeCollection.id,
       residentId: resident.id,
       amountDue: 12000,
       amountPaid: idx % 3 === 0 ? 12000 : idx % 3 === 1 ? 6000 : 0,
       status: idx % 3 === 2 ? "PENDING_REVIEW" : "APPROVED",
     })),
-  });
+  );
 
-  await prisma.specialCollectionAssignment.createMany({
-    data: residents.slice(0, 15).map((resident) => ({
+  await insertSpecialCollectionAssignments(
+    residents.slice(0, 15).map((resident) => ({
       specialCollectionId: closedCollection.id,
       residentId: resident.id,
       amountDue: 8000,
       amountPaid: 8000,
       status: "APPROVED",
     })),
-  });
+  );
 
   await prisma.publicPaymentSubmission.createMany({
     data: [

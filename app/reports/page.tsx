@@ -16,6 +16,7 @@ type ReportsPageProps = {
   searchParams: Promise<{
     year?: string;
     includeInactive?: string;
+    q?: string;
   }>;
 };
 
@@ -32,6 +33,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const now = new Date();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
   const includeInactive = params.includeInactive !== "off";
+  const query = params.q?.trim() ?? "";
 
   const { rows: unsortedRows, specialCollections } = await getYearGridData({
     year: selectedYear,
@@ -45,30 +47,38 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     return unitA - unitB;
   });
 
+  const filteredRows = query
+    ? rows.filter(
+        (row) =>
+          row.unitNumber.toLowerCase().includes(query.toLowerCase()) ||
+          row.name.toLowerCase().includes(query.toLowerCase()),
+      )
+    : rows;
+
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
-  const hasExtra = rows.some((r) => r.extraDueSen > 0);
+  const hasExtra = filteredRows.some((r) => r.extraDueSen > 0);
 
   const exportQuery = new URLSearchParams({
     year: String(selectedYear),
     ...(includeInactive ? { includeInactive: "on" } : {}),
   }).toString();
 
-  const paidAll = rows.filter(
+  const paidAll = filteredRows.filter(
     (r) =>
       r.status === "ACTIVE" &&
       r.months
         .slice(0, currentYear === selectedYear ? currentMonth : 12)
         .every((m) => (m ?? 0) >= DEFAULT_MONTHLY_FEE_SEN),
   ).length;
-  const hasArrears = rows.filter(
+  const hasArrears = filteredRows.filter(
     (r) =>
       r.status === "ACTIVE" &&
       r.months
         .slice(0, currentYear === selectedYear ? currentMonth : 12)
         .some((m) => (m ?? 0) < DEFAULT_MONTHLY_FEE_SEN),
   ).length;
-  const forSaleCount = rows.filter((r) => r.isForSale).length;
+  const forSaleCount = filteredRows.filter((r) => r.isForSale).length;
 
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8">
@@ -126,6 +136,16 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 type="number"
               />
             </label>
+            <label className="ui-label">
+              Search
+              <input
+                className="ui-input w-52"
+                defaultValue={query}
+                name="q"
+                placeholder="Search unit or resident"
+                type="search"
+              />
+            </label>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
               <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
               {t.reports.includeInactive}
@@ -134,7 +154,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               {t.common.apply}
             </button>
             <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-600">
-              <span><span className="font-semibold text-slate-900">{rows.length}</span> {t.reports.totalUnits}</span>
+              <span><span className="font-semibold text-slate-900">{filteredRows.length}</span> {t.reports.totalUnits}</span>
               <span><span className="font-semibold text-emerald-700">{paidAll}</span> {t.reports.fullyPaid}</span>
               <span><span className="font-semibold text-red-600">{hasArrears}</span> {t.reports.haveArrears}</span>
               {forSaleCount > 0 && <span><span className="font-semibold text-slate-500">{forSaleCount}</span> {t.reports.forSale}</span>}
@@ -171,7 +191,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row, rowIdx) => {
+                {filteredRows.map((row, rowIdx) => {
                   const rowBg = rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60";
 
                   return (
@@ -255,7 +275,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                     </tr>
                   );
                 })}
-                {rows.length === 0 && (
+                {filteredRows.length === 0 && (
                   <tr>
                     <td className="px-5 py-10 text-center text-slate-500" colSpan={16}>
                       {t.reports.noResidents}
