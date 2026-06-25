@@ -28,13 +28,13 @@ export function FileUploadForm() {
 
   return (
     <div className="space-y-6">
-      <form action={action} className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <form action={action} className="ui-card p-6">
         <div className="grid gap-6">
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
+          <label className="ui-label">
             <span>Select CSV or Excel file</span>
             <input
               accept=".csv,.xlsx,.xls"
-              className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:border-slate-400 hover:bg-slate-100 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="ui-file-input text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               name="file"
               onChange={handleFileChange}
               required
@@ -44,10 +44,10 @@ export function FileUploadForm() {
           </label>
 
           {state.message && (
-            <div className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm ${
+            <div className={`flex items-start gap-3 ${
               state.ok
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                : "border-red-200 bg-red-50 text-red-800"
+                ? "ui-alert-success"
+                : "ui-alert-error"
             }`}>
               {state.ok ? (
                 <CheckCircle2 className="shrink-0" size={18} />
@@ -58,11 +58,7 @@ export function FileUploadForm() {
             </div>
           )}
 
-          <button
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60"
-            disabled={pending || !fileName}
-            type="submit"
-          >
+          <button className="ui-button-primary" disabled={pending || !fileName} type="submit">
             <Upload size={18} />
             {pending ? "Analyzing..." : "Analyze File"}
           </button>

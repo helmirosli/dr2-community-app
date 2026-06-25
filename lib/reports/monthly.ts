@@ -55,15 +55,46 @@ function nextMonth(year: number, month: number) {
   return month >= 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
 }
 
-function aggregateCoverage(coverages: MonthlyCoverageInput[]) {
-  const appliedByMonth = new Map<number, number>();
+function keyToYearMonth(key: number) {
+  return { year: Math.floor(key / 100), month: key % 100 };
+}
 
-  for (const coverage of coverages) {
-    const key = monthKey(coverage.year, coverage.month);
-    appliedByMonth.set(key, (appliedByMonth.get(key) ?? 0) + coverage.amountApplied);
+function normalizeAppliedByMonth(rawByMonth: Map<number, number>) {
+  if (rawByMonth.size === 0) {
+    return new Map<number, number>();
   }
 
-  return appliedByMonth;
+  const keys = [...rawByMonth.keys()].sort((a, b) => a - b);
+  let currentKey = keys[0];
+  const lastKey = keys[keys.length - 1];
+  let carry = 0;
+  const normalized = new Map<number, number>();
+
+  while (currentKey <= lastKey || carry > 0) {
+    const total = (rawByMonth.get(currentKey) ?? 0) + carry;
+    const applied = Math.min(DEFAULT_MONTHLY_FEE_SEN, total);
+
+    if (applied > 0) {
+      normalized.set(currentKey, applied);
+    }
+
+    carry = Math.max(0, total - DEFAULT_MONTHLY_FEE_SEN);
+    const { year, month } = keyToYearMonth(currentKey);
+    const next = nextMonth(year, month);
+    currentKey = monthKey(next.year, next.month);
+  }
+
+  return normalized;
+}
+
+export function normalizeMonthlyAppliedByMonth(coverages: MonthlyCoverageInput[]) {
+  const rawByMonth = new Map<number, number>();
+  for (const coverage of coverages) {
+    const key = monthKey(coverage.year, coverage.month);
+    rawByMonth.set(key, (rawByMonth.get(key) ?? 0) + coverage.amountApplied);
+  }
+
+  return normalizeAppliedByMonth(rawByMonth);
 }
 
 /**
@@ -100,7 +131,7 @@ export function buildMonthlyReportRow(
   selectedYear: number,
   selectedMonth: number,
 ): MonthlyReportRow {
-  const appliedByMonth = aggregateCoverage(resident.coverages);
+  const appliedByMonth = normalizeMonthlyAppliedByMonth(resident.coverages);
   const paidUntil = calculatePaidUntil(appliedByMonth);
   const selectedKey = monthKey(selectedYear, selectedMonth);
   const selectedApplied = appliedByMonth.get(selectedKey) ?? 0;

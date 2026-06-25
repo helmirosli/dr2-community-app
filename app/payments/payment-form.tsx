@@ -117,11 +117,11 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
         </div>
       </dialog>
 
-      <form action={action} className="grid gap-6 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
+      <form action={action} className="ui-card grid gap-6 p-6">
         {/* Resident */}
         <div>
           <h3 className="mb-4 font-semibold text-slate-900">Resident</h3>
-          <div className="grid gap-2 text-sm font-medium text-slate-700">
+          <div className="ui-label">
             Select resident
             <SearchableDropdown
               name="residentId"
@@ -147,10 +147,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 required
               />
             </div>
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               Amount paid (RM)
               <input
-                className="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="ui-input"
                 defaultValue={expectedAmount}
                 key={expectedAmount}
                 min="1"
@@ -160,10 +160,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 type="number"
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               Payment date
               <input
-                className="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="ui-input"
                 defaultValue={now.toISOString().slice(0, 10)}
                 name="paymentDate"
                 required
@@ -177,7 +177,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
         <div>
           <h3 className="mb-4 font-semibold text-slate-900">Payment Method</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-2 text-sm font-medium text-slate-700">
+            <div className="ui-label">
               Method
               <SearchableDropdown
                 name="method"
@@ -186,10 +186,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 required
               />
             </div>
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               Reference number
               <input
-                className="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="ui-input"
                 name="referenceNo"
               />
             </label>
@@ -201,7 +201,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
           <h3 className="mb-4 font-semibold text-slate-900">Coverage Period</h3>
           <p className="mb-4 text-sm text-slate-600">Select the months this payment covers.</p>
           <div className="grid gap-4 sm:grid-cols-4">
-            <div className="grid gap-2 text-sm font-medium text-slate-700">
+            <div className="ui-label">
               Start month
               <SearchableDropdown
                 name="coverageStartMonth"
@@ -211,10 +211,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 required
               />
             </div>
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               Start year
               <input
-                className="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="ui-input"
                 name="coverageStartYear"
                 onChange={(e) => setStartYear(Number(e.target.value))}
                 required
@@ -222,7 +222,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 value={startYear}
               />
             </label>
-            <div className="grid gap-2 text-sm font-medium text-slate-700">
+            <div className="ui-label">
               End month
               <SearchableDropdown
                 name="coverageEndMonth"
@@ -232,10 +232,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
                 required
               />
             </div>
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               End year
               <input
-                className="rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="ui-input"
                 name="coverageEndYear"
                 onChange={(e) => setEndYear(Number(e.target.value))}
                 required
@@ -244,7 +244,7 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
               />
             </label>
           </div>
-          <div className="mt-4 rounded-lg bg-cyan-50 p-3 text-sm text-cyan-950">
+          <div className="mt-4 rounded-lg bg-brand-50 p-3 text-sm text-slate-800">
             Expected monthly fee amount: <span className="font-semibold">{expectedAmount ? `RM${expectedAmount}` : "not applicable"}</span>
           </div>
         </div>
@@ -260,11 +260,11 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
         {/* Receipt Upload */}
         <div>
           <h3 className="mb-4 font-semibold text-slate-900">Receipt / Proof</h3>
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
+          <label className="ui-label">
             Upload file
             <input
               accept="application/pdf,image/jpeg,image/png,image/webp"
-              className="rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:border-slate-400 hover:bg-slate-100 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="ui-file-input text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               name="proofFile"
               type="file"
             />
@@ -275,10 +275,10 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
         {/* Notes */}
         <div>
           <h3 className="mb-4 font-semibold text-slate-900">Notes</h3>
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
+          <label className="ui-label">
             Additional notes
             <textarea
-              className="min-h-24 rounded-lg border border-slate-300 px-4 py-2.5 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="ui-textarea min-h-24"
               name="notes"
             />
           </label>
@@ -286,18 +286,14 @@ export function PaymentForm({ residents, selectedResidentId }: PaymentFormProps)
 
         {/* Messages */}
         {state.message && state.ok && (
-          <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="ui-alert-success flex items-start gap-3">
             <CheckCircle className="shrink-0" size={18} />
             <p>{state.message}</p>
           </div>
         )}
 
         {/* Submit button */}
-        <button
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-60"
-          disabled={pending || residents.length === 0}
-          type="submit"
-        >
+        <button className="ui-button-primary" disabled={pending || residents.length === 0} type="submit">
           {pending ? "Recording..." : "Record payment"}
         </button>
       </form>

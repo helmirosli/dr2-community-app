@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit, ReceiptText, MapPin, Phone, Mail, FileText, CreditCard, Shield, Users, Car } from "lucide-react";
+import { Car, ChevronRight, CreditCard, Edit, MapPin, Phone, ReceiptText, Shield, Users } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { formatRM } from "@/lib/money";
@@ -78,6 +78,13 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
   return (
     <main className="min-h-screen bg-[#f8fafa] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-5xl gap-6">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <Link href="/residents" className="transition-colors hover:text-slate-700">
+            Resident Management
+          </Link>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{resident.unitNumber}</span>
+        </nav>
 
         {/* ── Hero header ─────────────────────────────────────────── */}
         <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">

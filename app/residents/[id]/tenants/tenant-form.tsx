@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useActionState } from "react";
+import { useState, useActionState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import {
@@ -37,11 +37,7 @@ export function TenantForm({ residentId, tenant }: TenantFormProps) {
       ? tenant.vehicles.map((v) => ({ make: v.make, model: v.model ?? "", plateNumber: v.plateNumber }))
       : [],
   );
-  const [hiddenValue, setHiddenValue] = useState("");
-
-  useEffect(() => {
-    setHiddenValue(JSON.stringify(vehicles));
-  }, [vehicles]);
+  const hiddenValue = JSON.stringify(vehicles);
 
   const addVehicle = () => {
     setVehicles((prev) => [

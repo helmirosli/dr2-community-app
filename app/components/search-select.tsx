@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 
 type SearchSelectProps = {
@@ -10,6 +10,7 @@ type SearchSelectProps = {
   required?: boolean;
   displayFormat?: (name: string, unit: string) => string;
   className?: string;
+  ariaLabel?: string;
 };
 
 function defaultDisplayFormat(personName: string, unit: string) {
@@ -23,6 +24,7 @@ export function SearchSelect({
   required,
   displayFormat,
   className,
+  ariaLabel,
 }: SearchSelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -35,12 +37,13 @@ export function SearchSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const listboxId = useId();
 
   useEffect(() => {
     if (!open) return;
 
-    setLoading(true);
     debounceRef.current = setTimeout(async () => {
+      setLoading(true);
       try {
         const res = await fetch(
           `${searchUrl}?q=${encodeURIComponent(query)}&limit=20`,
@@ -108,6 +111,10 @@ export function SearchSelect({
         type="button"
         className="flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-left text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-label={ariaLabel ?? `${name} selector`}
       >
         <span className={hasValue ? "text-slate-900" : "text-slate-400"}>
           {selectedLabel ?? placeholder}
@@ -130,12 +137,14 @@ export function SearchSelect({
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label={`Search ${ariaLabel ?? name} options`}
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
                 className="shrink-0 text-slate-400 hover:text-slate-600"
+                aria-label="Clear search query"
               >
                 <X size={14} />
               </button>
@@ -143,7 +152,7 @@ export function SearchSelect({
           </div>
 
           {/* Results */}
-          <ul className="max-h-60 overflow-y-auto py-1">
+          <ul className="max-h-60 overflow-y-auto py-1" role="listbox" id={listboxId}>
             {loading ? (
               <li className="px-4 py-3 text-sm text-slate-500">Searching...</li>
             ) : results.length > 0 ? (
@@ -159,6 +168,8 @@ export function SearchSelect({
                     onClick={() =>
                       handleSelect(item.value, item.name, item.unit)
                     }
+                    role="option"
+                    aria-selected={selectedValue === item.value}
                   >
                     <span className="min-w-0 truncate">
                       {(displayFormat ?? defaultDisplayFormat)(item.name, item.unit)}
@@ -184,6 +195,7 @@ export function SearchSelect({
                 type="button"
                 onClick={handleClear}
                 className="font-medium text-cyan-600 hover:text-cyan-700"
+                aria-label="Clear selected option"
               >
                 Clear
               </button>

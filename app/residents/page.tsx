@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Plus, Search } from "lucide-react";
+import { ChevronRight, Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -81,18 +81,23 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
   const activeResidents = counts.find((item) => item.status === "ACTIVE")?._count.status ?? 0;
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Resident Management</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{t.residents.title}</span>
+        </nav>
+        <header className="ui-card flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.residents.inventory}</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.residents.inventory}</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t.residents.title}</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {t.residents.subtitle}
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700" href="/residents/new">
+            <Link className="ui-button-primary" href="/residents/new">
               <Plus aria-hidden="true" size={17} />
               {t.residents.addResident}
             </Link>
@@ -100,21 +105,21 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
         </header>
 
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="ui-card p-5">
             <p className="text-sm font-medium text-slate-500">{t.residents.totalResidents}</p>
             <p className="mt-2 text-3xl font-semibold">{totalResidents}</p>
           </div>
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="ui-card p-5">
             <p className="text-sm font-medium text-slate-500">{t.residents.activeHouseholds}</p>
             <p className="mt-2 text-3xl font-semibold">{activeResidents}</p>
           </div>
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
+          <div className="ui-card p-5">
             <p className="text-sm font-medium text-slate-500">{t.residents.filteredResult}</p>
             <p className="mt-2 text-3xl font-semibold">{residents.length}</p>
           </div>
         </section>
 
-        <section className="rounded-lg border border-cyan-950/10 bg-white shadow-sm">
+        <section className="ui-card overflow-hidden">
           <form className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row md:items-end" method="get">
             <label className="grid flex-1 gap-2 text-sm font-medium text-slate-700">
               {t.common.search}
@@ -126,7 +131,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
 
             <label className="grid gap-2 text-sm font-medium text-slate-700 md:w-56">
               {t.common.status}
-              <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={selectedStatus} name="status">
+              <select className="ui-select" defaultValue={selectedStatus} name="status">
                 <option value="">{t.residents.allStatuses}</option>
                 {statuses.map((status) => (
                   <option key={status} value={status}>{statusLabel(status)}</option>
@@ -134,7 +139,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               </select>
             </label>
 
-            <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
+            <button className="ui-button-primary" type="submit">
               {t.common.apply}
             </button>
           </form>
@@ -143,13 +148,13 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             <table className="w-full min-w-220 border-collapse text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">{t.residents.unit}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.residentName}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.contact}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.block}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.status}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.records}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.residents.unit}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.residents.residentName}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.residents.contact}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.residents.block}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.common.status}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.residents.records}</th>
+                  <th className="sticky top-0 bg-slate-50 px-5 py-3 font-semibold">{t.common.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

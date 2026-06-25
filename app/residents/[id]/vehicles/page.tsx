@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteResidentVehicleAndRedirect } from "@/lib/actions/resident-vehicles";
 import { DeleteVehicleForm } from "./delete-form";
 
 type ResidentVehicleListPageProps = {

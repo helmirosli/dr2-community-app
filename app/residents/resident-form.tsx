@@ -38,71 +38,71 @@ export function ResidentForm({ resident }: ResidentFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
+    <form action={formAction} className="ui-card grid gap-5 p-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Unit number
-          <input className="rounded-md border border-slate-300 px-3 py-2 uppercase" defaultValue={resident?.unitNumber ?? ""} name="unitNumber" required />
+          <input className="ui-input uppercase" defaultValue={resident?.unitNumber ?? ""} name="unitNumber" required />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Resident name
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.name ?? ""} name="name" required />
+          <input className="ui-input" defaultValue={resident?.name ?? ""} name="name" required />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Phone
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.phone ?? ""} name="phone" />
+          <input className="ui-input" defaultValue={resident?.phone ?? ""} name="phone" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Email
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.email ?? ""} name="email" type="email" />
+          <input className="ui-input" defaultValue={resident?.email ?? ""} name="email" type="email" />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Street / block
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.streetBlock ?? ""} name="streetBlock" />
+          <input className="ui-input" defaultValue={resident?.streetBlock ?? ""} name="streetBlock" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Address line 1
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.addressLine1 ?? ""} name="addressLine1" />
+          <input className="ui-input" defaultValue={resident?.addressLine1 ?? ""} name="addressLine1" />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Address line 2
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.addressLine2 ?? ""} name="addressLine2" />
+          <input className="ui-input" defaultValue={resident?.addressLine2 ?? ""} name="addressLine2" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           City
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.city ?? ""} name="city" />
+          <input className="ui-input" defaultValue={resident?.city ?? ""} name="city" />
         </label>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           State
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.state ?? ""} name="state" />
+          <input className="ui-input" defaultValue={resident?.state ?? ""} name="state" />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Zip code
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.zipCode ?? ""} name="zipCode" />
+          <input className="ui-input" defaultValue={resident?.zipCode ?? ""} name="zipCode" />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
+        <label className="ui-label">
           Status
-          <select className="rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.status ?? "ACTIVE"} name="status">
+          <select className="ui-select" defaultValue={resident?.status ?? "ACTIVE"} name="status">
             <option value="ACTIVE">Active — paying RM50</option>
             <option value="EXEMPT">Exempt — exempt from monthly fee</option>
             <option value="FOR_SALE">For sale — vacant</option>
@@ -111,14 +111,14 @@ export function ResidentForm({ resident }: ResidentFormProps) {
         </label>
       </div>
 
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
+      <label className="ui-label">
         Notes
-        <textarea className="min-h-28 rounded-md border border-slate-300 px-3 py-2" defaultValue={resident?.notes ?? ""} name="notes" />
+        <textarea className="ui-textarea min-h-28" defaultValue={resident?.notes ?? ""} name="notes" />
       </label>
 
       {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
 
-      <button className="min-h-11 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60" disabled={pending} type="submit">
+      <button className="ui-button-primary" disabled={pending} type="submit">
         {pending ? "Saving..." : resident?.id ? "Save resident" : "Create resident"}
       </button>
     </form>

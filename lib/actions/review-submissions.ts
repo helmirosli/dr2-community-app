@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { assertDashboardUser } from "@/lib/auth";
 import { expandMonthRange } from "@/lib/months";
+import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { buildMonthlyCoverageRows } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 
@@ -19,20 +20,35 @@ export async function approveSubmission(submissionId: string) {
       return;
     }
 
-    const resident = await tx.resident.upsert({
+    const resident = await tx.resident.findUnique({
       where: { unitNumber: submission.unitNumber },
-      update: {
-        name: submission.residentName,
-        phone: submission.phone,
-        status: "ACTIVE",
-      },
-      create: {
-        unitNumber: submission.unitNumber,
-        name: submission.residentName,
-        phone: submission.phone,
-        status: "ACTIVE",
-      },
+      select: { id: true },
     });
+
+    if (!resident) {
+      await tx.publicPaymentSubmission.update({
+        where: { id: submission.id },
+        data: {
+          status: "REJECTED",
+          reviewReason: "Resident unit no longer exists. Re-register resident before approval.",
+          reviewedById: reviewer.id,
+          reviewedAt: new Date(),
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          entityType: "PublicPaymentSubmission",
+          entityId: submission.id,
+          action: "REJECT_MISSING_RESIDENT",
+          beforeJson: JSON.stringify({ status: submission.status, unitNumber: submission.unitNumber }),
+          afterJson: JSON.stringify({ status: "REJECTED" }),
+          createdBy: reviewer.id,
+        },
+      });
+
+      return;
+    }
 
     const coveredMonths =
       submission.paymentType === "MONTHLY_FEE"
@@ -45,7 +61,7 @@ export async function approveSubmission(submissionId: string) {
         : [];
 
     if (coveredMonths.length > 0) {
-      const duplicateCoverage = await tx.paymentCoverage.findFirst({
+      const existingCoverages = await tx.paymentCoverage.findMany({
         where: {
           residentId: resident.id,
           OR: coveredMonths.map((coverage) => ({
@@ -56,7 +72,19 @@ export async function approveSubmission(submissionId: string) {
         select: {
           year: true,
           month: true,
+          amountApplied: true,
         },
+      });
+
+      const totalsByMonth = new Map<number, number>();
+      for (const coverage of existingCoverages) {
+        const key = coverage.year * 100 + coverage.month;
+        totalsByMonth.set(key, (totalsByMonth.get(key) ?? 0) + coverage.amountApplied);
+      }
+
+      const duplicateCoverage = coveredMonths.find((coverage) => {
+        const key = coverage.year * 100 + coverage.month;
+        return (totalsByMonth.get(key) ?? 0) >= DEFAULT_MONTHLY_FEE_SEN;
       });
 
       if (duplicateCoverage) {
@@ -64,7 +92,7 @@ export async function approveSubmission(submissionId: string) {
           where: { id: submission.id },
           data: {
             status: "REJECTED",
-            reviewReason: `Duplicate official coverage for ${duplicateCoverage.month}/${duplicateCoverage.year}.`,
+            reviewReason: `Duplicate full official coverage for ${duplicateCoverage.month}/${duplicateCoverage.year}.`,
             reviewedById: reviewer.id,
             reviewedAt: new Date(),
           },

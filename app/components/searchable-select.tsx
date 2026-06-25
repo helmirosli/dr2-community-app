@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, Search } from "lucide-react";
 
 type Option = {
@@ -16,6 +16,7 @@ type SearchableSelectProps = {
   placeholder?: string;
   required?: boolean;
   onChange?: (value: string) => void;
+  ariaLabel?: string;
 };
 
 export function SearchableSelect({
@@ -26,20 +27,20 @@ export function SearchableSelect({
   placeholder = "Select...",
   required,
   onChange,
+  ariaLabel,
 }: SearchableSelectProps) {
+  const controlled = value !== undefined;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Option | null>(
-    () => options.find((o) => o.value === (value ?? defaultValue)) ?? null,
+    () => options.find((o) => o.value === defaultValue) ?? null,
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (value !== undefined) {
-      setSelected(options.find((o) => o.value === value) ?? null);
-    }
-  }, [value, options]);
+  const listboxId = useId();
+  const currentSelected = controlled
+    ? options.find((o) => o.value === value) ?? null
+    : selected;
 
   const filtered =
     query === ""
@@ -65,14 +66,18 @@ export function SearchableSelect({
 
   return (
     <div ref={containerRef} className="relative">
-      <input type="hidden" name={name} value={selected?.value ?? ""} />
+      <input type="hidden" name={name} value={currentSelected?.value ?? ""} />
       <button
         type="button"
-        className="flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-left text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+        className="flex w-full items-center justify-between ui-input text-left text-sm"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-label={ariaLabel ?? `${name} selector`}
       >
-        <span className={selected ? "text-slate-900" : "text-slate-400"}>
-          {selected?.label ?? placeholder}
+        <span className={currentSelected ? "text-slate-900" : "text-slate-400"}>
+          {currentSelected?.label ?? placeholder}
         </span>
         <ChevronDown
           size={16}
@@ -91,17 +96,18 @@ export function SearchableSelect({
               placeholder="Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label={`Search ${ariaLabel ?? name} options`}
             />
           </div>
-          <ul className="max-h-48 overflow-y-auto py-1">
+          <ul className="max-h-48 overflow-y-auto py-1" role="listbox" id={listboxId}>
             {filtered.length > 0 ? (
               filtered.map((option) => (
                 <li key={option.value}>
                   <button
                     type="button"
-                    className={`flex w-full px-4 py-2 text-left text-sm transition hover:bg-cyan-50 ${
-                      selected?.value === option.value
-                        ? "bg-cyan-50 font-medium text-cyan-700"
+                    className={`flex w-full px-4 py-2 text-left text-sm transition hover:bg-brand-50 ${
+                      currentSelected?.value === option.value
+                        ? "bg-brand-50 font-medium text-brand-700"
                         : "text-slate-700"
                     }`}
                     onClick={() => {
@@ -110,6 +116,8 @@ export function SearchableSelect({
                       setQuery("");
                       onChange?.(option.value);
                     }}
+                    role="option"
+                    aria-selected={currentSelected?.value === option.value}
                   >
                     {option.label}
                   </button>
@@ -122,7 +130,7 @@ export function SearchableSelect({
         </div>
       )}
 
-      {required && !selected && (
+      {required && !currentSelected && (
         <input
           tabIndex={-1}
           className="absolute inset-0 opacity-0"

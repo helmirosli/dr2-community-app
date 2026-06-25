@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { useState } from "react";
 import {
+  ChevronDown,
   FileSpreadsheet,
   Gift,
   LayoutDashboard,
@@ -26,6 +27,12 @@ type NavItem = {
   label: string;
   icon: keyof typeof iconMap;
   href: string;
+  highlight?: boolean;
+};
+
+type NavSection = {
+  title: string;
+  items: NavItem[];
 };
 
 type User = {
@@ -38,7 +45,7 @@ function LogoutButton() {
   const { t } = useDictionary();
   return (
     <button
-      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-60"
+    className="ui-button-secondary w-full"
       disabled={pending}
       type="submit"
     >
@@ -48,41 +55,78 @@ function LogoutButton() {
   );
 }
 
-export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User }) {
+export function NavSidebar({ navSections, user }: { navSections: NavSection[]; user: User }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const { t } = useDictionary();
 
-  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
-    <nav aria-label="Main navigation" className="grid gap-1">
-      {navItems.map((item) => {
-        const Icon = iconMap[item.icon];
-        const active = pathname === item.href || pathname.startsWith(item.href + "/");
-        return (
-          <Link
-            className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
-              active
-                ? "bg-cyan-50 text-cyan-700"
-                : "text-slate-700 hover:bg-slate-100"
-            }`}
-            href={item.href}
-            key={item.label}
-            onClick={onClick}
-          >
-            <Icon aria-hidden="true" size={18} />
-            <span>{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  const renderNavLinks = (onClick?: () => void) => (
+      <nav aria-label="Main navigation" className="grid gap-4">
+        {navSections.map((section) => {
+          const hasActive = section.items.some(
+            (item) => pathname === item.href || pathname.startsWith(item.href + "/"),
+          );
+          const isCollapsed = collapsed[section.title] ?? false;
+          const sectionId = `nav-section-${section.title.toLowerCase().replace(/\s+/g, "-")}`;
+
+          return (
+            <section key={section.title}>
+              <button
+                className="mb-2 flex w-full items-center justify-between px-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+                onClick={() =>
+                  setCollapsed((prev) => ({
+                    ...prev,
+                    [section.title]: !(prev[section.title] ?? false),
+                  }))
+                }
+                type="button"
+                aria-expanded={!isCollapsed || hasActive}
+                aria-controls={sectionId}
+              >
+                <span>{section.title}</span>
+                <ChevronDown
+                  className={`transition ${isCollapsed && !hasActive ? "-rotate-90" : ""}`}
+                  size={14}
+                />
+              </button>
+              {(!isCollapsed || hasActive) && (
+                <div className="grid gap-1" id={sectionId}>
+                  {section.items.map((item) => {
+                    const Icon = iconMap[item.icon];
+                    const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                    return (
+                      <Link
+                        className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                          active
+                            ? "bg-brand-50 text-brand-700"
+                            : item.highlight
+                              ? "bg-slate-900 text-white hover:bg-slate-800"
+                              : "text-slate-700 hover:bg-slate-100"
+                        }`}
+                        href={item.href}
+                        key={item.label}
+                        onClick={onClick}
+                      >
+                        <Icon aria-hidden="true" size={18} />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          );
+        })}
+      </nav>
+    );
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white lg:overflow-y-auto">
         <div className="flex items-center gap-3 px-5 pb-6 pt-5">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-cyan-700 text-sm font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">
             DR2
           </div>
           <div>
@@ -92,7 +136,21 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
         </div>
 
         <div className="flex-1 px-5">
-          <NavLinks />
+          {renderNavLinks()}
+          <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quick actions</p>
+            <div className="mt-2 grid gap-1">
+              <Link className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100" href="/payments/new">
+                + Record payment
+              </Link>
+              <Link className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100" href="/residents/new">
+                + Add resident
+              </Link>
+              <Link className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100" href="/special-collections/new">
+                + New collection
+              </Link>
+            </div>
+          </div>
         </div>
 
         <div className="border-t border-slate-100 px-5 py-5">
@@ -113,7 +171,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
       <div className="lg:hidden">
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-cyan-700 text-xs font-bold text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-xs font-bold text-white">
               DR2
             </div>
             <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
@@ -133,7 +191,7 @@ export function NavSidebar({ navItems, user }: { navItems: NavItem[]; user: User
 
         {open && (
           <div className="border-b border-slate-200 bg-white px-4 py-3 shadow-md">
-            <NavLinks onClick={() => setOpen(false)} />
+            {renderNavLinks(() => setOpen(false))}
             <div className="mt-4 border-t border-slate-100 pt-4">
               <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-3 text-sm">
                 <p className="font-semibold text-slate-900">{user.name}</p>

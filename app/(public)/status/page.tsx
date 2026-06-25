@@ -53,7 +53,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
         </div>
         <Link
           href="/submit"
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+          className="ui-button-primary shrink-0"
         >
           <Send size={18} />
           <span>{t.publicStatus.submitPayment}</span>
@@ -61,12 +61,12 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
       </div>
 
       {/* Year selector */}
-      <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
+      <div className="ui-card p-4 sm:p-5">
         <form className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4" method="get">
-          <label className="grid gap-2 sm:flex sm:items-end sm:gap-3">
+          <label className="ui-label sm:flex sm:items-end sm:gap-3">
             <span className="text-sm font-medium text-slate-700">{t.publicStatus.viewYear}</span>
             <input
-              className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:w-32"
+              className="ui-input text-sm font-medium sm:w-32"
               defaultValue={selectedYear}
               max={2100}
               min={2020}
@@ -74,10 +74,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
               type="number"
             />
           </label>
-          <button
-            className="rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-            type="submit"
-          >
+          <button className="ui-button-primary" type="submit">
             {t.common.update}
           </button>
         </form>
@@ -142,21 +139,34 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                     ) : (
                       <>
                         {row.months.map((amountSen, i) => {
+                          const monthOverride = row.monthStatusOverrides[i];
                           const isFuture =
                             selectedYear > currentYear ||
                             (selectedYear === currentYear && i + 1 > currentMonth);
                           const isPaid = (amountSen ?? 0) >= DEFAULT_MONTHLY_FEE_SEN;
                           const isPartial = !isPaid && (amountSen ?? 0) > 0;
                           const isUnpaidPast = !isPaid && !isPartial && !isFuture;
+                          const isExemptUnpaid = row.status === "EXEMPT" && amountSen === null;
+                          const isStatusOverride = monthOverride === "FOR_SALE" || monthOverride === "MOVED_OUT";
 
                           let cellClass = "border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium";
                           if (isPartial) cellClass += " bg-amber-50 text-amber-700";
                           else if (isUnpaidPast) cellClass += " bg-red-50 text-red-600";
+                          else if (isStatusOverride) cellClass += " bg-slate-100 italic text-slate-500";
+                          else if (isExemptUnpaid) cellClass += " bg-slate-100 italic text-slate-500";
                           else cellClass += " text-slate-600";
 
                           return (
                             <td className={cellClass} key={i}>
-                              {amountSen !== null ? fmtCell(amountSen) : ""}
+                              {amountSen !== null
+                                ? fmtCell(amountSen)
+                                : monthOverride === "FOR_SALE"
+                                  ? "FOR SALE"
+                                  : monthOverride === "MOVED_OUT"
+                                    ? "MOVED OUT"
+                                    : isExemptUnpaid
+                                      ? "EXEMPT"
+                                      : ""}
                             </td>
                           );
                         })}

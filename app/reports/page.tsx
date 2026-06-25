@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileSpreadsheet, FileText, Home, LayoutList, Upload } from "lucide-react";
+import { ChevronRight, FileSpreadsheet, FileText, Upload } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -55,19 +55,32 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   }).toString();
 
   const paidAll = rows.filter(
-    (r) => !r.isForSale && r.months.slice(0, currentYear === selectedYear ? currentMonth : 12).every((m) => (m ?? 0) >= DEFAULT_MONTHLY_FEE_SEN),
+    (r) =>
+      r.status === "ACTIVE" &&
+      r.months
+        .slice(0, currentYear === selectedYear ? currentMonth : 12)
+        .every((m) => (m ?? 0) >= DEFAULT_MONTHLY_FEE_SEN),
   ).length;
   const hasArrears = rows.filter(
-    (r) => !r.isForSale && r.months.slice(0, currentYear === selectedYear ? currentMonth : 12).some((m) => (m ?? 0) < DEFAULT_MONTHLY_FEE_SEN),
+    (r) =>
+      r.status === "ACTIVE" &&
+      r.months
+        .slice(0, currentYear === selectedYear ? currentMonth : 12)
+        .some((m) => (m ?? 0) < DEFAULT_MONTHLY_FEE_SEN),
   ).length;
   const forSaleCount = rows.filter((r) => r.isForSale).length;
 
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
+          <span>Reporting</span>
+          <ChevronRight size={14} />
+          <span className="font-medium text-slate-700">{t.reports.heading}</span>
+        </nav>
         <header className="flex flex-col gap-4 sm:gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{t.reports.title}</p>
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.reports.title}</p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               {t.reports.heading} — {selectedYear}
             </h1>
@@ -77,21 +90,21 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           </div>
           <div className="flex flex-wrap gap-3">
             <a
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="ui-button-secondary"
               href={`/reports/yearly.xlsx?${exportQuery}`}
             >
               <FileSpreadsheet size={17} />
               {t.reports.excel}
             </a>
             <a
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="ui-button-secondary"
               href={`/reports/yearly.pdf?${exportQuery}`}
             >
               <FileText size={17} />
               {t.reports.pdf}
             </a>
             <Link
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="ui-button-secondary"
               href="/reports/file-upload"
             >
               <Upload size={17} />
@@ -100,12 +113,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           </div>
         </header>
 
-        <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <section className="ui-card overflow-hidden">
           <form className="flex flex-wrap items-end gap-4 border-b border-slate-100 px-6 py-4" method="get">
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
+            <label className="ui-label">
               {t.common.year}
               <input
-                className="w-28 rounded-md border border-slate-300 px-3 py-2"
+                className="ui-input w-28"
                 defaultValue={selectedYear}
                 max={2100}
                 min={2020}
@@ -117,7 +130,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
               {t.reports.includeInactive}
             </label>
-            <button className="min-h-10 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800" type="submit">
+            <button className="ui-button-primary" type="submit">
               {t.common.apply}
             </button>
             <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-600">
@@ -132,12 +145,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0) * 72 + (specialCollections.length > 0 ? 72 : 0)}rem` }}>
               <thead>
                 <tr className="bg-cyan-800 text-white">
-                  <th className="sticky left-0 z-10 bg-cyan-800 px-3 py-2.5 text-center font-semibold">No</th>
-                  <th className="sticky left-8 z-10 bg-cyan-800 px-3 py-2.5 font-semibold">NO RUMAH</th>
-                  <th className="sticky left-24 z-10 min-w-32 bg-cyan-800 px-3 py-2.5 font-semibold">NAMA</th>
+                  <th className="sticky left-0 top-0 z-10 bg-cyan-800 px-3 py-2.5 text-center font-semibold">No</th>
+                  <th className="sticky left-8 top-0 z-10 bg-cyan-800 px-3 py-2.5 font-semibold">NO RUMAH</th>
+                  <th className="sticky left-24 top-0 z-10 min-w-32 bg-cyan-800 px-3 py-2.5 font-semibold">NAMA</th>
                   {MONTH_LABELS.map((label, i) => (
                     <th
-                      className={`px-2 py-2.5 text-center font-semibold ${
+                      className={`sticky top-0 px-2 py-2.5 text-center font-semibold ${
                         selectedYear === currentYear && i + 1 === currentMonth ? "bg-cyan-600" : ""
                       }`}
                       key={label}
@@ -181,19 +194,32 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                       ) : (
                         <>
                           {row.months.map((amountSen, i) => {
+                            const monthOverride = row.monthStatusOverrides[i];
                             const isFuture = selectedYear > currentYear || (selectedYear === currentYear && i + 1 > currentMonth);
                             const isPaid = (amountSen ?? 0) >= DEFAULT_MONTHLY_FEE_SEN;
                             const isPartial = !isPaid && (amountSen ?? 0) > 0;
                             const isUnpaidPast = !isPaid && !isPartial && !isFuture;
+                            const isExemptUnpaid = row.status === "EXEMPT" && amountSen === null;
+                            const isStatusOverride = monthOverride === "FOR_SALE" || monthOverride === "MOVED_OUT";
 
                             let cellClass = "border-b border-slate-100 px-2 py-2 text-center text-slate-800";
                             if (isPartial) cellClass += " bg-amber-50 text-amber-800";
                             else if (isUnpaidPast) cellClass += " bg-red-50";
+                            else if (isStatusOverride) cellClass += " bg-slate-100 italic text-slate-500";
+                            else if (isExemptUnpaid) cellClass += " bg-slate-100 italic text-slate-500";
                             else if (isFuture && amountSen === null) cellClass += " text-slate-300";
 
                             return (
                               <td className={cellClass} key={i}>
-                                {amountSen !== null ? fmtCell(amountSen) : (isFuture ? "" : "")}
+                                {amountSen !== null
+                                  ? fmtCell(amountSen)
+                                  : monthOverride === "FOR_SALE"
+                                    ? "FOR SALE"
+                                    : monthOverride === "MOVED_OUT"
+                                      ? "MOVED OUT"
+                                      : isExemptUnpaid
+                                        ? "EXEMPT"
+                                        : ""}
                               </td>
                             );
                           })}
