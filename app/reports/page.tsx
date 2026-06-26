@@ -183,78 +183,82 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           <ChevronRight size={14} />
           <span className="font-medium text-slate-700">{t.reports.heading}</span>
         </nav>
-        <header className="flex flex-col gap-4 sm:gap-6">
+
+        {/* Compact header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">{t.reports.title}</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">{t.reports.title}</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
               {t.reports.heading} — {selectedYear}
             </h1>
-            <p className="mt-3 text-base text-slate-600">
-              {t.reports.subtitle}
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <a
-              className="ui-button-secondary"
-              href={`/reports/yearly.xlsx?${exportQuery}`}
-            >
-              <FileSpreadsheet size={17} />
+          <div className="flex flex-wrap gap-2">
+            <a className="ui-button-secondary" href={`/reports/yearly.xlsx?${exportQuery}`}>
+              <FileSpreadsheet size={15} />
               {t.reports.excel}
             </a>
-            <a
-              className="ui-button-secondary"
-              href={`/reports/yearly.pdf?${exportQuery}`}
-            >
-              <FileText size={17} />
+            <a className="ui-button-secondary" href={`/reports/yearly.pdf?${exportQuery}`}>
+              <FileText size={15} />
               {t.reports.pdf}
             </a>
-            <Link
-              className="ui-button-secondary"
-              href="/reports/file-upload"
-            >
-              <Upload size={17} />
+            <Link className="ui-button-secondary" href="/reports/file-upload">
+              <Upload size={15} />
               {t.reports.upload}
             </Link>
           </div>
-        </header>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="ui-card p-4">
+            <p className="text-xs text-slate-500">{t.reports.totalUnits}</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{filteredRows.length}</p>
+          </div>
+          <div className="ui-card p-4">
+            <p className="text-xs text-slate-500">{t.reports.fullyPaid}</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-700">{paidAll}</p>
+          </div>
+          <div className="ui-card p-4">
+            <p className="text-xs text-slate-500">{t.reports.haveArrears}</p>
+            <p className="mt-1 text-2xl font-bold text-red-600">{hasArrears}</p>
+          </div>
+          <div className="ui-card p-4">
+            <p className="text-xs text-slate-500">{t.reports.forSale}</p>
+            <p className="mt-1 text-2xl font-bold text-slate-500">{forSaleCount}</p>
+          </div>
+        </div>
 
         <section className="ui-card overflow-hidden">
-          <form className="flex flex-wrap items-end gap-4 border-b border-slate-100 px-6 py-4" method="get">
+          {/* Filter bar */}
+          <form className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4" method="get">
             <label className="ui-label">
               {t.common.year}
-              <input
-                className="ui-input w-28"
-                defaultValue={selectedYear}
-                max={2100}
-                min={2020}
-                name="year"
-                type="number"
-              />
+              <input className="ui-input w-24" defaultValue={selectedYear} max={2100} min={2020} name="year" type="number" />
             </label>
-            <label className="ui-label">
+            <label className="ui-label flex-1">
               Search
-              <input
-                className="ui-input w-52"
-                defaultValue={query}
-                name="q"
-                placeholder="Search unit or resident"
-                type="search"
-              />
+              <input className="ui-input" defaultValue={query} name="q" placeholder="Search unit or name" type="search" />
             </label>
-            <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium text-slate-700">
               <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
               {t.reports.includeInactive}
             </label>
-            <button className="ui-button-primary" type="submit">
+            <button className="ui-button-primary self-end" type="submit">
               {t.common.apply}
             </button>
-            <div className="ml-auto flex flex-wrap gap-4 text-sm text-slate-600">
-              <span><span className="font-semibold text-slate-900">{filteredRows.length}</span> {t.reports.totalUnits}</span>
-              <span><span className="font-semibold text-emerald-700">{paidAll}</span> {t.reports.fullyPaid}</span>
-              <span><span className="font-semibold text-red-600">{hasArrears}</span> {t.reports.haveArrears}</span>
-              {forSaleCount > 0 && <span><span className="font-semibold text-slate-500">{forSaleCount}</span> {t.reports.forSale}</span>}
-            </div>
           </form>
+
+          {/* Legend — above table */}
+          <div className="flex flex-wrap items-center gap-4 border-b border-slate-100 px-5 py-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-200" />{t.reports.paid}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.partialPayment}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-100" />{t.reports.unpaidPast}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-slate-100" />{t.reports.forSaleVacant}</span>
+            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-blue-50 ring-1 ring-blue-200" />Pending review</span>
+            {(hasExtra || specialCollections.length > 0) && (
+              <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.specialCollectionLegend}</span>
+            )}
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0)}rem` }}>
@@ -366,18 +370,27 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                           })}
                           {specialCollections.length > 0
                             ? specialCollections.map((sc) => {
+                                const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
                                 const pendingKey = `${row.unitNumber}:${sc.id}`;
                                 const pendingAmountSen = pendingCollectionMap.get(pendingKey) ?? 0;
+
+                                if (!assignment && !pendingAmountSen) {
+                                  // Resident not assigned to this collection
+                                  return (
+                                    <td className="border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium" key={sc.id}>
+                                      <span className="text-slate-300">{"\u2014"}</span>
+                                    </td>
+                                  );
+                                }
+
+                                const outstanding = assignment ? assignment.outstanding : 0;
                                 return (
                                   <td className={`border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium ${pendingAmountSen > 0 ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-amber-50"}`} key={sc.id}>
-                                    {row.extraOutstandingSen > 0 && (
-                                      <div className="font-semibold text-amber-700">RM{(row.extraOutstandingSen / 100).toFixed(2)}</div>
+                                    {outstanding > 0 && !pendingAmountSen && (
+                                      <div className="font-semibold text-amber-700">RM{(outstanding / 100).toFixed(2)}</div>
                                     )}
-                                    {!row.extraOutstandingSen && row.extraDueSen > 0 && !pendingAmountSen && (
+                                    {outstanding === 0 && assignment && !pendingAmountSen && (
                                       <span className="text-emerald-600">{"\u2713"}</span>
-                                    )}
-                                    {!row.extraDueSen && !pendingAmountSen && (
-                                      <span className="text-slate-300">{"\u2014"}</span>
                                     )}
                                     {pendingAmountSen > 0 && (
                                       <div className="flex flex-col items-center gap-0.5 mt-0.5">
@@ -417,15 +430,6 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             </table>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 border-t border-slate-100 px-5 py-4 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-200" />{t.reports.paid}</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.partialPayment}</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-100" />{t.reports.unpaidPast}</span>
-            <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-slate-100" />{t.reports.forSaleVacant}</span>
-            {(hasExtra || specialCollections.length > 0) && (
-              <span className="flex items-center gap-1.5"><span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-200" />{t.reports.specialCollectionLegend}</span>
-            )}
-          </div>
         </section>
       </div>
     </main>

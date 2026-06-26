@@ -1,17 +1,14 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
   Banknote,
   CalendarClock,
-  ChevronRight,
   CheckCircle2,
-  Download,
   FileSpreadsheet,
   FileText,
   Inbox,
+  Plus,
   ReceiptText,
-  Search,
   Users,
   XCircle,
 } from "lucide-react";
@@ -37,24 +34,34 @@ export default async function DashboardPage() {
   const [
     residentCount,
     pendingSubmissions,
-    activeCollections,
-    currentMonthPayments,
-    totalPayments,
+    currentMonthFeePayments,
+    ytdFeePayments,
+    activeCollectionAssignments,
     recentSubmissions,
   ] = await Promise.all([
     prisma.resident.count({ where: { status: "ACTIVE" } }),
     prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } }),
-    prisma.specialCollection.count({ where: { status: "ACTIVE" } }),
+    // Monthly fees only — keeps target (residents × RM50) meaningful
     prisma.payment.aggregate({
       _sum: { amountSen: true },
       where: {
-        paymentDate: {
-          gte: monthStart,
-          lt: nextMonthStart,
-        },
+        paymentType: "MONTHLY_FEE",
+        paymentDate: { gte: monthStart, lt: nextMonthStart },
       },
     }),
-    prisma.payment.aggregate({ _sum: { amountSen: true } }),
+    // YTD monthly fees: Jan 1 → today
+    prisma.payment.aggregate({
+      _sum: { amountSen: true },
+      where: {
+        paymentType: "MONTHLY_FEE",
+        paymentDate: { gte: new Date(now.getFullYear(), 0, 1), lt: nextMonthStart },
+      },
+    }),
+    // Active special collections: total due vs paid across all assignments
+    prisma.specialCollectionAssignment.aggregate({
+      _sum: { amountDue: true, amountPaid: true },
+      where: { specialCollection: { status: "ACTIVE" } },
+    }),
     prisma.publicPaymentSubmission.findMany({
       where: { status: "PENDING_REVIEW" },
       orderBy: { createdAt: "desc" },
@@ -85,305 +92,286 @@ export default async function DashboardPage() {
 
   const t = await getDictionary();
 
-  const currentMonthCollection = currentMonthPayments._sum.amountSen ?? 0;
-  const totalCollection = totalPayments._sum.amountSen ?? 0;
-  const monthlyTarget = residentCount * 5000;
-  const collectionProgress = monthlyTarget > 0 ? Math.min(100, Math.round((currentMonthCollection / monthlyTarget) * 100)) : 0;
+  const currentMonth = now.getMonth() + 1; // 1–12
+  const currentMonthFeeCollection = currentMonthFeePayments._sum.amountSen ?? 0;
+  const monthlyTarget = residentCount * 5000; // RM50 per active resident
+  const collectionProgress = monthlyTarget > 0
+    ? Math.min(100, Math.round((currentMonthFeeCollection / monthlyTarget) * 100))
+    : 0;
 
-  const metrics = [
-    {
-      label: t.dashboard.currentMonthCollection,
-      value: formatRM(currentMonthCollection),
-      helper: `${collectionProgress}% ${t.dashboard.targetHelper.replace("{target}", formatRM(monthlyTarget))}`,
-      icon: Banknote,
-      accent: "bg-cyan-50 text-cyan-700 ring-cyan-100",
-    },
-    {
-      label: t.dashboard.activeResidents,
-      value: residentCount.toString(),
-      helper: t.dashboard.activeResidentsHelper,
-      icon: Users,
-      accent: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-    },
-    {
-      label: t.dashboard.pendingReview,
-      value: pendingSubmissions.toString(),
-      helper: t.dashboard.pendingReviewHelper,
-      icon: Inbox,
-      accent: "bg-amber-50 text-amber-700 ring-amber-100",
-    },
-    {
-      label: t.dashboard.specialCollections,
-      value: activeCollections.toString(),
-      helper: t.dashboard.specialCollectionsHelper,
-      icon: CalendarClock,
-      accent: "bg-sky-50 text-sky-700 ring-sky-100",
-    },
-  ];
+  // Year-to-date: Jan → current month inclusive
+  const ytdCollected  = ytdFeePayments._sum.amountSen ?? 0;
+  const ytdTarget     = currentMonth * residentCount * 5000; // months elapsed × RM50
+  const ytdProgress   = ytdTarget > 0
+    ? Math.min(100, Math.round((ytdCollected / ytdTarget) * 100))
+    : 0;
+  const ytdGap = Math.max(0, ytdTarget - ytdCollected);
 
-  const workflowItems = [
-    {
-      title: t.dashboard.reviewSubmissions,
-      description: t.dashboard.reviewSubmissionsDesc,
-      icon: CheckCircle2,
-      tone: "text-emerald-700 bg-emerald-50",
-      href: "/payments",
-    },
-    {
-      title: t.dashboard.recordPayments,
-      description: t.dashboard.recordPaymentsDesc,
-      icon: ReceiptText,
-      tone: "text-cyan-700 bg-cyan-50",
-      href: "/payments/new",
-    },
-    {
-      title: t.dashboard.exportReport,
-      description: t.dashboard.exportReportDesc,
-      icon: Download,
-      tone: "text-sky-700 bg-sky-50",
-      href: "/reports",
-    },
-  ];
+  const specialCollectionDue  = activeCollectionAssignments._sum.amountDue  ?? 0;
+  const specialCollectionPaid = activeCollectionAssignments._sum.amountPaid ?? 0;
+  const specialCollectionOutstanding = Math.max(0, specialCollectionDue - specialCollectionPaid);
+  const specialCollectionProgress = specialCollectionDue > 0
+    ? Math.min(100, Math.round((specialCollectionPaid / specialCollectionDue) * 100))
+    : 0;
 
   return (
     <main className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 [&>*]:min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <span>Overview</span>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">Dashboard</span>
-        </nav>
-        <header className="ui-card flex flex-col gap-4 p-5 sm:gap-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
+
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">
-              {monthLabel(now.getFullYear(), now.getMonth() + 1)} {t.dashboard.operations}
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">
+              {monthLabel(now.getFullYear(), now.getMonth() + 1)} {now.getFullYear()}
             </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
               {t.dashboard.title}
             </h1>
-            <p className="mt-3 max-w-3xl text-base text-slate-600">
-              {t.dashboard.subtitle}
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              className="ui-button-secondary"
-              href="/submit"
-            >
-              <FileText size={17} />
+          <div className="flex flex-wrap gap-2">
+            <Link className="ui-button-secondary" href="/submit">
+              <FileText size={15} />
               <span>{t.dashboard.publicForm}</span>
             </Link>
-            <Link
-              className="ui-button-secondary"
-              href="/reports"
-            >
-              <FileSpreadsheet size={17} />
+            <Link className="ui-button-secondary" href="/reports">
+              <FileSpreadsheet size={15} />
               <span>{t.dashboard.reports}</span>
             </Link>
-            <Link
-              className="ui-button-primary"
-              href="/payments"
-            >
-              <ReceiptText size={17} />
+            <Link className="ui-button-primary" href="/payments/new">
+              <Plus size={15} />
               <span>{t.dashboard.recordPayment}</span>
             </Link>
           </div>
-        </header>
+        </div>
 
-        {/* Metrics */}
+        {/* Pending alert banner */}
+        {pendingSubmissions > 0 && (
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="shrink-0 text-amber-600" size={20} />
+              <p className="text-sm font-semibold text-amber-900">
+                {pendingSubmissions} submission{pendingSubmissions > 1 ? "s" : ""} waiting for review
+              </p>
+            </div>
+            <Link
+              className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
+              href="/payments"
+            >
+              Review all
+            </Link>
+          </div>
+        )}
+
+        {/* Stat cards */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {metrics.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <div className="ui-card p-5" key={metric.label}>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-500">{metric.label}</p>
-                    <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{metric.value}</p>
-                  </div>
-                  <div className={`flex size-12 shrink-0 items-center justify-center rounded-lg ring-1 ${metric.accent}`}>
-                    <Icon aria-hidden="true" size={24} />
-                  </div>
-                </div>
-                <p className="mt-4 min-h-5 text-sm text-slate-600">{metric.helper}</p>
+          {/* Monthly fee collection this month */}
+          <div className="ui-card p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-500">{t.dashboard.currentMonthCollection}</p>
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 ring-1 ring-cyan-100">
+                <Banknote className="text-cyan-700" size={18} />
               </div>
-            );
-          })}
+            </div>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{formatRM(currentMonthFeeCollection)}</p>
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                <span>of {formatRM(monthlyTarget)} target</span>
+                <span className="font-semibold text-cyan-700">{collectionProgress}%</span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-cyan-600 transition-all" style={{ width: `${collectionProgress}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Active residents */}
+          <div className="ui-card p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-500">{t.dashboard.activeResidents}</p>
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
+                <Users className="text-emerald-700" size={18} />
+              </div>
+            </div>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{residentCount}</p>
+            <p className="mt-3 text-xs text-slate-500">{t.dashboard.activeResidentsHelper}</p>
+          </div>
+
+          {/* Pending review */}
+          <div className={`ui-card p-5 ${pendingSubmissions > 0 ? "ring-1 ring-amber-200" : ""}`}>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-500">{t.dashboard.pendingReview}</p>
+              <div className={`flex size-9 shrink-0 items-center justify-center rounded-lg ring-1 ${pendingSubmissions > 0 ? "bg-amber-50 ring-amber-100" : "bg-slate-50 ring-slate-100"}`}>
+                <Inbox className={pendingSubmissions > 0 ? "text-amber-700" : "text-slate-400"} size={18} />
+              </div>
+            </div>
+            <p className={`mt-3 text-2xl font-bold tracking-tight ${pendingSubmissions > 0 ? "text-amber-700" : "text-slate-900"}`}>
+              {pendingSubmissions}
+            </p>
+            <p className="mt-3 text-xs text-slate-500">{t.dashboard.pendingReviewHelper}</p>
+          </div>
+
+          {/* Active special collections */}
+          <div className="ui-card p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-500">{t.dashboard.specialCollections}</p>
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-50 ring-1 ring-sky-100">
+                <CalendarClock className="text-sky-700" size={18} />
+              </div>
+            </div>
+            {specialCollectionDue > 0 ? (
+              <>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{formatRM(specialCollectionPaid)}</p>
+                <div className="mt-3">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>of {formatRM(specialCollectionDue)} due</span>
+                    <span className="font-semibold text-sky-700">{specialCollectionProgress}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${specialCollectionProgress}%` }} />
+                  </div>
+                  {specialCollectionOutstanding > 0 && (
+                    <p className="mt-2 text-xs text-amber-600 font-medium">{formatRM(specialCollectionOutstanding)} outstanding</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className="mt-3 text-sm text-slate-400">No active collections</p>
+            )}
+          </div>
         </section>
 
-        {/* Main content grid */}
-        <section className="grid gap-8 xl:grid-cols-[1fr_320px]">
-          {/* Left: Submissions queue */}
-          <div className="ui-card overflow-hidden">
-            <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.submissionQueue}</h2>
-                <p className="mt-1 text-sm text-slate-500">{t.dashboard.submissionQueueSubtitle}</p>
-              </div>
-              <button className="ui-button-secondary" type="button">
-                <Search size={16} />
-                {t.common.filter}
-              </button>
+        {/* Pending submissions queue */}
+        <section className="ui-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">{t.dashboard.submissionQueue}</h2>
+              <p className="mt-0.5 text-xs text-slate-500">{t.dashboard.submissionQueueSubtitle}</p>
             </div>
+            {pendingSubmissions > 5 && (
+              <Link className="text-xs font-semibold text-brand-700 hover:underline" href="/payments">
+                View all {pendingSubmissions} →
+              </Link>
+            )}
+          </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-220 border-collapse text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
-                  <tr>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.resident}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.coverage}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.type}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.amount}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.proof}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.status}</th>
-                    <th className="sticky top-0 bg-slate-50 px-6 py-3 font-semibold">{t.dashboard.action}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {recentSubmissions.length > 0 ? (
-                    recentSubmissions.map((submission) => (
-                      <tr className="transition hover:bg-slate-50" key={submission.id}>
-                        <td className="px-6 py-4">
-                          <p className="font-semibold text-slate-900">{submission.unitNumber}</p>
-                          <p className="mt-0.5 text-sm text-slate-500">{submission.residentName}</p>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
-                          {monthLabel(submission.coverageStartYear, submission.coverageStartMonth)} – {monthLabel(submission.coverageEndYear, submission.coverageEndMonth)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-200 border-collapse text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.resident}</th>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.type}</th>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.coverage}</th>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.amount}</th>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.proof}</th>
+                  <th className="px-5 py-3 font-semibold">{t.dashboard.action}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {recentSubmissions.length > 0 ? (
+                  recentSubmissions.map((submission) => (
+                    <tr className="transition hover:bg-cyan-50/30" key={submission.id}>
+                      <td className="px-5 py-3">
+                        <p className="font-semibold text-slate-900">{submission.unitNumber}</p>
+                        <p className="text-xs text-slate-500">{submission.residentName}</p>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${
+                          submission.paymentType === "MONTHLY_FEE"
+                            ? "bg-cyan-50 text-cyan-700 ring-cyan-100"
+                            : "bg-sky-50 text-sky-700 ring-sky-100"
+                        }`}>
                           {submission.paymentType === "MONTHLY_FEE" ? t.dashboard.monthlyFee : t.dashboard.specialCollection}
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-slate-900">{formatRM(submission.amountSen)}</td>
-                        <td className="px-6 py-4">
-                          <FileViewer files={submission.uploads} />
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
-                            <AlertTriangle size={13} />
-                            {t.dashboard.review}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            <ApproveRejectButton
-                              action={approveSubmission.bind(null, submission.id)}
-                              label={
-                                <>
-                                  <CheckCircle2 size={14} />
-                                  {t.common.approve}
-                                </>
-                              }
-                              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
-                            />
-                            <ApproveRejectButton
-                              action={rejectSubmission.bind(null, submission.id)}
-                              label={
-                                <>
-                                  <XCircle size={14} />
-                                  {t.common.reject}
-                                </>
-                              }
-                              className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-60"
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="px-6 py-8 text-center text-slate-500" colSpan={7}>
-                        {t.dashboard.noPending}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-xs text-slate-600">
+                        {monthLabel(submission.coverageStartYear, submission.coverageStartMonth)}
+                        {" – "}
+                        {monthLabel(submission.coverageEndYear, submission.coverageEndMonth)}
+                      </td>
+                      <td className="px-5 py-3 font-semibold text-slate-900">{formatRM(submission.amountSen)}</td>
+                      <td className="px-5 py-3">
+                        <FileViewer files={submission.uploads} />
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex gap-2">
+                          <ApproveRejectButton
+                            action={approveSubmission.bind(null, submission.id)}
+                            label={<><CheckCircle2 size={13} />{t.common.approve}</>}
+                            className="inline-flex items-center justify-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+                          />
+                          <ApproveRejectButton
+                            action={rejectSubmission.bind(null, submission.id)}
+                            label={<><XCircle size={13} />{t.common.reject}</>}
+                            className="inline-flex items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-60"
+                          />
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Right: Collection health + workflow */}
-          <div className="grid gap-6">
-            <div className="ui-card p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.collectionHealth}</h2>
-                  <p className="mt-1 text-xs text-slate-500">{t.dashboard.monthlyTarget}</p>
-                </div>
-                <CheckCircle2 className="shrink-0 text-emerald-600" size={28} />
-              </div>
-              <div className="mt-5 space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-slate-600">{t.dashboard.progress}</span>
-                    <span className="font-bold text-cyan-700">{collectionProgress}%</span>
-                  </div>
-                  <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-cyan-600" style={{ width: `${collectionProgress}%` }} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="rounded-md bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">{t.dashboard.monthTarget}</p>
-                    <p className="mt-1.5 font-bold text-slate-900">{formatRM(monthlyTarget)}</p>
-                  </div>
-                  <div className="rounded-md bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">{t.dashboard.allTime}</p>
-                    <p className="mt-1.5 font-bold text-slate-900">{formatRM(totalCollection)}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="ui-card p-6">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t.dashboard.workflow}</h2>
-              <div className="mt-4 space-y-3">
-                {workflowItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link className="flex gap-3 rounded-lg border border-slate-100 p-3 transition hover:bg-slate-50" href={item.href} key={item.title}>
-                      <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${item.tone}`}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                        <p className="mt-0.5 text-xs leading-4 text-slate-500">{item.description}</p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="ui-card p-6">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Recent activity</h2>
-              <div className="mt-4 space-y-3 text-sm text-slate-600">
-                {recentSubmissions.slice(0, 3).map((item) => (
-                  <p key={`activity-${item.id}`}>
-                    <span className="font-semibold text-slate-900">{item.unitNumber}</span>{" "}
-                    submitted {formatRM(item.amountSen)} ({monthLabel(item.coverageStartYear, item.coverageStartMonth)} – {monthLabel(item.coverageEndYear, item.coverageEndMonth)})
-                  </p>
-                ))}
-                {recentSubmissions.length === 0 ? <p>No recent submission activity.</p> : null}
-              </div>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-5 py-12 text-center text-slate-500" colSpan={6}>
+                      <CheckCircle2 className="mx-auto mb-2 text-emerald-400" size={28} />
+                      {t.dashboard.noPending}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </section>
 
-        {/* Footer cards */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          {[
-            [t.dashboard.residentLedger, t.dashboard.residentLedgerDesc, "/residents"],
-            [t.dashboard.extraCollection, t.dashboard.extraCollectionDesc, "/special-collections"],
-            [t.dashboard.auditReadiness, t.dashboard.auditReadinessDesc, "/reports"],
-          ].map(([title, body, href]) => (
-            <Link className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md" href={href} key={title}>
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-                <ArrowRight className="shrink-0 text-cyan-600" size={18} />
+        {/* Bottom row: collection health + quick links */}
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {/* YTD collection health — spans 2 cols */}
+          <div className="ui-card p-5 sm:col-span-2">
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-sm font-semibold text-slate-900">Year-to-date collection</h2>
+              <span className="text-xs text-slate-500">{now.getFullYear()} · Jan – {now.toLocaleString("en", { month: "short" })}</span>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-end justify-between">
+                <p className="text-2xl font-bold tracking-tight text-slate-900">{formatRM(ytdCollected)}</p>
+                <p className="text-sm font-semibold text-cyan-700">{ytdProgress}%</p>
               </div>
-              <p className="mt-2 text-sm leading-5 text-slate-600">{body}</p>
-            </Link>
-          ))}
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-cyan-600 transition-all" style={{ width: `${ytdProgress}%` }} />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
+                <span>YTD target: <strong className="text-slate-900">{formatRM(ytdTarget)}</strong></span>
+                <span>{currentMonth} months × {residentCount} units × RM50</span>
+                {ytdGap > 0 && (
+                  <span className="text-amber-600 font-medium">{formatRM(ytdGap)} short</span>
+                )}
+                {ytdGap === 0 && ytdTarget > 0 && (
+                  <span className="text-emerald-600 font-medium">On track ✓</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <Link className="ui-card flex items-center gap-4 p-5 transition hover:shadow-md" href="/residents">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
+              <Users className="text-emerald-700" size={18} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900">{t.dashboard.residentLedger}</p>
+              <p className="mt-0.5 text-xs text-slate-500 line-clamp-2">{t.dashboard.residentLedgerDesc}</p>
+            </div>
+          </Link>
+
+          <Link className="ui-card flex items-center gap-4 p-5 transition hover:shadow-md" href="/special-collections">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-50 ring-1 ring-sky-100">
+              <CalendarClock className="text-sky-700" size={18} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900">{t.dashboard.extraCollection}</p>
+              <p className="mt-0.5 text-xs text-slate-500 line-clamp-2">{t.dashboard.extraCollectionDesc}</p>
+            </div>
+          </Link>
         </section>
+
       </div>
     </main>
   );

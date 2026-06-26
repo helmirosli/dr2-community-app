@@ -16,15 +16,18 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   await requireDashboardUser();
   const params = await searchParams;
 
-  const residents = await prisma.resident.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { unitNumber: "asc" },
-    select: {
-      id: true,
-      unitNumber: true,
-      name: true,
-    },
-  });
+  const [residents, specialCollections] = await Promise.all([
+    prisma.resident.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { unitNumber: "asc" },
+      select: { id: true, unitNumber: true, name: true },
+    }),
+    prisma.specialCollection.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, title: true, amountPerResident: true },
+    }),
+  ]);
 
   return (
     <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
@@ -44,7 +47,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
           </p>
         </header>
         {residents.length > 0 ? (
-          <PaymentForm residents={residents} selectedResidentId={params?.residentId} />
+          <PaymentForm residents={residents} specialCollections={specialCollections} selectedResidentId={params?.residentId} />
         ) : (
           <div className="rounded-lg border border-cyan-950/10 bg-white p-6 text-sm text-slate-600 shadow-sm">
             Add at least one active resident before recording payments.

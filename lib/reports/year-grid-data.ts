@@ -2,6 +2,13 @@ import { monthKey } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { normalizeMonthlyAppliedByMonth } from "@/lib/reports/monthly";
 
+export type YearGridAssignment = {
+  specialCollectionId: string;
+  amountDue: number;
+  amountPaid: number;
+  outstanding: number;
+};
+
 export type YearGridRow = {
   no: number;
   unitNumber: string;
@@ -10,8 +17,12 @@ export type YearGridRow = {
   isForSale: boolean;
   months: (number | null)[];
   monthStatusOverrides: (("FOR_SALE" | "MOVED_OUT" | "EXEMPT") | null)[];
+  assignments: YearGridAssignment[];
+  /** @deprecated use assignments map instead */
   extraOutstandingSen: number;
+  /** @deprecated use assignments map instead */
   extraPaidSen: number;
+  /** @deprecated use assignments map instead */
   extraDueSen: number;
 };
 
@@ -65,7 +76,7 @@ export async function getYearGridData({
           select: { year: true, month: true, amountApplied: true },
         },
         assignments: {
-          select: { amountDue: true, amountPaid: true },
+          select: { specialCollectionId: true, amountDue: true, amountPaid: true },
         },
       },
     }),
@@ -152,8 +163,15 @@ export async function getYearGridData({
       }
     }
 
-    const extraDueSen = resident.assignments.reduce((sum, a) => sum + a.amountDue, 0);
-    const extraPaidSen = resident.assignments.reduce((sum, a) => sum + a.amountPaid, 0);
+    const assignments: YearGridAssignment[] = resident.assignments.map((a) => ({
+      specialCollectionId: a.specialCollectionId,
+      amountDue: a.amountDue,
+      amountPaid: a.amountPaid,
+      outstanding: Math.max(0, a.amountDue - a.amountPaid),
+    }));
+
+    const extraDueSen = assignments.reduce((sum, a) => sum + a.amountDue, 0);
+    const extraPaidSen = assignments.reduce((sum, a) => sum + a.amountPaid, 0);
     const extraOutstandingSen = Math.max(0, extraDueSen - extraPaidSen);
 
     return {
@@ -164,6 +182,7 @@ export async function getYearGridData({
       isForSale: resident.status === "FOR_SALE" || resident.status === "MOVED_OUT",
       months,
       monthStatusOverrides,
+      assignments,
       extraDueSen,
       extraPaidSen,
       extraOutstandingSen,

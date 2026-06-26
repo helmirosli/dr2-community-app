@@ -22,26 +22,23 @@ export default async function LoginPage() {
   const t = await getDictionary();
 
   return (
-    <main className="min-h-screen flex flex-col md:flex-row">
-      {/* Left — branding panel */}
+    <main className="flex min-h-screen flex-col md:flex-row">
+      {/* Left — branding + live stats */}
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-brand-gradient px-10 py-16 text-white md:w-1/2">
-        {/* Logo */}
-        <div className="mb-6">
+        <div className="flex flex-col items-center text-center">
           <Image
             src="/jr2-logo.jpeg"
             alt="Desa Restu 2 @ Sepang"
-            width={120}
-            height={120}
+            width={110}
+            height={110}
             className="rounded-full ring-4 ring-white/30 drop-shadow-xl"
             priority
           />
+          <p className="mt-5 text-base font-light tracking-wide text-white/80">{t.login.welcomeTo}</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight">{t.login.communityName}</h1>
+          <p className="mt-2 max-w-xs text-sm leading-6 text-white/70">{t.login.tagline}</p>
         </div>
 
-        <p className="text-base font-light tracking-wide text-white/80">{t.login.welcomeTo}</p>
-        <h1 className="mt-1 text-center text-3xl font-bold tracking-tight">{t.login.communityName}</h1>
-        <p className="mt-4 max-w-xs text-center text-sm leading-6 text-white/70">
-          {t.login.tagline}
-        </p>
 
         {/* Wave separator */}
         <div className="absolute right-0 top-0 hidden h-full md:block" style={{ width: 72 }}>
@@ -53,7 +50,7 @@ export default async function LoginPage() {
         </div>
       </div>
 
-      {/* Right — form panel */}
+      {/* Right — sign in form */}
       <div className="flex flex-col items-center justify-center bg-white px-8 py-16 md:w-1/2">
         <div className="w-full max-w-sm">
           <h2 className="text-2xl font-semibold text-slate-900">{t.login.title}</h2>
@@ -63,12 +60,14 @@ export default async function LoginPage() {
             <LoginForm />
           </div>
 
-          <Link
-            className="mt-6 block text-sm font-medium text-brand-700 hover:opacity-90"
-            href="/submit"
-          >
-            {t.login.publicFormLink}
-          </Link>
+          <div className="mt-6 flex justify-center gap-4 text-sm">
+            <Link className="font-medium text-brand-700 hover:opacity-80" href="/status">
+              Payment Status →
+            </Link>
+            <Link className="font-medium text-brand-700 hover:opacity-80" href="/submit">
+              Submit Payment →
+            </Link>
+          </div>
         </div>
       </div>
     </main>
