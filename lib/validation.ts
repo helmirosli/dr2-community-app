@@ -19,6 +19,7 @@ export const publicSubmissionSchema = z
     coverageStartMonth: z.coerce.number().int().min(1).max(12),
     coverageEndYear: z.coerce.number().int().min(2020).max(2100),
     coverageEndMonth: z.coerce.number().int().min(1).max(12),
+    specialCollectionId: z.string().optional(),
     referenceNo: optionalText,
     notes: optionalText,
     website: z.string().max(0).optional(),

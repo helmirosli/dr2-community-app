@@ -6,6 +6,7 @@ import { formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { clampReportMonth, clampReportYear, getMonthlyReport } from "@/lib/reports/monthly-data";
 import { type SelectedMonthStatus } from "@/lib/reports/monthly";
+import { SearchableSelect } from "@/app/components/searchable-select";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -79,14 +80,15 @@ export default async function MonthlyDetailPage({ searchParams }: Props) {
 
         <section className="ui-card overflow-hidden">
           <form className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row md:items-end" method="get">
-            <label className="ui-label md:w-44">
+            <div className="grid gap-2 text-sm font-medium text-slate-700 md:w-44">
               Month
-              <select className="ui-select" defaultValue={selectedMonth} name="month">
-                {months.map((m) => (
-                  <option key={m} value={m}>{monthLabel(selectedYear, m)}</option>
-                ))}
-              </select>
-            </label>
+              <SearchableSelect
+                name="month"
+                defaultValue={String(selectedMonth)}
+                options={months.map((m) => ({ value: String(m), label: monthLabel(selectedYear, m) }))}
+                required
+              />
+            </div>
             <label className="ui-label md:w-36">
               Year
               <input className="ui-input" defaultValue={selectedYear} max={2100} min={2020} name="year" type="number" />

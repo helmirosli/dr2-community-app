@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Send, ShieldAlert } from "lucide-react";
+import { Send, ShieldAlert, Clock } from "lucide-react";
 
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { getDictionary } from "@/lib/i18n";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,8 +16,61 @@ type StatusPageProps = {
   searchParams: Promise<{ year?: string }>;
 };
 
+type PendingSubmission = {
+  unitNumber: string;
+  amountSen: number;
+  coverageStartYear: number;
+  coverageStartMonth: number;
+  coverageEndYear: number;
+  coverageEndMonth: number;
+};
+
+type PendingMonthInfo = {
+  appliedSen: number;
+  isCarryForward: boolean;
+  totalPending: number;
+};
+
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;
+}
+
+function getPendingSubmissionsMap(submissions: PendingSubmission[]): Map<string, PendingMonthInfo> {
+  const map = new Map<string, PendingMonthInfo>();
+  const DEFAULT_MONTHLY_FEE_SEN = 5000; // RM50
+
+  for (const sub of submissions) {
+    let remainingAmountSen = sub.amountSen;
+    let currentYear = sub.coverageStartYear;
+    let currentMonth = sub.coverageStartMonth;
+    let isFirstMonth = true;
+
+    // Distribute amount across months with automatic carry-forward
+    while (remainingAmountSen > 0 && currentYear <= sub.coverageEndYear + 1) {
+      const appliedSen = Math.min(DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
+      const key = `${sub.unitNumber}:${currentYear}:${currentMonth}`;
+
+      map.set(key, {
+        appliedSen,
+        isCarryForward: !isFirstMonth,
+        totalPending: sub.amountSen,
+      });
+
+      remainingAmountSen -= appliedSen;
+      isFirstMonth = false;
+
+      currentMonth += 1;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear += 1;
+      }
+
+      // Stop if we've gone way beyond the intended coverage period
+      if (currentYear > sub.coverageEndYear + 2) break;
+    }
+  }
+
+  return map;
 }
 
 export default async function StatusPage({ searchParams }: StatusPageProps) {
@@ -32,6 +86,46 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
     year: selectedYear,
     includeInactive: true,
   });
+
+  const pendingSubmissions = await prisma.publicPaymentSubmission.findMany({
+    where: {
+      paymentType: "MONTHLY_FEE",
+      status: "PENDING_REVIEW",
+      coverageStartYear: { lte: selectedYear },
+      coverageEndYear: { gte: selectedYear },
+    },
+    select: {
+      unitNumber: true,
+      amountSen: true,
+      coverageStartYear: true,
+      coverageStartMonth: true,
+      coverageEndYear: true,
+      coverageEndMonth: true,
+    },
+  });
+
+  const pendingMap = getPendingSubmissionsMap(pendingSubmissions);
+
+  // Fetch pending special collection submissions: key = "unitNumber:collectionId"
+  const pendingCollectionSubmissions = await prisma.publicPaymentSubmission.findMany({
+    where: {
+      paymentType: "SPECIAL_COLLECTION",
+      status: "PENDING_REVIEW",
+      specialCollectionId: { not: null },
+    },
+    select: {
+      unitNumber: true,
+      amountSen: true,
+      specialCollectionId: true,
+    },
+  });
+
+  const pendingCollectionMap = new Map<string, number>();
+  for (const sub of pendingCollectionSubmissions) {
+    if (!sub.specialCollectionId) continue;
+    const key = `${sub.unitNumber}:${sub.specialCollectionId}`;
+    pendingCollectionMap.set(key, (pendingCollectionMap.get(key) ?? 0) + sub.amountSen);
+  }
 
   const rows = [...unsortedRows].sort((a, b) => {
     const unitA = parseInt(a.unitNumber, 10);
@@ -91,10 +185,10 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                 <th className="min-w-32 px-3 py-3 font-semibold">{t.publicStatus.name}</th>
                 {MONTH_LABELS.map((label, i) => (
                   <th
-                    className={`px-2 py-3 text-center font-semibold ${
+                    className={`px-2 py-3 text-center font-semibold text-white ${
                       selectedYear === currentYear && i + 1 === currentMonth
-                        ? "bg-cyan-600 text-white"
-                        : "text-slate-700"
+                        ? "bg-cyan-600"
+                        : "bg-slate-700"
                     }`}
                     key={label}
                   >
@@ -149,41 +243,77 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                           const isExemptUnpaid = row.status === "EXEMPT" && amountSen === null;
                           const isStatusOverride = monthOverride === "FOR_SALE" || monthOverride === "MOVED_OUT";
 
-                          let cellClass = "border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium";
-                          if (isPartial) cellClass += " bg-amber-50 text-amber-700";
-                          else if (isUnpaidPast) cellClass += " bg-red-50 text-red-600";
-                          else if (isStatusOverride) cellClass += " bg-slate-100 italic text-slate-500";
-                          else if (isExemptUnpaid) cellClass += " bg-slate-100 italic text-slate-500";
-                          else cellClass += " text-slate-600";
+                          const pendingKey = `${row.unitNumber}:${selectedYear}:${i + 1}`;
+                          const pendingSubmission = pendingMap.get(pendingKey);
+
+                          let cellClass = "border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium relative";
+                          let content: React.ReactNode = "";
+
+                          if (pendingSubmission) {
+                            cellClass += " bg-blue-50 text-blue-700 border-l-4 border-l-blue-500";
+                            content = (
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span>{fmtCell(pendingSubmission.appliedSen)}</span>
+                                <span className="text-xs text-blue-600 font-semibold">
+                                  {pendingSubmission.isCarryForward ? "CARRY" : "PENDING"}
+                                </span>
+                              </div>
+                            );
+                          } else if (isPartial) {
+                            cellClass += " bg-amber-50 text-amber-700";
+                            content = fmtCell(amountSen ?? 0);
+                          } else if (isUnpaidPast) {
+                            cellClass += " bg-red-50";
+                            content = "";
+                          } else if (isStatusOverride) {
+                            cellClass += " bg-slate-100 italic text-slate-500";
+                            content =
+                              monthOverride === "FOR_SALE"
+                                ? "FOR SALE"
+                                : monthOverride === "MOVED_OUT"
+                                  ? "MOVED OUT"
+                                  : "";
+                          } else if (isExemptUnpaid) {
+                            cellClass += " bg-slate-100 italic text-slate-500";
+                            content = "EXEMPT";
+                          } else if (isPaid) {
+                            cellClass += " text-slate-600";
+                            content = fmtCell(amountSen ?? 0);
+                          } else {
+                            cellClass += " text-slate-400";
+                            content = "";
+                          }
 
                           return (
                             <td className={cellClass} key={i}>
-                              {amountSen !== null
-                                ? fmtCell(amountSen)
-                                : monthOverride === "FOR_SALE"
-                                  ? "FOR SALE"
-                                  : monthOverride === "MOVED_OUT"
-                                    ? "MOVED OUT"
-                                    : isExemptUnpaid
-                                      ? "EXEMPT"
-                                      : ""}
+                              {content}
                             </td>
                           );
                         })}
                         {specialCollections.length > 0
-                          ? specialCollections.map((sc) => (
-                              <td className="border-b border-slate-100 bg-amber-50 px-2 py-2.5 text-center text-xs font-medium" key={sc.id}>
-                                {row.extraOutstandingSen > 0 ? (
-                                  <span className="text-amber-700">
-                                    RM{(row.extraOutstandingSen / 100).toFixed(2)}
-                                  </span>
-                                ) : row.extraDueSen > 0 ? (
-                                  <span className="text-emerald-600">✓</span>
-                                ) : (
-                                  <span className="text-slate-300">—</span>
-                                )}
-                              </td>
-                            ))
+                          ? specialCollections.map((sc) => {
+                              const pendingKey = `${row.unitNumber}:${sc.id}`;
+                              const pendingAmountSen = pendingCollectionMap.get(pendingKey) ?? 0;
+                              return (
+                                <td className={`border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium ${pendingAmountSen > 0 ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-amber-50"}`} key={sc.id}>
+                                  {row.extraOutstandingSen > 0 && (
+                                    <div className="text-amber-700">RM{(row.extraOutstandingSen / 100).toFixed(2)}</div>
+                                  )}
+                                  {!row.extraOutstandingSen && row.extraDueSen > 0 && !pendingAmountSen && (
+                                    <span className="text-emerald-600">✓</span>
+                                  )}
+                                  {!row.extraDueSen && !pendingAmountSen && (
+                                    <span className="text-slate-300">—</span>
+                                  )}
+                                  {pendingAmountSen > 0 && (
+                                    <div className="flex flex-col items-center gap-0.5 mt-0.5">
+                                      <span className="text-blue-700">RM{(pendingAmountSen / 100).toFixed(2)}</span>
+                                      <span className="text-xs font-semibold text-blue-600">PENDING</span>
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })
                           : hasExtra && (
                               <td className="border-b border-slate-100 bg-amber-50 px-2 py-2.5 text-center text-xs font-medium">
                                 {row.extraOutstandingSen > 0 ? (
@@ -234,6 +364,17 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
             <div className="flex items-center gap-3">
               <span className="inline-block size-3 rounded-sm bg-slate-100" />
               <span className="text-sm text-slate-600">{t.publicStatus.notApplicable}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-block size-3 rounded-sm bg-blue-50 ring-1 ring-blue-300" />
+                <span className="inline-block h-3 w-1 bg-blue-500 rounded-sm" />
+              </div>
+              <div>
+                <span className="text-sm text-slate-600">Pending Approval (awaiting admin verification)</span>
+                <p className="text-xs text-slate-500 mt-1">• PENDING = Initial month | CARRY = Overflow to next month(s)</p>
+                <p className="text-xs text-slate-500">• Example: RM70 for June = RM50 (June) + RM20 (July)</p>
+              </div>
             </div>
           </div>
         </div>

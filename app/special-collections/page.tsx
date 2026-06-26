@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Edit, Plus } from "lucide-react";
+import { ChevronRight, Edit, Eye, Plus } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -107,10 +107,16 @@ export default async function SpecialCollectionsPage() {
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <Link className="inline-flex items-center gap-1.5 font-semibold text-cyan-700 hover:text-cyan-900" href={`/special-collections/${collection.id}/edit`}>
-                            <Edit aria-hidden="true" size={14} />
-                            {t.common.edit}
-                          </Link>
+                          <div className="flex items-center gap-4">
+                            <Link className="inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-900" href={`/special-collections/${collection.id}`}>
+                              <Eye aria-hidden="true" size={14} />
+                              View
+                            </Link>
+                            <Link className="inline-flex items-center gap-1.5 font-semibold text-cyan-700 hover:text-cyan-900" href={`/special-collections/${collection.id}/edit`}>
+                              <Edit aria-hidden="true" size={14} />
+                              {t.common.edit}
+                            </Link>
+                          </div>
                         </td>
                       </tr>
                     );

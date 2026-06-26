@@ -1584,6 +1584,7 @@ export const PublicPaymentSubmissionScalarFieldEnum = {
   coverageStartMonth: 'coverageStartMonth',
   coverageEndYear: 'coverageEndYear',
   coverageEndMonth: 'coverageEndMonth',
+  specialCollectionId: 'specialCollectionId',
   referenceNo: 'referenceNo',
   notes: 'notes',
   status: 'status',

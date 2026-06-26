@@ -55,6 +55,7 @@ export type PublicPaymentSubmissionMinAggregateOutputType = {
   coverageStartMonth: number | null
   coverageEndYear: number | null
   coverageEndMonth: number | null
+  specialCollectionId: string | null
   referenceNo: string | null
   notes: string | null
   status: $Enums.SubmissionStatus | null
@@ -77,6 +78,7 @@ export type PublicPaymentSubmissionMaxAggregateOutputType = {
   coverageStartMonth: number | null
   coverageEndYear: number | null
   coverageEndMonth: number | null
+  specialCollectionId: string | null
   referenceNo: string | null
   notes: string | null
   status: $Enums.SubmissionStatus | null
@@ -99,6 +101,7 @@ export type PublicPaymentSubmissionCountAggregateOutputType = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId: number
   referenceNo: number
   notes: number
   status: number
@@ -139,6 +142,7 @@ export type PublicPaymentSubmissionMinAggregateInputType = {
   coverageStartMonth?: true
   coverageEndYear?: true
   coverageEndMonth?: true
+  specialCollectionId?: true
   referenceNo?: true
   notes?: true
   status?: true
@@ -161,6 +165,7 @@ export type PublicPaymentSubmissionMaxAggregateInputType = {
   coverageStartMonth?: true
   coverageEndYear?: true
   coverageEndMonth?: true
+  specialCollectionId?: true
   referenceNo?: true
   notes?: true
   status?: true
@@ -183,6 +188,7 @@ export type PublicPaymentSubmissionCountAggregateInputType = {
   coverageStartMonth?: true
   coverageEndYear?: true
   coverageEndMonth?: true
+  specialCollectionId?: true
   referenceNo?: true
   notes?: true
   status?: true
@@ -292,6 +298,7 @@ export type PublicPaymentSubmissionGroupByOutputType = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId: string | null
   referenceNo: string | null
   notes: string | null
   status: $Enums.SubmissionStatus
@@ -337,6 +344,7 @@ export type PublicPaymentSubmissionWhereInput = {
   coverageStartMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
   coverageEndYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
   coverageEndMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  specialCollectionId?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   referenceNo?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   notes?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   status?: Prisma.EnumSubmissionStatusFilter<"PublicPaymentSubmission"> | $Enums.SubmissionStatus
@@ -344,6 +352,7 @@ export type PublicPaymentSubmissionWhereInput = {
   reviewedById?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"PublicPaymentSubmission"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
+  specialCollection?: Prisma.XOR<Prisma.SpecialCollectionNullableScalarRelationFilter, Prisma.SpecialCollectionWhereInput> | null
   reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   uploads?: Prisma.UploadListRelationFilter
 }
@@ -361,6 +370,7 @@ export type PublicPaymentSubmissionOrderByWithRelationInput = {
   coverageStartMonth?: Prisma.SortOrder
   coverageEndYear?: Prisma.SortOrder
   coverageEndMonth?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceNo?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -368,6 +378,7 @@ export type PublicPaymentSubmissionOrderByWithRelationInput = {
   reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  specialCollection?: Prisma.SpecialCollectionOrderByWithRelationInput
   reviewedBy?: Prisma.UserOrderByWithRelationInput
   uploads?: Prisma.UploadOrderByRelationAggregateInput
 }
@@ -388,6 +399,7 @@ export type PublicPaymentSubmissionWhereUniqueInput = Prisma.AtLeast<{
   coverageStartMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
   coverageEndYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
   coverageEndMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  specialCollectionId?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   referenceNo?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   notes?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   status?: Prisma.EnumSubmissionStatusFilter<"PublicPaymentSubmission"> | $Enums.SubmissionStatus
@@ -395,6 +407,7 @@ export type PublicPaymentSubmissionWhereUniqueInput = Prisma.AtLeast<{
   reviewedById?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"PublicPaymentSubmission"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
+  specialCollection?: Prisma.XOR<Prisma.SpecialCollectionNullableScalarRelationFilter, Prisma.SpecialCollectionWhereInput> | null
   reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   uploads?: Prisma.UploadListRelationFilter
 }, "id">
@@ -412,6 +425,7 @@ export type PublicPaymentSubmissionOrderByWithAggregationInput = {
   coverageStartMonth?: Prisma.SortOrder
   coverageEndYear?: Prisma.SortOrder
   coverageEndMonth?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceNo?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -442,6 +456,7 @@ export type PublicPaymentSubmissionScalarWhereWithAggregatesInput = {
   coverageStartMonth?: Prisma.IntWithAggregatesFilter<"PublicPaymentSubmission"> | number
   coverageEndYear?: Prisma.IntWithAggregatesFilter<"PublicPaymentSubmission"> | number
   coverageEndMonth?: Prisma.IntWithAggregatesFilter<"PublicPaymentSubmission"> | number
+  specialCollectionId?: Prisma.StringNullableWithAggregatesFilter<"PublicPaymentSubmission"> | string | null
   referenceNo?: Prisma.StringNullableWithAggregatesFilter<"PublicPaymentSubmission"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"PublicPaymentSubmission"> | string | null
   status?: Prisma.EnumSubmissionStatusWithAggregatesFilter<"PublicPaymentSubmission"> | $Enums.SubmissionStatus
@@ -470,6 +485,7 @@ export type PublicPaymentSubmissionCreateInput = {
   reviewReason?: string | null
   reviewedAt?: Date | string | null
   createdAt?: Date | string
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutSubmissionsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedSubmissionsInput
   uploads?: Prisma.UploadCreateNestedManyWithoutSubmissionInput
 }
@@ -487,6 +503,7 @@ export type PublicPaymentSubmissionUncheckedCreateInput = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId?: string | null
   referenceNo?: string | null
   notes?: string | null
   status?: $Enums.SubmissionStatus
@@ -516,6 +533,7 @@ export type PublicPaymentSubmissionUpdateInput = {
   reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutSubmissionsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedSubmissionsNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutSubmissionNestedInput
 }
@@ -533,6 +551,7 @@ export type PublicPaymentSubmissionUncheckedUpdateInput = {
   coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -556,6 +575,7 @@ export type PublicPaymentSubmissionCreateManyInput = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId?: string | null
   referenceNo?: string | null
   notes?: string | null
   status?: $Enums.SubmissionStatus
@@ -599,6 +619,7 @@ export type PublicPaymentSubmissionUncheckedUpdateManyInput = {
   coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -606,6 +627,16 @@ export type PublicPaymentSubmissionUncheckedUpdateManyInput = {
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PublicPaymentSubmissionListRelationFilter = {
+  every?: Prisma.PublicPaymentSubmissionWhereInput
+  some?: Prisma.PublicPaymentSubmissionWhereInput
+  none?: Prisma.PublicPaymentSubmissionWhereInput
+}
+
+export type PublicPaymentSubmissionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PublicPaymentSubmissionNullableScalarRelationFilter = {
@@ -626,6 +657,7 @@ export type PublicPaymentSubmissionCountOrderByAggregateInput = {
   coverageStartMonth?: Prisma.SortOrder
   coverageEndYear?: Prisma.SortOrder
   coverageEndMonth?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
   referenceNo?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -656,6 +688,7 @@ export type PublicPaymentSubmissionMaxOrderByAggregateInput = {
   coverageStartMonth?: Prisma.SortOrder
   coverageEndYear?: Prisma.SortOrder
   coverageEndMonth?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
   referenceNo?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -678,6 +711,7 @@ export type PublicPaymentSubmissionMinOrderByAggregateInput = {
   coverageStartMonth?: Prisma.SortOrder
   coverageEndYear?: Prisma.SortOrder
   coverageEndMonth?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
   referenceNo?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -695,14 +729,46 @@ export type PublicPaymentSubmissionSumOrderByAggregateInput = {
   coverageEndMonth?: Prisma.SortOrder
 }
 
-export type PublicPaymentSubmissionListRelationFilter = {
-  every?: Prisma.PublicPaymentSubmissionWhereInput
-  some?: Prisma.PublicPaymentSubmissionWhereInput
-  none?: Prisma.PublicPaymentSubmissionWhereInput
+export type PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput = {
+  create?: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput[] | Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInputEnvelope
+  connect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
 }
 
-export type PublicPaymentSubmissionOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput = {
+  create?: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput[] | Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInputEnvelope
+  connect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+}
+
+export type PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput[] | Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput[]
+  upsert?: Prisma.PublicPaymentSubmissionUpsertWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpsertWithWhereUniqueWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInputEnvelope
+  set?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  delete?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  connect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  update?: Prisma.PublicPaymentSubmissionUpdateWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpdateWithWhereUniqueWithoutSpecialCollectionInput[]
+  updateMany?: Prisma.PublicPaymentSubmissionUpdateManyWithWhereWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpdateManyWithWhereWithoutSpecialCollectionInput[]
+  deleteMany?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
+}
+
+export type PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput[] | Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput[]
+  upsert?: Prisma.PublicPaymentSubmissionUpsertWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpsertWithWhereUniqueWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInputEnvelope
+  set?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  delete?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  connect?: Prisma.PublicPaymentSubmissionWhereUniqueInput | Prisma.PublicPaymentSubmissionWhereUniqueInput[]
+  update?: Prisma.PublicPaymentSubmissionUpdateWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpdateWithWhereUniqueWithoutSpecialCollectionInput[]
+  updateMany?: Prisma.PublicPaymentSubmissionUpdateManyWithWhereWithoutSpecialCollectionInput | Prisma.PublicPaymentSubmissionUpdateManyWithWhereWithoutSpecialCollectionInput[]
+  deleteMany?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
 }
 
 export type PublicPaymentSubmissionCreateNestedOneWithoutUploadsInput = {
@@ -763,7 +829,7 @@ export type PublicPaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInp
   deleteMany?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
 }
 
-export type PublicPaymentSubmissionCreateWithoutUploadsInput = {
+export type PublicPaymentSubmissionCreateWithoutSpecialCollectionInput = {
   id?: string
   unitNumber: string
   residentName: string
@@ -783,6 +849,105 @@ export type PublicPaymentSubmissionCreateWithoutUploadsInput = {
   reviewedAt?: Date | string | null
   createdAt?: Date | string
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedSubmissionsInput
+  uploads?: Prisma.UploadCreateNestedManyWithoutSubmissionInput
+}
+
+export type PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput = {
+  id?: string
+  unitNumber: string
+  residentName: string
+  phone: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  coverageStartYear: number
+  coverageStartMonth: number
+  coverageEndYear: number
+  coverageEndMonth: number
+  referenceNo?: string | null
+  notes?: string | null
+  status?: $Enums.SubmissionStatus
+  reviewReason?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+  uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutSubmissionInput
+}
+
+export type PublicPaymentSubmissionCreateOrConnectWithoutSpecialCollectionInput = {
+  where: Prisma.PublicPaymentSubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput>
+}
+
+export type PublicPaymentSubmissionCreateManySpecialCollectionInputEnvelope = {
+  data: Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInput | Prisma.PublicPaymentSubmissionCreateManySpecialCollectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type PublicPaymentSubmissionUpsertWithWhereUniqueWithoutSpecialCollectionInput = {
+  where: Prisma.PublicPaymentSubmissionWhereUniqueInput
+  update: Prisma.XOR<Prisma.PublicPaymentSubmissionUpdateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedUpdateWithoutSpecialCollectionInput>
+  create: Prisma.XOR<Prisma.PublicPaymentSubmissionCreateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedCreateWithoutSpecialCollectionInput>
+}
+
+export type PublicPaymentSubmissionUpdateWithWhereUniqueWithoutSpecialCollectionInput = {
+  where: Prisma.PublicPaymentSubmissionWhereUniqueInput
+  data: Prisma.XOR<Prisma.PublicPaymentSubmissionUpdateWithoutSpecialCollectionInput, Prisma.PublicPaymentSubmissionUncheckedUpdateWithoutSpecialCollectionInput>
+}
+
+export type PublicPaymentSubmissionUpdateManyWithWhereWithoutSpecialCollectionInput = {
+  where: Prisma.PublicPaymentSubmissionScalarWhereInput
+  data: Prisma.XOR<Prisma.PublicPaymentSubmissionUpdateManyMutationInput, Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionInput>
+}
+
+export type PublicPaymentSubmissionScalarWhereInput = {
+  AND?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
+  OR?: Prisma.PublicPaymentSubmissionScalarWhereInput[]
+  NOT?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
+  id?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
+  unitNumber?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
+  residentName?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
+  phone?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
+  paymentType?: Prisma.EnumPaymentTypeFilter<"PublicPaymentSubmission"> | $Enums.PaymentType
+  amountSen?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  paymentDate?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
+  method?: Prisma.EnumPaymentMethodFilter<"PublicPaymentSubmission"> | $Enums.PaymentMethod
+  coverageStartYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  coverageStartMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  coverageEndYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  coverageEndMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
+  specialCollectionId?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
+  referenceNo?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
+  notes?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
+  status?: Prisma.EnumSubmissionStatusFilter<"PublicPaymentSubmission"> | $Enums.SubmissionStatus
+  reviewReason?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"PublicPaymentSubmission"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
+}
+
+export type PublicPaymentSubmissionCreateWithoutUploadsInput = {
+  id?: string
+  unitNumber: string
+  residentName: string
+  phone: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  coverageStartYear: number
+  coverageStartMonth: number
+  coverageEndYear: number
+  coverageEndMonth: number
+  referenceNo?: string | null
+  notes?: string | null
+  status?: $Enums.SubmissionStatus
+  reviewReason?: string | null
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutSubmissionsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedSubmissionsInput
 }
 
 export type PublicPaymentSubmissionUncheckedCreateWithoutUploadsInput = {
@@ -798,6 +963,7 @@ export type PublicPaymentSubmissionUncheckedCreateWithoutUploadsInput = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId?: string | null
   referenceNo?: string | null
   notes?: string | null
   status?: $Enums.SubmissionStatus
@@ -842,6 +1008,7 @@ export type PublicPaymentSubmissionUpdateWithoutUploadsInput = {
   reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutSubmissionsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedSubmissionsNestedInput
 }
 
@@ -858,6 +1025,7 @@ export type PublicPaymentSubmissionUncheckedUpdateWithoutUploadsInput = {
   coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -886,6 +1054,7 @@ export type PublicPaymentSubmissionCreateWithoutReviewedByInput = {
   reviewReason?: string | null
   reviewedAt?: Date | string | null
   createdAt?: Date | string
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutSubmissionsInput
   uploads?: Prisma.UploadCreateNestedManyWithoutSubmissionInput
 }
 
@@ -902,6 +1071,7 @@ export type PublicPaymentSubmissionUncheckedCreateWithoutReviewedByInput = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId?: string | null
   referenceNo?: string | null
   notes?: string | null
   status?: $Enums.SubmissionStatus
@@ -937,29 +1107,94 @@ export type PublicPaymentSubmissionUpdateManyWithWhereWithoutReviewedByInput = {
   data: Prisma.XOR<Prisma.PublicPaymentSubmissionUpdateManyMutationInput, Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutReviewedByInput>
 }
 
-export type PublicPaymentSubmissionScalarWhereInput = {
-  AND?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
-  OR?: Prisma.PublicPaymentSubmissionScalarWhereInput[]
-  NOT?: Prisma.PublicPaymentSubmissionScalarWhereInput | Prisma.PublicPaymentSubmissionScalarWhereInput[]
-  id?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
-  unitNumber?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
-  residentName?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
-  phone?: Prisma.StringFilter<"PublicPaymentSubmission"> | string
-  paymentType?: Prisma.EnumPaymentTypeFilter<"PublicPaymentSubmission"> | $Enums.PaymentType
-  amountSen?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
-  paymentDate?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
-  method?: Prisma.EnumPaymentMethodFilter<"PublicPaymentSubmission"> | $Enums.PaymentMethod
-  coverageStartYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
-  coverageStartMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
-  coverageEndYear?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
-  coverageEndMonth?: Prisma.IntFilter<"PublicPaymentSubmission"> | number
-  referenceNo?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
-  notes?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
-  status?: Prisma.EnumSubmissionStatusFilter<"PublicPaymentSubmission"> | $Enums.SubmissionStatus
-  reviewReason?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
-  reviewedById?: Prisma.StringNullableFilter<"PublicPaymentSubmission"> | string | null
-  reviewedAt?: Prisma.DateTimeNullableFilter<"PublicPaymentSubmission"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"PublicPaymentSubmission"> | Date | string
+export type PublicPaymentSubmissionCreateManySpecialCollectionInput = {
+  id?: string
+  unitNumber: string
+  residentName: string
+  phone: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  coverageStartYear: number
+  coverageStartMonth: number
+  coverageEndYear: number
+  coverageEndMonth: number
+  referenceNo?: string | null
+  notes?: string | null
+  status?: $Enums.SubmissionStatus
+  reviewReason?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type PublicPaymentSubmissionUpdateWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  residentName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  coverageStartYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviewedBy?: Prisma.UserUpdateOneWithoutReviewedSubmissionsNestedInput
+  uploads?: Prisma.UploadUpdateManyWithoutSubmissionNestedInput
+}
+
+export type PublicPaymentSubmissionUncheckedUpdateWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  residentName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  coverageStartYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploads?: Prisma.UploadUncheckedUpdateManyWithoutSubmissionNestedInput
+}
+
+export type PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unitNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  residentName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  coverageStartYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
+  coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
+  reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PublicPaymentSubmissionCreateManyReviewedByInput = {
@@ -975,6 +1210,7 @@ export type PublicPaymentSubmissionCreateManyReviewedByInput = {
   coverageStartMonth: number
   coverageEndYear: number
   coverageEndMonth: number
+  specialCollectionId?: string | null
   referenceNo?: string | null
   notes?: string | null
   status?: $Enums.SubmissionStatus
@@ -1002,6 +1238,7 @@ export type PublicPaymentSubmissionUpdateWithoutReviewedByInput = {
   reviewReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutSubmissionsNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutSubmissionNestedInput
 }
 
@@ -1018,6 +1255,7 @@ export type PublicPaymentSubmissionUncheckedUpdateWithoutReviewedByInput = {
   coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -1040,6 +1278,7 @@ export type PublicPaymentSubmissionUncheckedUpdateManyWithoutReviewedByInput = {
   coverageStartMonth?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndYear?: Prisma.IntFieldUpdateOperationsInput | number
   coverageEndMonth?: Prisma.IntFieldUpdateOperationsInput | number
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
@@ -1092,6 +1331,7 @@ export type PublicPaymentSubmissionSelect<ExtArgs extends runtime.Types.Extensio
   coverageStartMonth?: boolean
   coverageEndYear?: boolean
   coverageEndMonth?: boolean
+  specialCollectionId?: boolean
   referenceNo?: boolean
   notes?: boolean
   status?: boolean
@@ -1099,6 +1339,7 @@ export type PublicPaymentSubmissionSelect<ExtArgs extends runtime.Types.Extensio
   reviewedById?: boolean
   reviewedAt?: boolean
   createdAt?: boolean
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
   uploads?: boolean | Prisma.PublicPaymentSubmission$uploadsArgs<ExtArgs>
   _count?: boolean | Prisma.PublicPaymentSubmissionCountOutputTypeDefaultArgs<ExtArgs>
@@ -1117,6 +1358,7 @@ export type PublicPaymentSubmissionSelectCreateManyAndReturn<ExtArgs extends run
   coverageStartMonth?: boolean
   coverageEndYear?: boolean
   coverageEndMonth?: boolean
+  specialCollectionId?: boolean
   referenceNo?: boolean
   notes?: boolean
   status?: boolean
@@ -1124,6 +1366,7 @@ export type PublicPaymentSubmissionSelectCreateManyAndReturn<ExtArgs extends run
   reviewedById?: boolean
   reviewedAt?: boolean
   createdAt?: boolean
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
 }, ExtArgs["result"]["publicPaymentSubmission"]>
 
@@ -1140,6 +1383,7 @@ export type PublicPaymentSubmissionSelectUpdateManyAndReturn<ExtArgs extends run
   coverageStartMonth?: boolean
   coverageEndYear?: boolean
   coverageEndMonth?: boolean
+  specialCollectionId?: boolean
   referenceNo?: boolean
   notes?: boolean
   status?: boolean
@@ -1147,6 +1391,7 @@ export type PublicPaymentSubmissionSelectUpdateManyAndReturn<ExtArgs extends run
   reviewedById?: boolean
   reviewedAt?: boolean
   createdAt?: boolean
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
 }, ExtArgs["result"]["publicPaymentSubmission"]>
 
@@ -1163,6 +1408,7 @@ export type PublicPaymentSubmissionSelectScalar = {
   coverageStartMonth?: boolean
   coverageEndYear?: boolean
   coverageEndMonth?: boolean
+  specialCollectionId?: boolean
   referenceNo?: boolean
   notes?: boolean
   status?: boolean
@@ -1172,22 +1418,26 @@ export type PublicPaymentSubmissionSelectScalar = {
   createdAt?: boolean
 }
 
-export type PublicPaymentSubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "unitNumber" | "residentName" | "phone" | "paymentType" | "amountSen" | "paymentDate" | "method" | "coverageStartYear" | "coverageStartMonth" | "coverageEndYear" | "coverageEndMonth" | "referenceNo" | "notes" | "status" | "reviewReason" | "reviewedById" | "reviewedAt" | "createdAt", ExtArgs["result"]["publicPaymentSubmission"]>
+export type PublicPaymentSubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "unitNumber" | "residentName" | "phone" | "paymentType" | "amountSen" | "paymentDate" | "method" | "coverageStartYear" | "coverageStartMonth" | "coverageEndYear" | "coverageEndMonth" | "specialCollectionId" | "referenceNo" | "notes" | "status" | "reviewReason" | "reviewedById" | "reviewedAt" | "createdAt", ExtArgs["result"]["publicPaymentSubmission"]>
 export type PublicPaymentSubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
   uploads?: boolean | Prisma.PublicPaymentSubmission$uploadsArgs<ExtArgs>
   _count?: boolean | Prisma.PublicPaymentSubmissionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PublicPaymentSubmissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
 }
 export type PublicPaymentSubmissionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  specialCollection?: boolean | Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>
 }
 
 export type $PublicPaymentSubmissionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PublicPaymentSubmission"
   objects: {
+    specialCollection: Prisma.$SpecialCollectionPayload<ExtArgs> | null
     reviewedBy: Prisma.$UserPayload<ExtArgs> | null
     uploads: Prisma.$UploadPayload<ExtArgs>[]
   }
@@ -1204,6 +1454,7 @@ export type $PublicPaymentSubmissionPayload<ExtArgs extends runtime.Types.Extens
     coverageStartMonth: number
     coverageEndYear: number
     coverageEndMonth: number
+    specialCollectionId: string | null
     referenceNo: string | null
     notes: string | null
     status: $Enums.SubmissionStatus
@@ -1605,6 +1856,7 @@ readonly fields: PublicPaymentSubmissionFieldRefs;
  */
 export interface Prisma__PublicPaymentSubmissionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  specialCollection<T extends Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PublicPaymentSubmission$specialCollectionArgs<ExtArgs>>): Prisma.Prisma__SpecialCollectionClient<runtime.Types.Result.GetResult<Prisma.$SpecialCollectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reviewedBy<T extends Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PublicPaymentSubmission$reviewedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   uploads<T extends Prisma.PublicPaymentSubmission$uploadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PublicPaymentSubmission$uploadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1648,6 +1900,7 @@ export interface PublicPaymentSubmissionFieldRefs {
   readonly coverageStartMonth: Prisma.FieldRef<"PublicPaymentSubmission", 'Int'>
   readonly coverageEndYear: Prisma.FieldRef<"PublicPaymentSubmission", 'Int'>
   readonly coverageEndMonth: Prisma.FieldRef<"PublicPaymentSubmission", 'Int'>
+  readonly specialCollectionId: Prisma.FieldRef<"PublicPaymentSubmission", 'String'>
   readonly referenceNo: Prisma.FieldRef<"PublicPaymentSubmission", 'String'>
   readonly notes: Prisma.FieldRef<"PublicPaymentSubmission", 'String'>
   readonly status: Prisma.FieldRef<"PublicPaymentSubmission", 'SubmissionStatus'>
@@ -2053,6 +2306,25 @@ export type PublicPaymentSubmissionDeleteManyArgs<ExtArgs extends runtime.Types.
    * Limit how many PublicPaymentSubmissions to delete.
    */
   limit?: number
+}
+
+/**
+ * PublicPaymentSubmission.specialCollection
+ */
+export type PublicPaymentSubmission$specialCollectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SpecialCollection
+   */
+  select?: Prisma.SpecialCollectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SpecialCollection
+   */
+  omit?: Prisma.SpecialCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SpecialCollectionInclude<ExtArgs> | null
+  where?: Prisma.SpecialCollectionWhereInput
 }
 
 /**

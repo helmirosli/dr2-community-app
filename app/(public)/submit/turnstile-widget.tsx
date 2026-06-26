@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 
-export function TurnstileWidget() {
+export type TurnstileHandle = {
+  reset: () => void;
+};
+
+export const TurnstileWidget = forwardRef<TurnstileHandle>(function TurnstileWidget(_, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    reset() {
+      const w = window as unknown as {
+        turnstile?: { reset: (id: string) => void };
+      };
+      if (w.turnstile && widgetIdRef.current) {
+        w.turnstile.reset(widgetIdRef.current);
+      }
+    },
+  }));
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -20,18 +36,16 @@ export function TurnstileWidget() {
     script.defer = true;
 
     script.onload = () => {
-      if (typeof window !== "undefined") {
-        const w = window as unknown as {
-          turnstile?: {
-            render: (id: string, opts: { sitekey: string; theme: string }) => void;
-          };
+      const w = window as unknown as {
+        turnstile?: {
+          render: (id: string | HTMLElement, opts: { sitekey: string; theme: string }) => string;
         };
-        if (w.turnstile) {
-          w.turnstile.render("#turnstile-widget", {
-            sitekey: siteKey,
-            theme: "light",
-          });
-        }
+      };
+      if (w.turnstile && containerRef.current) {
+        widgetIdRef.current = w.turnstile.render(containerRef.current, {
+          sitekey: siteKey,
+          theme: "light",
+        });
       }
     };
 
@@ -44,9 +58,9 @@ export function TurnstileWidget() {
 
   return (
     <div
-      className="rounded-lg border border-slate-300"
+      className="rounded-lg"
       id="turnstile-widget"
       ref={containerRef}
     />
   );
-}
+});

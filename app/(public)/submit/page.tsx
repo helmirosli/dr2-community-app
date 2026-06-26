@@ -2,12 +2,19 @@ import Link from "next/link";
 import { BarChart3 } from "lucide-react";
 
 import { getDictionary } from "@/lib/i18n";
+import { prisma } from "@/lib/prisma";
 import { SubmitPaymentForm } from "./submit-payment-form";
 
 export const runtime = "nodejs";
 
 export default async function PublicSubmitPage() {
   const t = await getDictionary();
+  
+  const specialCollections = await prisma.specialCollection.findMany({
+    where: { status: "ACTIVE" },
+    select: { id: true, title: true },
+    orderBy: { createdAt: "asc" },
+  });
 
   return (
     <div className="grid gap-6">
@@ -43,7 +50,7 @@ export default async function PublicSubmitPage() {
       {/* Form card */}
       <div className="ui-card p-6">
         <h2 className="mb-6 text-lg font-semibold text-slate-900">{t.publicSubmit.paymentDetails}</h2>
-        <SubmitPaymentForm />
+        <SubmitPaymentForm specialCollections={specialCollections} />
       </div>
 
       {/* Help section */}

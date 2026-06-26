@@ -4,6 +4,7 @@ import { ChevronRight, Plus, Search } from "lucide-react";
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { SearchableSelect } from "@/app/components/searchable-select";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -129,15 +130,17 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               </div>
             </label>
 
-            <label className="grid gap-2 text-sm font-medium text-slate-700 md:w-56">
+            <div className="grid gap-2 text-sm font-medium text-slate-700 md:w-56">
               {t.common.status}
-              <select className="ui-select" defaultValue={selectedStatus} name="status">
-                <option value="">{t.residents.allStatuses}</option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>{statusLabel(status)}</option>
-                ))}
-              </select>
-            </label>
+              <SearchableSelect
+                name="status"
+                defaultValue={selectedStatus}
+                options={[
+                  { value: "", label: t.residents.allStatuses },
+                  ...statuses.map((s) => ({ value: s, label: statusLabel(s) })),
+                ]}
+              />
+            </div>
 
             <button className="ui-button-primary" type="submit">
               {t.common.apply}

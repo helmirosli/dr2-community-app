@@ -257,6 +257,7 @@ export type SpecialCollectionWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
+  submissions?: Prisma.PublicPaymentSubmissionListRelationFilter
 }
 
 export type SpecialCollectionOrderByWithRelationInput = {
@@ -271,6 +272,7 @@ export type SpecialCollectionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assignments?: Prisma.SpecialCollectionAssignmentOrderByRelationAggregateInput
+  submissions?: Prisma.PublicPaymentSubmissionOrderByRelationAggregateInput
 }
 
 export type SpecialCollectionWhereUniqueInput = Prisma.AtLeast<{
@@ -288,6 +290,7 @@ export type SpecialCollectionWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
+  submissions?: Prisma.PublicPaymentSubmissionListRelationFilter
 }, "id">
 
 export type SpecialCollectionOrderByWithAggregationInput = {
@@ -336,6 +339,7 @@ export type SpecialCollectionCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutSpecialCollectionInput
+  submissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUncheckedCreateInput = {
@@ -350,6 +354,7 @@ export type SpecialCollectionUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutSpecialCollectionInput
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUpdateInput = {
@@ -364,6 +369,7 @@ export type SpecialCollectionUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutSpecialCollectionNestedInput
+  submissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionUncheckedUpdateInput = {
@@ -378,6 +384,7 @@ export type SpecialCollectionUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionCreateManyInput = {
@@ -471,6 +478,11 @@ export type SpecialCollectionScalarRelationFilter = {
   isNot?: Prisma.SpecialCollectionWhereInput
 }
 
+export type SpecialCollectionNullableScalarRelationFilter = {
+  is?: Prisma.SpecialCollectionWhereInput | null
+  isNot?: Prisma.SpecialCollectionWhereInput | null
+}
+
 export type EnumSpecialCollectionStatusFieldUpdateOperationsInput = {
   set?: $Enums.SpecialCollectionStatus
 }
@@ -489,6 +501,22 @@ export type SpecialCollectionUpdateOneRequiredWithoutAssignmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SpecialCollectionUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.SpecialCollectionUpdateWithoutAssignmentsInput>, Prisma.SpecialCollectionUncheckedUpdateWithoutAssignmentsInput>
 }
 
+export type SpecialCollectionCreateNestedOneWithoutSubmissionsInput = {
+  create?: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedCreateWithoutSubmissionsInput>
+  connectOrCreate?: Prisma.SpecialCollectionCreateOrConnectWithoutSubmissionsInput
+  connect?: Prisma.SpecialCollectionWhereUniqueInput
+}
+
+export type SpecialCollectionUpdateOneWithoutSubmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedCreateWithoutSubmissionsInput>
+  connectOrCreate?: Prisma.SpecialCollectionCreateOrConnectWithoutSubmissionsInput
+  upsert?: Prisma.SpecialCollectionUpsertWithoutSubmissionsInput
+  disconnect?: Prisma.SpecialCollectionWhereInput | boolean
+  delete?: Prisma.SpecialCollectionWhereInput | boolean
+  connect?: Prisma.SpecialCollectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SpecialCollectionUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.SpecialCollectionUpdateWithoutSubmissionsInput>, Prisma.SpecialCollectionUncheckedUpdateWithoutSubmissionsInput>
+}
+
 export type SpecialCollectionCreateWithoutAssignmentsInput = {
   id?: string
   title: string
@@ -500,6 +528,7 @@ export type SpecialCollectionCreateWithoutAssignmentsInput = {
   status?: $Enums.SpecialCollectionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  submissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUncheckedCreateWithoutAssignmentsInput = {
@@ -513,6 +542,7 @@ export type SpecialCollectionUncheckedCreateWithoutAssignmentsInput = {
   status?: $Enums.SpecialCollectionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionCreateOrConnectWithoutAssignmentsInput = {
@@ -542,6 +572,7 @@ export type SpecialCollectionUpdateWithoutAssignmentsInput = {
   status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionUncheckedUpdateWithoutAssignmentsInput = {
@@ -555,6 +586,79 @@ export type SpecialCollectionUncheckedUpdateWithoutAssignmentsInput = {
   status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+}
+
+export type SpecialCollectionCreateWithoutSubmissionsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  amountPerResident: number
+  dueDate?: Date | string | null
+  eventStartDate?: Date | string | null
+  eventEndDate?: Date | string | null
+  status?: $Enums.SpecialCollectionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutSpecialCollectionInput
+}
+
+export type SpecialCollectionUncheckedCreateWithoutSubmissionsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  amountPerResident: number
+  dueDate?: Date | string | null
+  eventStartDate?: Date | string | null
+  eventEndDate?: Date | string | null
+  status?: $Enums.SpecialCollectionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutSpecialCollectionInput
+}
+
+export type SpecialCollectionCreateOrConnectWithoutSubmissionsInput = {
+  where: Prisma.SpecialCollectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedCreateWithoutSubmissionsInput>
+}
+
+export type SpecialCollectionUpsertWithoutSubmissionsInput = {
+  update: Prisma.XOR<Prisma.SpecialCollectionUpdateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedUpdateWithoutSubmissionsInput>
+  create: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedCreateWithoutSubmissionsInput>
+  where?: Prisma.SpecialCollectionWhereInput
+}
+
+export type SpecialCollectionUpdateToOneWithWhereWithoutSubmissionsInput = {
+  where?: Prisma.SpecialCollectionWhereInput
+  data: Prisma.XOR<Prisma.SpecialCollectionUpdateWithoutSubmissionsInput, Prisma.SpecialCollectionUncheckedUpdateWithoutSubmissionsInput>
+}
+
+export type SpecialCollectionUpdateWithoutSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amountPerResident?: Prisma.IntFieldUpdateOperationsInput | number
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutSpecialCollectionNestedInput
+}
+
+export type SpecialCollectionUncheckedUpdateWithoutSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amountPerResident?: Prisma.IntFieldUpdateOperationsInput | number
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 
@@ -564,10 +668,12 @@ export type SpecialCollectionUncheckedUpdateWithoutAssignmentsInput = {
 
 export type SpecialCollectionCountOutputType = {
   assignments: number
+  submissions: number
 }
 
 export type SpecialCollectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | SpecialCollectionCountOutputTypeCountAssignmentsArgs
+  submissions?: boolean | SpecialCollectionCountOutputTypeCountSubmissionsArgs
 }
 
 /**
@@ -587,6 +693,13 @@ export type SpecialCollectionCountOutputTypeCountAssignmentsArgs<ExtArgs extends
   where?: Prisma.SpecialCollectionAssignmentWhereInput
 }
 
+/**
+ * SpecialCollectionCountOutputType without action
+ */
+export type SpecialCollectionCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PublicPaymentSubmissionWhereInput
+}
+
 
 export type SpecialCollectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -600,6 +713,7 @@ export type SpecialCollectionSelect<ExtArgs extends runtime.Types.Extensions.Int
   createdAt?: boolean
   updatedAt?: boolean
   assignments?: boolean | Prisma.SpecialCollection$assignmentsArgs<ExtArgs>
+  submissions?: boolean | Prisma.SpecialCollection$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.SpecialCollectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["specialCollection"]>
 
@@ -645,6 +759,7 @@ export type SpecialCollectionSelectScalar = {
 export type SpecialCollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "amountPerResident" | "dueDate" | "eventStartDate" | "eventEndDate" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["specialCollection"]>
 export type SpecialCollectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | Prisma.SpecialCollection$assignmentsArgs<ExtArgs>
+  submissions?: boolean | Prisma.SpecialCollection$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.SpecialCollectionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SpecialCollectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -654,6 +769,7 @@ export type $SpecialCollectionPayload<ExtArgs extends runtime.Types.Extensions.I
   name: "SpecialCollection"
   objects: {
     assignments: Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>[]
+    submissions: Prisma.$PublicPaymentSubmissionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1061,6 +1177,7 @@ readonly fields: SpecialCollectionFieldRefs;
 export interface Prisma__SpecialCollectionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assignments<T extends Prisma.SpecialCollection$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpecialCollection$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  submissions<T extends Prisma.SpecialCollection$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpecialCollection$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PublicPaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1514,6 +1631,30 @@ export type SpecialCollection$assignmentsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.SpecialCollectionAssignmentScalarFieldEnum | Prisma.SpecialCollectionAssignmentScalarFieldEnum[]
+}
+
+/**
+ * SpecialCollection.submissions
+ */
+export type SpecialCollection$submissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PublicPaymentSubmission
+   */
+  select?: Prisma.PublicPaymentSubmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PublicPaymentSubmission
+   */
+  omit?: Prisma.PublicPaymentSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PublicPaymentSubmissionInclude<ExtArgs> | null
+  where?: Prisma.PublicPaymentSubmissionWhereInput
+  orderBy?: Prisma.PublicPaymentSubmissionOrderByWithRelationInput | Prisma.PublicPaymentSubmissionOrderByWithRelationInput[]
+  cursor?: Prisma.PublicPaymentSubmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PublicPaymentSubmissionScalarFieldEnum | Prisma.PublicPaymentSubmissionScalarFieldEnum[]
 }
 
 /**
