@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -24,11 +25,16 @@ export default async function LoginPage() {
     <main className="min-h-screen flex flex-col md:flex-row">
       {/* Left — branding panel */}
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-brand-gradient px-10 py-16 text-white md:w-1/2">
-        {/* Logo circle */}
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 ring-4 ring-white/30">
-          <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-          </svg>
+        {/* Logo */}
+        <div className="mb-6">
+          <Image
+            src="/jr2-logo.jpeg"
+            alt="Desa Restu 2 @ Sepang"
+            width={120}
+            height={120}
+            className="rounded-full ring-4 ring-white/30 drop-shadow-xl"
+            priority
+          />
         </div>
 
         <p className="text-base font-light tracking-wide text-white/80">{t.login.welcomeTo}</p>

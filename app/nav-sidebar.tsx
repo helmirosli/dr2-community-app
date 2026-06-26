@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
@@ -126,9 +127,13 @@ export function NavSidebar({ navSections, user }: { navSections: NavSection[]; u
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white lg:overflow-y-auto">
         <div className="flex items-center gap-3 px-5 pb-6 pt-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">
-            DR2
-          </div>
+          <Image
+            src="/jr2-logo.jpeg"
+            alt="JR2 Desa Restu"
+            width={40}
+            height={40}
+            className="rounded-lg ring-1 ring-slate-200"
+          />
           <div>
             <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
             <p className="text-xs text-slate-500">{t.nav.brandTagline}</p>
@@ -154,7 +159,7 @@ export function NavSidebar({ navSections, user }: { navSections: NavSection[]; u
         </div>
 
         <div className="border-t border-slate-100 px-5 py-5">
-          <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-4 text-sm">
+          <div className="rounded-lg bg-linear-to-br from-cyan-50 to-blue-50 p-4 text-sm">
             <p className="font-semibold text-slate-900">{user.name}</p>
             <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
           </div>
@@ -171,9 +176,13 @@ export function NavSidebar({ navSections, user }: { navSections: NavSection[]; u
       <div className="lg:hidden">
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-xs font-bold text-white">
-              DR2
-            </div>
+            <Image
+              src="/jr2-logo.jpeg"
+              alt="JR2 Desa Restu"
+              width={32}
+              height={32}
+              className="rounded-lg ring-1 ring-slate-200"
+            />
             <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -193,7 +202,7 @@ export function NavSidebar({ navSections, user }: { navSections: NavSection[]; u
           <div className="border-b border-slate-200 bg-white px-4 py-3 shadow-md">
             {renderNavLinks(() => setOpen(false))}
             <div className="mt-4 border-t border-slate-100 pt-4">
-              <div className="rounded-lg bg-gradient-to-br from-cyan-50 to-blue-50 p-3 text-sm">
+              <div className="rounded-lg bg-linear-to-br from-cyan-50 to-blue-50 p-3 text-sm">
                 <p className="font-semibold text-slate-900">{user.name}</p>
                 <p className="mt-0.5 text-xs text-slate-600">{user.role}</p>
               </div>
