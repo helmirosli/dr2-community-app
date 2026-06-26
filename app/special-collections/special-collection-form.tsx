@@ -7,6 +7,7 @@ import {
   updateSpecialCollection,
   type SpecialCollectionFormState,
 } from "@/lib/actions/special-collections";
+import { SearchableSelect } from "@/app/components/searchable-select";
 
 const initialState: SpecialCollectionFormState = {
   ok: false,
@@ -95,14 +96,19 @@ export function SpecialCollectionForm({
         </label>
       </div>
 
-      <label className="ui-label">
+      <div className="grid gap-2 text-sm font-medium text-slate-700">
         Status
-        <select className="ui-select" defaultValue={collection?.status ?? "DRAFT"} name="status">
-          <option value="DRAFT">Draft — not yet active</option>
-          <option value="ACTIVE">Active — collecting payments</option>
-          <option value="CLOSED">Closed — collection ended</option>
-        </select>
-      </label>
+        <SearchableSelect
+          name="status"
+          defaultValue={collection?.status ?? "DRAFT"}
+          options={[
+            { value: "DRAFT", label: "Draft — not yet active" },
+            { value: "ACTIVE", label: "Active — collecting payments" },
+            { value: "CLOSED", label: "Closed — collection ended" },
+          ]}
+          required
+        />
+      </div>
 
       <fieldset className="rounded-lg border border-slate-200 p-4">
         <legend className="text-sm font-semibold text-slate-700">Assign to residents</legend>

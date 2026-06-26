@@ -6,6 +6,7 @@ import { getDictionary } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,8 +21,61 @@ type ReportsPageProps = {
   }>;
 };
 
+type PendingSubmission = {
+  unitNumber: string;
+  amountSen: number;
+  coverageStartYear: number;
+  coverageStartMonth: number;
+  coverageEndYear: number;
+  coverageEndMonth: number;
+};
+
+type PendingMonthInfo = {
+  appliedSen: number;
+  isCarryForward: boolean;
+  totalPending: number;
+};
+
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;
+}
+
+function getPendingSubmissionsMap(submissions: PendingSubmission[]): Map<string, PendingMonthInfo> {
+  const map = new Map<string, PendingMonthInfo>();
+  const DEFAULT_MONTHLY_FEE_SEN = 5000; // RM50
+
+  for (const sub of submissions) {
+    let remainingAmountSen = sub.amountSen;
+    let currentYear = sub.coverageStartYear;
+    let currentMonth = sub.coverageStartMonth;
+    let isFirstMonth = true;
+
+    // Distribute amount across months with automatic carry-forward
+    while (remainingAmountSen > 0 && currentYear <= sub.coverageEndYear + 1) {
+      const appliedSen = Math.min(DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
+      const key = `${sub.unitNumber}:${currentYear}:${currentMonth}`;
+
+      map.set(key, {
+        appliedSen,
+        isCarryForward: !isFirstMonth,
+        totalPending: sub.amountSen,
+      });
+
+      remainingAmountSen -= appliedSen;
+      isFirstMonth = false;
+
+      currentMonth += 1;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear += 1;
+      }
+
+      // Stop if we've gone way beyond the intended coverage period
+      if (currentYear > sub.coverageEndYear + 2) break;
+    }
+  }
+
+  return map;
 }
 
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
@@ -39,6 +93,47 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     year: selectedYear,
     includeInactive,
   });
+
+  // Fetch pending submissions
+  const pendingSubmissions = await prisma.publicPaymentSubmission.findMany({
+    where: {
+      paymentType: "MONTHLY_FEE",
+      status: "PENDING_REVIEW",
+      coverageStartYear: { lte: selectedYear },
+      coverageEndYear: { gte: selectedYear },
+    },
+    select: {
+      unitNumber: true,
+      amountSen: true,
+      coverageStartYear: true,
+      coverageStartMonth: true,
+      coverageEndYear: true,
+      coverageEndMonth: true,
+    },
+  });
+
+  const pendingMap = getPendingSubmissionsMap(pendingSubmissions);
+
+  // Fetch pending special collection submissions: key = "unitNumber:collectionId"
+  const pendingCollectionSubmissions = await prisma.publicPaymentSubmission.findMany({
+    where: {
+      paymentType: "SPECIAL_COLLECTION",
+      status: "PENDING_REVIEW",
+      specialCollectionId: { not: null },
+    },
+    select: {
+      unitNumber: true,
+      amountSen: true,
+      specialCollectionId: true,
+    },
+  });
+
+  const pendingCollectionMap = new Map<string, number>();
+  for (const sub of pendingCollectionSubmissions) {
+    if (!sub.specialCollectionId) continue;
+    const key = `${sub.unitNumber}:${sub.specialCollectionId}`;
+    pendingCollectionMap.set(key, (pendingCollectionMap.get(key) ?? 0) + sub.amountSen);
+  }
 
   // Always sort by unit number
   const rows = [...unsortedRows].sort((a, b) => {
@@ -162,31 +257,31 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
           </form>
 
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0) * 72 + (specialCollections.length > 0 ? 72 : 0)}rem` }}>
+            <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0)}rem` }}>
               <thead>
                 <tr className="bg-cyan-800 text-white">
-                  <th className="sticky left-0 top-0 z-10 bg-cyan-800 px-3 py-2.5 text-center font-semibold">No</th>
-                  <th className="sticky left-8 top-0 z-10 bg-cyan-800 px-3 py-2.5 font-semibold">NO RUMAH</th>
-                  <th className="sticky left-24 top-0 z-10 min-w-32 bg-cyan-800 px-3 py-2.5 font-semibold">NAMA</th>
+                  <th className="sticky left-0 top-0 z-10 bg-cyan-800 px-3 py-3 text-center font-semibold">No</th>
+                  <th className="sticky left-8 top-0 z-10 bg-cyan-800 px-3 py-3 font-semibold">NO RUMAH</th>
+                  <th className="sticky left-24 top-0 z-10 min-w-32 bg-cyan-800 px-3 py-3 font-semibold">NAMA</th>
                   {MONTH_LABELS.map((label, i) => (
                     <th
-                      className={`sticky top-0 px-2 py-2.5 text-center font-semibold ${
-                        selectedYear === currentYear && i + 1 === currentMonth ? "bg-cyan-600" : ""
+                      className={`sticky top-0 px-2 py-3 text-center font-semibold text-white ${
+                        selectedYear === currentYear && i + 1 === currentMonth ? "bg-cyan-600" : "bg-cyan-800"
                       }`}
                       key={label}
                     >
                       {label}
-                      <span className="block font-normal opacity-75">{String(selectedYear).slice(2)}</span>
+                      <span className="block text-xs font-normal opacity-75">{String(selectedYear).slice(2)}</span>
                     </th>
                   ))}
                   {specialCollections.length > 0 &&
                     specialCollections.map((sc) => (
-                      <th className="bg-amber-600 px-2 py-2.5 text-center font-semibold" key={sc.id}>
+                      <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white" key={sc.id}>
                         {sc.title.toUpperCase()}
                       </th>
                     ))}
                   {hasExtra && specialCollections.length === 0 && (
-                    <th className="bg-amber-600 px-2 py-2.5 text-center font-semibold">EXTRA</th>
+                    <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white">EXTRA</th>
                   )}
                 </tr>
               </thead>
@@ -196,18 +291,18 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
                   return (
                     <tr className={`${rowBg} hover:bg-cyan-50/40`} key={row.unitNumber}>
-                      <td className={`sticky left-0 z-10 ${rowBg} border-b border-slate-100 px-3 py-2 text-center font-medium text-slate-500`}>
+                      <td className={`sticky left-0 z-10 ${rowBg} border-b border-slate-100 px-3 py-2.5 text-center font-medium text-slate-500`}>
                         {row.no}
                       </td>
-                      <td className={`sticky left-8 z-10 ${rowBg} border-b border-slate-100 px-3 py-2 font-semibold text-slate-800`}>
+                      <td className={`sticky left-8 z-10 ${rowBg} border-b border-slate-100 px-3 py-2.5 font-semibold text-slate-800`}>
                         {row.unitNumber}
                       </td>
-                      <td className={`sticky left-24 z-10 min-w-32 ${rowBg} border-b border-slate-100 px-3 py-2 font-medium text-slate-900`}>
+                      <td className={`sticky left-24 z-10 min-w-32 ${rowBg} border-b border-slate-100 px-3 py-2.5 font-medium text-slate-900`}>
                         {row.name}
                       </td>
                       {row.isForSale ? (
                         Array.from({ length: 12 + (specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0) }).map((_, i) => (
-                          <td className="border-b border-slate-100 bg-slate-100 px-2 py-2 text-center italic text-slate-400" key={i}>
+                          <td className="border-b border-slate-100 bg-slate-100 px-2 py-2.5 text-center italic text-xs font-medium text-slate-400" key={i}>
                             {row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : "EXEMPT"}
                           </td>
                         ))
@@ -222,43 +317,79 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                             const isExemptUnpaid = row.status === "EXEMPT" && amountSen === null;
                             const isStatusOverride = monthOverride === "FOR_SALE" || monthOverride === "MOVED_OUT";
 
-                            let cellClass = "border-b border-slate-100 px-2 py-2 text-center text-slate-800";
-                            if (isPartial) cellClass += " bg-amber-50 text-amber-800";
-                            else if (isUnpaidPast) cellClass += " bg-red-50";
-                            else if (isStatusOverride) cellClass += " bg-slate-100 italic text-slate-500";
-                            else if (isExemptUnpaid) cellClass += " bg-slate-100 italic text-slate-500";
-                            else if (isFuture && amountSen === null) cellClass += " text-slate-300";
+                            const pendingKey = `${row.unitNumber}:${selectedYear}:${i + 1}`;
+                            const pendingSubmission = pendingMap.get(pendingKey);
+
+                            let cellClass = "border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium relative";
+                            let content: React.ReactNode = "";
+
+                            if (pendingSubmission) {
+                              cellClass += " bg-blue-50 text-blue-700 border-l-4 border-l-blue-500";
+                              content = (
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span>{fmtCell(pendingSubmission.appliedSen)}</span>
+                                  <span className="text-xs text-blue-600 font-semibold">
+                                    {pendingSubmission.isCarryForward ? "CARRY" : "PENDING"}
+                                  </span>
+                                </div>
+                              );
+                            } else if (isPartial) {
+                              cellClass += " bg-amber-50 text-amber-800";
+                              content = fmtCell(amountSen ?? 0);
+                            } else if (isUnpaidPast) {
+                              cellClass += " bg-red-50";
+                              content = "";
+                            } else if (isStatusOverride) {
+                              cellClass += " bg-slate-100 italic text-slate-500";
+                              content =
+                                monthOverride === "FOR_SALE"
+                                  ? "FOR SALE"
+                                  : monthOverride === "MOVED_OUT"
+                                    ? "MOVED OUT"
+                                    : "";
+                            } else if (isExemptUnpaid) {
+                              cellClass += " bg-slate-100 italic text-slate-500";
+                              content = "EXEMPT";
+                            } else if (isPaid) {
+                              cellClass += " text-slate-800";
+                              content = fmtCell(amountSen ?? 0);
+                            } else {
+                              cellClass += " text-slate-400";
+                              content = "";
+                            }
 
                             return (
                               <td className={cellClass} key={i}>
-                                {amountSen !== null
-                                  ? fmtCell(amountSen)
-                                  : monthOverride === "FOR_SALE"
-                                    ? "FOR SALE"
-                                    : monthOverride === "MOVED_OUT"
-                                      ? "MOVED OUT"
-                                      : isExemptUnpaid
-                                        ? "EXEMPT"
-                                        : ""}
+                                {content}
                               </td>
                             );
                           })}
                           {specialCollections.length > 0
-                            ? specialCollections.map((sc) => (
-                                <td className="border-b border-slate-100 bg-amber-50 px-2 py-2 text-center" key={sc.id}>
-                                  {row.extraOutstandingSen > 0 ? (
-                                    <span className="font-semibold text-amber-700">
-                                      RM{(row.extraOutstandingSen / 100).toFixed(2)}
-                                    </span>
-                                  ) : row.extraDueSen > 0 ? (
-                                    <span className="text-emerald-600">{"\u2713"}</span>
-                                  ) : (
-                                    <span className="text-slate-300">{"\u2014"}</span>
-                                  )}
-                                </td>
-                              ))
+                            ? specialCollections.map((sc) => {
+                                const pendingKey = `${row.unitNumber}:${sc.id}`;
+                                const pendingAmountSen = pendingCollectionMap.get(pendingKey) ?? 0;
+                                return (
+                                  <td className={`border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium ${pendingAmountSen > 0 ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-amber-50"}`} key={sc.id}>
+                                    {row.extraOutstandingSen > 0 && (
+                                      <div className="font-semibold text-amber-700">RM{(row.extraOutstandingSen / 100).toFixed(2)}</div>
+                                    )}
+                                    {!row.extraOutstandingSen && row.extraDueSen > 0 && !pendingAmountSen && (
+                                      <span className="text-emerald-600">{"\u2713"}</span>
+                                    )}
+                                    {!row.extraDueSen && !pendingAmountSen && (
+                                      <span className="text-slate-300">{"\u2014"}</span>
+                                    )}
+                                    {pendingAmountSen > 0 && (
+                                      <div className="flex flex-col items-center gap-0.5 mt-0.5">
+                                        <span className="text-blue-700">RM{(pendingAmountSen / 100).toFixed(2)}</span>
+                                        <span className="text-xs font-semibold text-blue-600">PENDING</span>
+                                      </div>
+                                    )}
+                                  </td>
+                                );
+                              })
                             : hasExtra && (
-                                <td className="border-b border-slate-100 bg-amber-50 px-2 py-2 text-center">
+                                <td className="border-b border-slate-100 bg-amber-50 px-2 py-2.5 text-center text-xs font-medium">
                                   {row.extraOutstandingSen > 0 ? (
                                     <span className="font-semibold text-amber-700">
                                       RM{(row.extraOutstandingSen / 100).toFixed(2)}

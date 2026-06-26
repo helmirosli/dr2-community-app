@@ -312,6 +312,117 @@ async function main() {
     ),
   );
 
+  // Add tenants for some residents
+  const tenant1 = await prisma.tenant.create({
+    data: {
+      residentId: residents[0]!.id,
+      name: "Tenant 01-A",
+      phone: "60187654321",
+      email: "tenant01a@dummy.local",
+    },
+  });
+
+  const tenant2 = await prisma.tenant.create({
+    data: {
+      residentId: residents[1]!.id,
+      name: "Tenant 02-A",
+      phone: "60187654322",
+      email: "tenant02a@dummy.local",
+    },
+  });
+
+  const tenant3 = await prisma.tenant.create({
+    data: {
+      residentId: residents[3]!.id,
+      name: "Tenant 04-A",
+      phone: "60187654323",
+      email: "tenant04a@dummy.local",
+    },
+  });
+
+  const tenant4 = await prisma.tenant.create({
+    data: {
+      residentId: residents[3]!.id,
+      name: "Tenant 04-B",
+      phone: "60187654324",
+      email: "tenant04b@dummy.local",
+    },
+  });
+
+  // Add vehicles for residents
+  await prisma.residentVehicle.create({
+    data: {
+      residentId: residents[0]!.id,
+      make: "Honda",
+      model: "Civic",
+      plateNumber: "WBJ1001",
+    },
+  });
+
+  await prisma.residentVehicle.create({
+    data: {
+      residentId: residents[0]!.id,
+      make: "Yamaha",
+      model: "Y15ZR",
+      plateNumber: "WBJ1002",
+    },
+  });
+
+  await prisma.residentVehicle.create({
+    data: {
+      residentId: residents[1]!.id,
+      make: "Toyota",
+      model: "Vios",
+      plateNumber: "WBJ2001",
+    },
+  });
+
+  await prisma.residentVehicle.create({
+    data: {
+      residentId: residents[2]!.id,
+      make: "Perodua",
+      model: "Myvi",
+      plateNumber: "WBJ3001",
+    },
+  });
+
+  // Add vehicles for tenants
+  await prisma.tenantVehicle.create({
+    data: {
+      tenantId: tenant1.id,
+      make: "BMW",
+      model: "3 Series",
+      plateNumber: "WBJ1003",
+    },
+  });
+
+  await prisma.tenantVehicle.create({
+    data: {
+      tenantId: tenant2.id,
+      make: "Mercedes",
+      model: "A-Class",
+      plateNumber: "WBJ2002",
+    },
+  });
+
+  await prisma.tenantVehicle.create({
+    data: {
+      tenantId: tenant3.id,
+      make: "Harley-Davidson",
+      model: "Street 750",
+      plateNumber: "WBJ4001",
+    },
+  });
+
+  await prisma.tenantVehicle.create({
+    data: {
+      tenantId: tenant4.id,
+      make: "Proton",
+      model: "X50",
+      plateNumber: "WBJ4002",
+    },
+  });
+
   // A-Z style scenarios across 30 units.
   await seedResidentMonthlyPattern({ residentId: residents[0]!.id, createdById: admin.id, months, note: "Always paid on time" });
   await seedResidentMonthlyPattern({ residentId: residents[1]!.id, createdById: admin.id, months, method: "CASH", note: "Cash-only payer" });

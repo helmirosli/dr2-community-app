@@ -100,6 +100,29 @@ export async function createPublicSubmission(
     };
   }
 
+  if (parsed.data.paymentType === "SPECIAL_COLLECTION") {
+    if (!parsed.data.specialCollectionId) {
+      return {
+        ok: false,
+        message: "Please select a collection from the list.",
+      };
+    }
+
+    const assignment = await prisma.specialCollectionAssignment.findFirst({
+      where: {
+        specialCollectionId: parsed.data.specialCollectionId,
+        resident: { unitNumber: parsed.data.unitNumber },
+      },
+    });
+
+    if (!assignment) {
+      return {
+        ok: false,
+        message: "Your unit is not assigned to this collection. Please contact the Admin or AJK for assistance.",
+      };
+    }
+  }
+
   if (parsed.data.paymentType === "MONTHLY_FEE") {
     const existingCoverage = await findExistingOfficialCoverageByUnitNumber(
       parsed.data.unitNumber,
@@ -135,6 +158,7 @@ export async function createPublicSubmission(
         coverageStartMonth: parsed.data.coverageStartMonth,
         coverageEndYear: parsed.data.coverageEndYear,
         coverageEndMonth: parsed.data.coverageEndMonth,
+        specialCollectionId: parsed.data.paymentType === "SPECIAL_COLLECTION" ? (parsed.data.specialCollectionId || null) : null,
         referenceNo: parsed.data.referenceNo,
         notes: parsed.data.notes,
         uploads: storedUpload
@@ -144,7 +168,8 @@ export async function createPublicSubmission(
           : undefined,
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("createPublicSubmission failed:", error);
     if (storedUpload) {
       await removeStoredUpload(storedUpload.storagePath);
     }

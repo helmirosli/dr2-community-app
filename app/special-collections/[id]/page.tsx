@@ -9,8 +9,12 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+const DEFAULT_PAGE_SIZE = 10;
+
 type DetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; perPage?: string }>;
 };
 
 function statusLabel(status: string) {
@@ -19,11 +23,17 @@ function statusLabel(status: string) {
   return "Draft";
 }
 
-export default async function SpecialCollectionDetailPage({ params }: DetailPageProps) {
+export default async function SpecialCollectionDetailPage({ params, searchParams }: DetailPageProps) {
   await requireDashboardUser();
 
   const { id } = await params;
-  const [collection, assignments] = await Promise.all([
+  const { page: pageParam, perPage: perPageParam } = await searchParams;
+  const perPage = PAGE_SIZE_OPTIONS.includes(parseInt(perPageParam ?? "", 10))
+    ? parseInt(perPageParam!, 10)
+    : DEFAULT_PAGE_SIZE;
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10));
+
+  const [collection, allAssignments] = await Promise.all([
     prisma.specialCollection.findUnique({
       where: { id },
       select: {
@@ -40,7 +50,6 @@ export default async function SpecialCollectionDetailPage({ params }: DetailPage
     }),
     prisma.specialCollectionAssignment.findMany({
       where: { specialCollectionId: id },
-      orderBy: { resident: { unitNumber: "asc" } },
       select: {
         id: true,
         resident: { select: { id: true, unitNumber: true, name: true } },
@@ -51,14 +60,27 @@ export default async function SpecialCollectionDetailPage({ params }: DetailPage
     }),
   ]);
 
+  // Numeric sort by unit number
+  allAssignments.sort((a, b) => {
+    const ua = parseInt(a.resident.unitNumber, 10);
+    const ub = parseInt(b.resident.unitNumber, 10);
+    if (!isNaN(ua) && !isNaN(ub)) return ua - ub;
+    return a.resident.unitNumber.localeCompare(b.resident.unitNumber);
+  });
+
+  const totalCount = allAssignments.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
+  const currentPage = Math.min(page, totalPages);
+  const assignments = allAssignments.slice((currentPage - 1) * perPage, currentPage * perPage);
+
   if (!collection) {
     notFound();
   }
 
-  const totalDue = assignments.reduce((sum, a) => sum + a.amountDue, 0);
-  const totalPaid = assignments.reduce((sum, a) => sum + a.amountPaid, 0);
+  const totalDue = allAssignments.reduce((sum, a) => sum + a.amountDue, 0);
+  const totalPaid = allAssignments.reduce((sum, a) => sum + a.amountPaid, 0);
   const outstanding = totalDue - totalPaid;
-  const paidCount = assignments.filter((a) => a.amountPaid >= a.amountDue).length;
+  const paidCount = allAssignments.filter((a) => a.amountPaid >= a.amountDue).length;
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
@@ -106,7 +128,7 @@ export default async function SpecialCollectionDetailPage({ params }: DetailPage
         <section className="ui-card overflow-hidden">
           <div className="border-b border-slate-100 px-5 py-4">
             <h2 className="text-lg font-semibold tracking-tight">Household assignments</h2>
-            <p className="mt-1 text-sm text-slate-500">{assignments.length} households assigned</p>
+            <p className="mt-1 text-sm text-slate-500">{totalCount} households assigned · {paidCount} paid</p>
           </div>
 
           <div className="overflow-x-auto">
@@ -155,6 +177,56 @@ export default async function SpecialCollectionDetailPage({ params }: DetailPage
                 )}
               </tbody>
             </table>
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span>
+                Showing {totalCount === 0 ? 0 : (currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, totalCount)} of {totalCount}
+              </span>
+              <span className="text-slate-300">·</span>
+              <span>Rows per page:</span>
+              <div className="flex items-center gap-1">
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <Link
+                    key={size}
+                    href={`/special-collections/${id}?page=1&perPage=${size}`}
+                    className={`rounded px-2 py-0.5 text-xs font-semibold transition ${
+                      perPage === size
+                        ? "bg-cyan-700 text-white"
+                        : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {size}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                {currentPage > 1 ? (
+                  <Link
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    href={`/special-collections/${id}?page=${currentPage - 1}&perPage=${perPage}`}
+                  >
+                    Previous
+                  </Link>
+                ) : (
+                  <span className="rounded-lg border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-300">Previous</span>
+                )}
+                <span className="text-sm text-slate-500">Page {currentPage} of {totalPages}</span>
+                {currentPage < totalPages ? (
+                  <Link
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    href={`/special-collections/${id}?page=${currentPage + 1}&perPage=${perPage}`}
+                  >
+                    Next
+                  </Link>
+                ) : (
+                  <span className="rounded-lg border border-slate-100 px-3 py-1.5 text-sm font-medium text-slate-300">Next</span>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

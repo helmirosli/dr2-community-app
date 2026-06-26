@@ -7,6 +7,7 @@ import {
   updateResident,
   type ResidentFormState,
 } from "@/lib/actions/residents";
+import { SearchableSelect } from "@/app/components/searchable-select";
 
 const initialState: ResidentFormState = {
   ok: false,
@@ -100,15 +101,20 @@ export function ResidentForm({ resident }: ResidentFormProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="ui-label">
+        <div className="grid gap-2 text-sm font-medium text-slate-700">
           Status
-          <select className="ui-select" defaultValue={resident?.status ?? "ACTIVE"} name="status">
-            <option value="ACTIVE">Active — paying RM50</option>
-            <option value="EXEMPT">Exempt — exempt from monthly fee</option>
-            <option value="FOR_SALE">For sale — vacant</option>
-            <option value="MOVED_OUT">Moved out — pending new resident</option>
-          </select>
-        </label>
+          <SearchableSelect
+            name="status"
+            defaultValue={resident?.status ?? "ACTIVE"}
+            options={[
+              { value: "ACTIVE", label: "Active — paying RM50" },
+              { value: "EXEMPT", label: "Exempt — exempt from monthly fee" },
+              { value: "FOR_SALE", label: "For sale — vacant" },
+              { value: "MOVED_OUT", label: "Moved out — pending new resident" },
+            ]}
+            required
+          />
+        </div>
       </div>
 
       <label className="ui-label">

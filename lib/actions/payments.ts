@@ -116,27 +116,35 @@ async function findDuplicateCoverage(residentId: string, coveredMonths: { year: 
   });
 }
 
-function buildCoverageRows(residentId: string, coveredMonths: { year: number; month: number }[], amountSen: number) {
+function buildCoverageRows(
+  residentId: string,
+  coveredMonths: { year: number; month: number }[],
+  amountSen: number,
+  existingCoverageMap?: Map<string, number>,
+) {
+  const rows = [];
   let remainingAmountSen = amountSen;
 
-  return coveredMonths.flatMap((coverage) => {
-    if (remainingAmountSen <= 0) {
-      return [];
-    }
+  // Process initially selected months - smart distribution for partial payments
+  for (const coverage of coveredMonths) {
+    if (remainingAmountSen <= 0) break;
 
-    const amountApplied = Math.min(DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
+    const key = `${coverage.year}:${coverage.month}`;
+    const existingAmount = existingCoverageMap?.get(key) ?? 0;
+    const amountNeeded = Math.max(0, DEFAULT_MONTHLY_FEE_SEN - existingAmount);
+    const amountApplied = Math.min(amountNeeded || DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
     remainingAmountSen -= amountApplied;
 
-    return [
-      {
-        residentId,
-        year: coverage.year,
-        month: coverage.month,
-        amountApplied,
-        status: amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? "PAID" as const : "PARTIAL" as const,
-      },
-    ];
-  });
+    rows.push({
+      residentId,
+      year: coverage.year,
+      month: coverage.month,
+      amountApplied,
+      status: existingAmount + amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? ("PAID" as const) : ("PARTIAL" as const),
+    });
+  }
+
+  return rows;
 }
 
 export async function createPayment(_previousState: PaymentFormState, formData: FormData): Promise<PaymentFormState> {

@@ -150,12 +150,12 @@ CREATE TABLE "PublicPaymentSubmission" (
     "coverageStartMonth" INTEGER NOT NULL,
     "coverageEndYear" INTEGER NOT NULL,
     "coverageEndMonth" INTEGER NOT NULL,
+    "specialCollectionId" TEXT,
     "referenceNo" TEXT,
     "notes" TEXT,
     "status" "SubmissionStatus" NOT NULL DEFAULT 'PENDING_REVIEW',
     "reviewReason" TEXT,
     "reviewedById" TEXT,
-    "reviewedBy" TEXT,
     "reviewedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -282,6 +282,9 @@ ALTER TABLE "SpecialCollectionAssignment" ADD CONSTRAINT "SpecialCollectionAssig
 
 -- AddForeignKey
 ALTER TABLE "PublicPaymentSubmission" ADD CONSTRAINT "PublicPaymentSubmission_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PublicPaymentSubmission" ADD CONSTRAINT "PublicPaymentSubmission_specialCollectionId_fkey" FOREIGN KEY ("specialCollectionId") REFERENCES "SpecialCollection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Upload" ADD CONSTRAINT "Upload_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE SET NULL ON UPDATE CASCADE;

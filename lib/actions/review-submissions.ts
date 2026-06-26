@@ -76,23 +76,26 @@ export async function approveSubmission(submissionId: string) {
         },
       });
 
-      const totalsByMonth = new Map<number, number>();
-      for (const coverage of existingCoverages) {
+      // Check if any month already has FULL payment (a single PAID record)
+      // Allow supplementary payments to months with PARTIAL payment
+      const fullyPaidMonth = coveredMonths.find((coverage) => {
         const key = coverage.year * 100 + coverage.month;
-        totalsByMonth.set(key, (totalsByMonth.get(key) ?? 0) + coverage.amountApplied);
-      }
+        const existingForMonth = existingCoverages.filter((e) => {
+          const existingKey = e.year * 100 + e.month;
+          return existingKey === key;
+        });
 
-      const duplicateCoverage = coveredMonths.find((coverage) => {
-        const key = coverage.year * 100 + coverage.month;
-        return (totalsByMonth.get(key) ?? 0) >= DEFAULT_MONTHLY_FEE_SEN;
+        // Only reject if there's already a PAID record (single record >= RM50)
+        // Allow if only PARTIAL records exist (supplementary payments)
+        return existingForMonth.some((e) => e.amountApplied >= DEFAULT_MONTHLY_FEE_SEN);
       });
 
-      if (duplicateCoverage) {
+      if (fullyPaidMonth) {
         await tx.publicPaymentSubmission.update({
           where: { id: submission.id },
           data: {
             status: "REJECTED",
-            reviewReason: `Duplicate full official coverage for ${duplicateCoverage.month}/${duplicateCoverage.year}.`,
+            reviewReason: `Month already has full payment for ${fullyPaidMonth.month}/${fullyPaidMonth.year}. Cannot apply additional payment to fully paid month.`,
             reviewedById: reviewer.id,
             reviewedAt: new Date(),
           },
@@ -104,12 +107,39 @@ export async function approveSubmission(submissionId: string) {
             entityId: submission.id,
             action: "REJECT_DUPLICATE_COVERAGE",
             beforeJson: JSON.stringify({ status: submission.status }),
-            afterJson: JSON.stringify({ status: "REJECTED", duplicateCoverage }),
+            afterJson: JSON.stringify({ status: "REJECTED", fullyPaidMonth: fullyPaidMonth.month }),
             createdBy: reviewer.id,
           },
         });
 
         return;
+      }
+    }
+
+    // Build map of existing coverage for smart distribution
+    const existingCoverageMap = new Map<string, number>();
+    if (coveredMonths.length > 0) {
+      const allExistingCoverages = await tx.paymentCoverage.findMany({
+        where: {
+          residentId: resident.id,
+          OR: coveredMonths.map((coverage) => ({
+            year: coverage.year,
+            month: coverage.month,
+          })),
+        },
+        select: {
+          year: true,
+          month: true,
+          amountApplied: true,
+        },
+      });
+
+      for (const coverage of allExistingCoverages) {
+        const key = `${coverage.year}:${coverage.month}`;
+        existingCoverageMap.set(
+          key,
+          (existingCoverageMap.get(key) ?? 0) + coverage.amountApplied,
+        );
       }
     }
 
@@ -124,10 +154,25 @@ export async function approveSubmission(submissionId: string) {
         notes: submission.notes,
         createdById: reviewer.id,
         coverages: {
-          create: buildMonthlyCoverageRows(resident.id, coveredMonths, submission.amountSen),
+          create: buildMonthlyCoverageRows(resident.id, coveredMonths, submission.amountSen, existingCoverageMap),
         },
       },
     });
+
+    // For special collection payments, update the assignment record
+    if (submission.paymentType === "SPECIAL_COLLECTION" && submission.specialCollectionId) {
+      await tx.specialCollectionAssignment.updateMany({
+        where: {
+          residentId: resident.id,
+          specialCollectionId: submission.specialCollectionId,
+        },
+        data: {
+          amountPaid: {
+            increment: submission.amountSen,
+          },
+        },
+      });
+    }
 
     await tx.upload.updateMany({
       where: { submissionId: submission.id },
