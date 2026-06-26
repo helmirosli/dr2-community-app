@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getDictionary } from "@/lib/i18n";
 import { getCurrentUser } from "@/lib/auth";
@@ -22,9 +23,13 @@ export default async function PublicLayout({ children }: { children: React.React
       <header className="border-b border-white/50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="flex items-center gap-3 transition hover:opacity-80">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-brand text-white font-bold text-sm">
-              DR2
-            </div>
+            <Image
+              src="/jr2-logo.jpeg"
+              alt="JR2 Desa Restu"
+              width={40}
+              height={40}
+              className="rounded-lg ring-1 ring-slate-200"
+            />
             <div>
               <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
               <p className="hidden text-xs text-slate-500 sm:block">{t.publicLayout.residentPortal}</p>
