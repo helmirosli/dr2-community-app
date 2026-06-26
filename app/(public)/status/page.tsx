@@ -292,18 +292,26 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                         })}
                         {specialCollections.length > 0
                           ? specialCollections.map((sc) => {
+                              const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
                               const pendingKey = `${row.unitNumber}:${sc.id}`;
                               const pendingAmountSen = pendingCollectionMap.get(pendingKey) ?? 0;
+
+                              if (!assignment && !pendingAmountSen) {
+                                return (
+                                  <td className="border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium" key={sc.id}>
+                                    <span className="text-slate-300">—</span>
+                                  </td>
+                                );
+                              }
+
+                              const outstanding = assignment ? assignment.outstanding : 0;
                               return (
                                 <td className={`border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium ${pendingAmountSen > 0 ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-amber-50"}`} key={sc.id}>
-                                  {row.extraOutstandingSen > 0 && (
-                                    <div className="text-amber-700">RM{(row.extraOutstandingSen / 100).toFixed(2)}</div>
+                                  {outstanding > 0 && !pendingAmountSen && (
+                                    <div className="text-amber-700">RM{(outstanding / 100).toFixed(2)}</div>
                                   )}
-                                  {!row.extraOutstandingSen && row.extraDueSen > 0 && !pendingAmountSen && (
+                                  {outstanding === 0 && assignment && !pendingAmountSen && (
                                     <span className="text-emerald-600">✓</span>
-                                  )}
-                                  {!row.extraDueSen && !pendingAmountSen && (
-                                    <span className="text-slate-300">—</span>
                                   )}
                                   {pendingAmountSen > 0 && (
                                     <div className="flex flex-col items-center gap-0.5 mt-0.5">

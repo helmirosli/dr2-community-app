@@ -27,10 +27,85 @@ const paymentSchema = z.object({
   coverageStartMonth: z.coerce.number().int().min(1).max(12),
   coverageEndYear: z.coerce.number().int().min(2020).max(2100),
   coverageEndMonth: z.coerce.number().int().min(1).max(12),
+  specialCollectionId: optionalText,
   referenceNo: optionalText,
   notes: optionalText,
   allowAdjustment: z.string().optional(),
 });
+
+// ── Resident snapshot for admin form ──────────────────────────────────────────
+
+export type ResidentSnapshot = {
+  unitNumber: string;
+  name: string;
+  latestCoverage: { year: number; month: number } | null;
+  outstandingMonths: number[];
+  currentYear: number;
+  currentMonth: number;
+  assignedCollections: {
+    id: string;
+    title: string;
+    amountDue: number;
+    amountPaid: number;
+    outstanding: number;
+  }[];
+};
+
+export async function getResidentSnapshot(residentId: string): Promise<ResidentSnapshot | null> {
+  await assertDashboardUser();
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  const [resident, coverages, assignments] = await Promise.all([
+    prisma.resident.findUnique({
+      where: { id: residentId },
+      select: { unitNumber: true, name: true },
+    }),
+    prisma.paymentCoverage.findMany({
+      where: { residentId },
+      select: { year: true, month: true, amountApplied: true },
+      orderBy: [{ year: "desc" }, { month: "desc" }],
+    }),
+    prisma.specialCollectionAssignment.findMany({
+      where: { residentId, specialCollection: { status: "ACTIVE" } },
+      select: {
+        amountDue: true,
+        amountPaid: true,
+        specialCollection: { select: { id: true, title: true } },
+      },
+    }),
+  ]);
+
+  if (!resident) return null;
+
+  const latestCoverage = coverages[0] ?? null;
+
+  const coveredThisYear = new Set(
+    coverages.filter((c) => c.year === currentYear).map((c) => c.month),
+  );
+  const outstandingMonths: number[] = [];
+  for (let m = 1; m <= currentMonth; m++) {
+    if (!coveredThisYear.has(m)) outstandingMonths.push(m);
+  }
+
+  return {
+    unitNumber: resident.unitNumber,
+    name: resident.name,
+    latestCoverage: latestCoverage ? { year: latestCoverage.year, month: latestCoverage.month } : null,
+    outstandingMonths,
+    currentYear,
+    currentMonth,
+    assignedCollections: assignments.map((a) => ({
+      id: a.specialCollection.id,
+      title: a.specialCollection.title,
+      amountDue: a.amountDue,
+      amountPaid: a.amountPaid,
+      outstanding: a.amountDue - a.amountPaid,
+    })),
+  };
+}
 
 function getPaymentInput(formData: FormData) {
   const parsed = paymentSchema.safeParse(Object.fromEntries(formData));
@@ -191,28 +266,39 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
   let paymentId = "";
 
   try {
-    const payment = await prisma.payment.create({
-      data: {
-        residentId: resident.id,
-        paymentType: paymentInput.data.paymentType,
-        amountSen: paymentInput.amountSen,
-        paymentDate: new Date(paymentInput.data.paymentDate),
-        method: paymentInput.data.method,
-        referenceNo: paymentInput.data.referenceNo || null,
-        notes: paymentInput.data.notes || null,
-        createdById: user.id,
-        coverages: {
-          create: buildCoverageRows(resident.id, paymentInput.coveredMonths, paymentInput.amountSen),
+    const payment = await prisma.$transaction(async (tx) => {
+      const p = await tx.payment.create({
+        data: {
+          residentId: resident.id,
+          paymentType: paymentInput.data.paymentType,
+          amountSen: paymentInput.amountSen,
+          paymentDate: new Date(paymentInput.data.paymentDate),
+          method: paymentInput.data.method,
+          referenceNo: paymentInput.data.referenceNo || null,
+          notes: paymentInput.data.notes || null,
+          createdById: user.id,
+          coverages: {
+            create: buildCoverageRows(resident.id, paymentInput.coveredMonths, paymentInput.amountSen),
+          },
+          uploads: storedUpload ? { create: storedUpload } : undefined,
         },
-        uploads: storedUpload
-          ? {
-              create: storedUpload,
-            }
-          : undefined,
-      },
+      });
+
+      if (
+        paymentInput.data.paymentType === "SPECIAL_COLLECTION" &&
+        paymentInput.data.specialCollectionId
+      ) {
+        await tx.specialCollectionAssignment.updateMany({
+          where: { residentId: resident.id, specialCollectionId: paymentInput.data.specialCollectionId },
+          data: { amountPaid: { increment: paymentInput.amountSen } },
+        });
+      }
+
+      return p;
     });
 
     paymentId = payment.id;
+
 
     await prisma.auditLog.create({
       data: {
