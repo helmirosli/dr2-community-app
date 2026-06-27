@@ -1,0 +1,46 @@
+name: Database Backup
+
+on:
+  schedule:
+    # 1st of every month at 02:00 UTC (10:00 MYT)
+    - cron: "0 2 1 * *"
+  workflow_dispatch: # allow manual trigger from GitHub UI
+
+jobs:
+  backup:
+    name: Dump & upload to GCS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get install -y gnupg curl
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+          echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-17
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run backup
+        env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
+          GCS_BUCKET_NAME:     ${{ secrets.GCS_BUCKET_NAME }}
+          GCS_PROJECT_ID:      ${{ secrets.GCS_PROJECT_ID }}
+          GCS_CLIENT_EMAIL:    ${{ secrets.GCS_CLIENT_EMAIL }}
+          GCS_PRIVATE_KEY:     ${{ secrets.GCS_PRIVATE_KEY }}
+          PG_DUMP_BIN:         /usr/lib/postgresql/17/bin/pg_dump
+        run: npm run db:backup
