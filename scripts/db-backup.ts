@@ -127,6 +127,18 @@ async function main() {
   console.log(`✅  pg_dump complete (${(sizeBytes / 1024).toFixed(1)} KB compressed)\n`);
 
   // ── 2. Upload to GCS ───────────────────────────────────────────────────────
+  const destPath = `db-backups/${filename}`;
+
+  // In CI (GitHub Actions), auth is handled by google-github-actions/auth and
+  // upload is done via gsutil — skip SDK upload here.
+  if (process.env.CI) {
+    // Write the destination path so the workflow step can read it
+    console.log(`BACKUP_FILE=${tmpFile}`);
+    console.log(`BACKUP_DEST=gs://${bucketName}/${destPath}`);
+    console.log("\n✅  Dump ready for upload by workflow.\n");
+    return;
+  }
+
   console.log("⏳  Uploading to GCS...");
 
   const storage = new Storage({
@@ -137,19 +149,14 @@ async function main() {
     },
   });
 
-  const bucket   = storage.bucket(bucketName!);
-  const destPath = `db-backups/${filename}`;
+  const bucket = storage.bucket(bucketName!);
 
   await bucket.upload(tmpFile, {
     destination: destPath,
     gzip: false,
     metadata: {
       contentType: "application/gzip",
-      metadata: {
-        database: conn.database,
-        host:     conn.host,
-        backedAt: new Date().toISOString(),
-      },
+      metadata: { database: conn.database, host: conn.host, backedAt: new Date().toISOString() },
     },
   });
 
