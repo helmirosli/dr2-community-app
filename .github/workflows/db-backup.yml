@@ -4,7 +4,7 @@ on:
   schedule:
     # 1st of every month at 02:00 UTC (10:00 MYT)
     - cron: "0 2 1 * *"
-  workflow_dispatch: # allow manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -35,10 +35,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run backup
+      - name: Run pg_dump
+        id: dump
         env:
           DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
-          GCS_BUCKET_NAME:              ${{ secrets.GCS_BUCKET_NAME }}
-          GCS_SERVICE_ACCOUNT_JSON_B64: ${{ secrets.GCS_SERVICE_ACCOUNT_JSON_B64 }}
+          GCS_BUCKET_NAME:     ${{ secrets.GCS_BUCKET_NAME }}
           PG_DUMP_BIN:         /usr/lib/postgresql/17/bin/pg_dump
-        run: npm run db:backup
+        run: |
+          output=$(npm run db:backup 2>&1)
+          echo "$output"
+          backup_file=$(echo "$output" | grep '^BACKUP_FILE=' | cut -d= -f2-)
+          backup_dest=$(echo "$output" | grep '^BACKUP_DEST=' | cut -d= -f2-)
+          echo "backup_file=$backup_file" >> $GITHUB_OUTPUT
+          echo "backup_dest=$backup_dest" >> $GITHUB_OUTPUT
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCS_SERVICE_ACCOUNT_JSON }}
+
+      - name: Upload to GCS
+        run: |
+          gsutil cp "${{ steps.dump.outputs.backup_file }}" "${{ steps.dump.outputs.backup_dest }}"
+          echo "✅  Uploaded → ${{ steps.dump.outputs.backup_dest }}"
+          rm -f "${{ steps.dump.outputs.backup_file }}"
