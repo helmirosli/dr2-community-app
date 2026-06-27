@@ -28,9 +28,11 @@ const projectId  = process.env.GCS_PROJECT_ID;
 const clientEmail = process.env.GCS_CLIENT_EMAIL;
 // Support both raw PEM and base64-encoded PEM (GCS_PRIVATE_KEY_BASE64)
 const privateKey = (() => {
-  const b64 = process.env.GCS_PRIVATE_KEY_BASE64;
-  if (b64) return Buffer.from(b64, "base64").toString("utf8");
-  return process.env.GCS_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const raw = process.env.GCS_PRIVATE_KEY_BASE64
+    ? Buffer.from(process.env.GCS_PRIVATE_KEY_BASE64, "base64").toString("utf8")
+    : process.env.GCS_PRIVATE_KEY ?? "";
+  // Normalise: convert literal \n (two chars) to real newlines
+  return raw.replace(/\\n/g, "\n");
 })();
 
 if (!dbUrl) throw new Error("DATABASE_URL_DIRECT (or DATABASE_URL) is not set");
