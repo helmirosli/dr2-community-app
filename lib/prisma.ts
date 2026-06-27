@@ -1,6 +1,7 @@
 import { mkdirSync } from "node:fs";
 
 import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
@@ -42,16 +43,34 @@ if (process.env.NODE_ENV !== "production") {
   try {
     mkdirSync("uploads", { recursive: true });
   } catch (err) {
-    // Best-effort in dev: don't crash if the directory can't be created
-    // (e.g. unusual permission issues).
     console.warn("Could not create local uploads directory:", err);
   }
 }
 
+// Neon: use HTTP driver (avoids TCP cold-start latency).
+// Supabase / other: use standard pg adapter with connection_limit=1 for serverless.
+const isNeon = databaseUrl.includes("neon.tech");
 
-const client = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: databaseUrl }),
-});
+function buildConnectionString(url: string): string {
+  // Ensure connection_limit=1 for serverless environments to avoid pool exhaustion.
+  // Not needed for Neon (uses HTTP) or local dev (long-lived process).
+  if (!isNeon && process.env.NODE_ENV === "production") {
+    const u = new URL(url);
+    if (!u.searchParams.has("connection_limit")) {
+      u.searchParams.set("connection_limit", "1");
+    }
+    return u.toString();
+  }
+  return url;
+}
+
+const connectionString = buildConnectionString(databaseUrl);
+
+const adapter = isNeon
+  ? new PrismaNeon({ connectionString: databaseUrl })
+  : new PrismaPg({ connectionString });
+
+const client = new PrismaClient({ adapter });
 
 export const prisma = globalForPrisma.prisma ?? client;
 
