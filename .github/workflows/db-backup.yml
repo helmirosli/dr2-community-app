@@ -56,6 +56,6 @@ jobs:
 
       - name: Upload to GCS
         run: |
-          gsutil cp "${{ steps.dump.outputs.backup_file }}" "${{ steps.dump.outputs.backup_dest }}"
+          gcloud storage cp "${{ steps.dump.outputs.backup_file }}" "${{ steps.dump.outputs.backup_dest }}"
           echo "✅  Uploaded → ${{ steps.dump.outputs.backup_dest }}"
           rm -f "${{ steps.dump.outputs.backup_file }}"
