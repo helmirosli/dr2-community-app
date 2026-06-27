@@ -26,7 +26,12 @@ const dbUrl      = process.env.DATABASE_URL_DIRECT ?? process.env.DATABASE_URL;
 const bucketName = process.env.GCS_BUCKET_NAME;
 const projectId  = process.env.GCS_PROJECT_ID;
 const clientEmail = process.env.GCS_CLIENT_EMAIL;
-const privateKey  = process.env.GCS_PRIVATE_KEY?.replace(/\\n/g, "\n");
+// Support both raw PEM and base64-encoded PEM (GCS_PRIVATE_KEY_BASE64)
+const privateKey = (() => {
+  const b64 = process.env.GCS_PRIVATE_KEY_BASE64;
+  if (b64) return Buffer.from(b64, "base64").toString("utf8");
+  return process.env.GCS_PRIVATE_KEY?.replace(/\\n/g, "\n");
+})();
 
 if (!dbUrl) throw new Error("DATABASE_URL_DIRECT (or DATABASE_URL) is not set");
 if (dbUrl.includes(":6543")) {
@@ -37,7 +42,7 @@ if (dbUrl.includes(":6543")) {
 }
 if (!bucketName) throw new Error("GCS_BUCKET_NAME is not set");
 if (!projectId || !clientEmail || !privateKey) {
-  throw new Error("GCS_PROJECT_ID / GCS_CLIENT_EMAIL / GCS_PRIVATE_KEY are not set");
+  throw new Error("GCS_PROJECT_ID / GCS_CLIENT_EMAIL / GCS_PRIVATE_KEY (or GCS_PRIVATE_KEY_BASE64) are not set");
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
