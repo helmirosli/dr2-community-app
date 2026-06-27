@@ -6,14 +6,13 @@
  *   npm run db:backup
  *
  * Required env vars:
- *   DATABASE_URL_DIRECT  — direct connection (not pooler) for pg_dump
- *   GCS_BUCKET_NAME      — GCS bucket (same one used for uploads)
- *   GCS_PROJECT_ID       — GCP project ID
- *   GCS_CLIENT_EMAIL     — service account email
- *   GCS_PRIVATE_KEY      — service account private key
+ *   DATABASE_URL_DIRECT          — Session pooler URL (port 5432) for pg_dump
+ *   GCS_BUCKET_NAME              — destination bucket
+ *   GCS_SERVICE_ACCOUNT_JSON_B64 — base64 of full service-account JSON (preferred)
+ *   OR: GCS_PROJECT_ID + GCS_CLIENT_EMAIL + GCS_PRIVATE_KEY (local .env fallback)
  */
 
-import { execSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { unlinkSync, existsSync } from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -24,27 +23,36 @@ import { Storage } from "@google-cloud/storage";
 
 const dbUrl      = process.env.DATABASE_URL_DIRECT ?? process.env.DATABASE_URL;
 const bucketName = process.env.GCS_BUCKET_NAME;
-const projectId  = process.env.GCS_PROJECT_ID;
-const clientEmail = process.env.GCS_CLIENT_EMAIL;
-// Support both raw PEM and base64-encoded PEM (GCS_PRIVATE_KEY_BASE64)
-const privateKey = (() => {
-  const raw = process.env.GCS_PRIVATE_KEY_BASE64
-    ? Buffer.from(process.env.GCS_PRIVATE_KEY_BASE64, "base64").toString("utf8")
-    : process.env.GCS_PRIVATE_KEY ?? "";
-  // Normalise: convert literal \n (two chars) to real newlines
-  return raw.replace(/\\n/g, "\n");
+
+// GCS auth: prefer full service-account JSON blob (survives GitHub Secrets intact).
+// To generate: base64 -i service-account.json | tr -d '\n'
+// Store as GCS_SERVICE_ACCOUNT_JSON_B64.
+const gcsCredentials = (() => {
+  const b64 = process.env.GCS_SERVICE_ACCOUNT_JSON_B64;
+  if (b64) {
+    return JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
+  }
+  // Fallback for local .env: individual vars
+  return {
+    project_id:   process.env.GCS_PROJECT_ID  ?? "",
+    client_email: process.env.GCS_CLIENT_EMAIL ?? "",
+    private_key:  (process.env.GCS_PRIVATE_KEY ?? "").replace(/\\n/g, "\n"),
+  };
 })();
 
 if (!dbUrl) throw new Error("DATABASE_URL_DIRECT (or DATABASE_URL) is not set");
 if (dbUrl.includes(":6543")) {
   throw new Error(
     "DATABASE_URL_DIRECT must not use the Transaction pooler (port 6543).\n" +
-    "  Use the Session pooler (port 5432) from Supabase → Settings → Database → Connection pooling → Session mode."
+    "  Use the Session pooler (port 5432): Supabase → Settings → Database → Connection pooling → Session mode."
   );
 }
 if (!bucketName) throw new Error("GCS_BUCKET_NAME is not set");
-if (!projectId || !clientEmail || !privateKey) {
-  throw new Error("GCS_PROJECT_ID / GCS_CLIENT_EMAIL / GCS_PRIVATE_KEY (or GCS_PRIVATE_KEY_BASE64) are not set");
+if (!gcsCredentials.client_email || !gcsCredentials.private_key) {
+  throw new Error(
+    "GCS auth not configured.\n" +
+    "  Set GCS_SERVICE_ACCOUNT_JSON_B64 (preferred) or GCS_PROJECT_ID + GCS_CLIENT_EMAIL + GCS_PRIVATE_KEY."
+  );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -79,25 +87,18 @@ async function main() {
   console.log(`    Bucket   : ${bucketName}\n`);
 
   // ── 1. pg_dump | gzip → temp file ─────────────────────────────────────────
-  // Prefer pg_dump v17 on macOS (Homebrew) to match Supabase server version.
   const pgDumpBin =
     process.env.PG_DUMP_BIN ??
     [
       "/opt/homebrew/opt/postgresql@17/bin/pg_dump",
       "/usr/local/opt/postgresql@17/bin/pg_dump",
-      "pg_dump",
-    ].find((p) => { try { return require("node:fs").existsSync(p); } catch { return false; } }) ??
+    ].find((p) => existsSync(p)) ??
     "pg_dump";
 
-  const env = {
-    ...process.env,
-    PGPASSWORD: conn.password,
-  };
+  const env = { ...process.env, PGPASSWORD: conn.password };
 
   console.log("⏳  Running pg_dump...");
 
-  // pipefail ensures the pipe exits non-zero if pg_dump fails,
-  // even if gzip itself succeeds with empty input.
   const cmd = [
     "set -e -o pipefail",
     `${pgDumpBin} -h ${conn.host} -p ${conn.port} -U ${conn.user} -d ${conn.database} --no-owner --no-acl --schema=desarestu_db`,
@@ -111,11 +112,9 @@ async function main() {
 
   const stderr = result.stderr?.toString().trim();
   if (stderr) console.error("pg_dump stderr:\n", stderr);
-
   if (result.status !== 0) {
     throw new Error(`pg_dump failed (exit ${result.status})${stderr ? `:\n${stderr}` : ""}`);
   }
-
   if (!existsSync(tmpFile)) {
     throw new Error(`Backup file not created: ${tmpFile}`);
   }
@@ -125,23 +124,25 @@ async function main() {
   if (sizeBytes < 100) {
     throw new Error(`Backup file is suspiciously small (${sizeBytes} bytes) — pg_dump likely produced no output. Check DATABASE_URL_DIRECT.`);
   }
-
   console.log(`✅  pg_dump complete (${(sizeBytes / 1024).toFixed(1)} KB compressed)\n`);
 
   // ── 2. Upload to GCS ───────────────────────────────────────────────────────
   console.log("⏳  Uploading to GCS...");
 
   const storage = new Storage({
-    projectId,
-    credentials: { client_email: clientEmail, private_key: privateKey },
+    projectId:   gcsCredentials.project_id,
+    credentials: {
+      client_email: gcsCredentials.client_email,
+      private_key:  gcsCredentials.private_key,
+    },
   });
 
-  const bucket = storage.bucket(bucketName!);
+  const bucket   = storage.bucket(bucketName!);
   const destPath = `db-backups/${filename}`;
 
   await bucket.upload(tmpFile, {
     destination: destPath,
-    gzip: false, // already gzipped
+    gzip: false,
     metadata: {
       contentType: "application/gzip",
       metadata: {
@@ -154,7 +155,7 @@ async function main() {
 
   console.log(`✅  Uploaded → gs://${bucketName}/${destPath}\n`);
 
-  // ── 3. Clean up temp file ─────────────────────────────────────────────────
+  // ── 3. Clean up ────────────────────────────────────────────────────────────
   unlinkSync(tmpFile);
   console.log("🗑️   Temp file removed");
   console.log("\n🎉  Backup complete!\n");
