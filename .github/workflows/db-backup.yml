@@ -38,9 +38,9 @@ jobs:
       - name: Run backup
         env:
           DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
-          GCS_BUCKET_NAME:     ${{ secrets.GCS_BUCKET_NAME }}
-          GCS_PROJECT_ID:      ${{ secrets.GCS_PROJECT_ID }}
-          GCS_CLIENT_EMAIL:    ${{ secrets.GCS_CLIENT_EMAIL }}
-          GCS_PRIVATE_KEY:     ${{ secrets.GCS_PRIVATE_KEY }}
+          GCS_BUCKET_NAME:         ${{ secrets.GCS_BUCKET_NAME }}
+          GCS_PROJECT_ID:          ${{ secrets.GCS_PROJECT_ID }}
+          GCS_CLIENT_EMAIL:        ${{ secrets.GCS_CLIENT_EMAIL }}
+          GCS_PRIVATE_KEY_BASE64:  ${{ secrets.GCS_PRIVATE_KEY_BASE64 }}
           PG_DUMP_BIN:         /usr/lib/postgresql/17/bin/pg_dump
         run: npm run db:backup
