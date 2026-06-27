@@ -48,12 +48,7 @@ if (dbUrl.includes(":6543")) {
   );
 }
 if (!bucketName) throw new Error("GCS_BUCKET_NAME is not set");
-if (!gcsCredentials.client_email || !gcsCredentials.private_key) {
-  throw new Error(
-    "GCS auth not configured.\n" +
-    "  Set GCS_SERVICE_ACCOUNT_JSON_B64 (preferred) or GCS_PROJECT_ID + GCS_CLIENT_EMAIL + GCS_PRIVATE_KEY."
-  );
-}
+// GCS credential check is deferred to upload time (CI uses gsutil, not the SDK)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -137,6 +132,13 @@ async function main() {
     console.log(`BACKUP_DEST=gs://${bucketName}/${destPath}`);
     console.log("\n✅  Dump ready for upload by workflow.\n");
     return;
+  }
+
+  if (!gcsCredentials.client_email || !gcsCredentials.private_key) {
+    throw new Error(
+      "GCS auth not configured.\n" +
+      "  Set GCS_SERVICE_ACCOUNT_JSON_B64 or GCS_PROJECT_ID + GCS_CLIENT_EMAIL + GCS_PRIVATE_KEY."
+    );
   }
 
   console.log("⏳  Uploading to GCS...");
