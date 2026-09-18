@@ -1,30 +1,1307 @@
 [
   {
-    "unitNumber": "101",
-    "name": "Example Resident One",
-    "phone": "60112222333",
-    "email": "resident101@example.com",
-    "streetBlock": "A",
-    "addressLine1": "Lot 101, Jalan Komuniti",
-    "addressLine2": "",
-    "city": "Shah Alam",
+    "unitNumber": "1",
+    "name": "Mr. Lai",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
     "state": "Selangor",
-    "zipCode": "40100",
+    "zipCode": "43900",
     "status": "ACTIVE",
-    "notes": "Replace this file with your official resident data."
+    "notes": "OCR-derived. No payments captured for 2026. 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 9,
+        "amountSen": 5000
+      }
+    ]
   },
   {
-    "unitNumber": "102",
-    "name": "Example Resident Two",
-    "phone": "60113333444",
-    "email": "resident102@example.com",
-    "streetBlock": "A",
-    "addressLine1": "Lot 102, Jalan Komuniti",
-    "addressLine2": "",
-    "city": "Shah Alam",
+    "unitNumber": "2",
+    "name": "Ismail",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
     "state": "Selangor",
-    "zipCode": "40100",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 10,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 11,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 12,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "3",
+    "name": "Hanani",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 10,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 11,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 12,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "4",
+    "name": "Haizi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived name (could be Aisi/Haizi). 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "5",
+    "name": "Firdaus",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "6",
+    "name": "Irfan",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "7",
+    "name": "Irwan",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "8",
+    "name": "Azliza",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR shows ~10 months paid in 2026; assumed Jan-Oct. 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 10,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "9",
+    "name": "",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "FOR_SALE",
+    "notes": "OCR-derived. FOR SALE row in table; no resident name.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "10",
+    "name": "Hafiz",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "Previously noted as 'PALANG BOOMGATE' exempt in 2025; active payer in 2026.",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "11",
+    "name": "Helmi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "12",
+    "name": "Abuzar",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026 (paid Jan-May in 2025). 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "13",
+    "name": "Mustapa",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "14",
+    "name": "Mazian",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "15",
+    "name": "Shamsul",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 10,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 11,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 12,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "16",
+    "name": "Fadzly",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "FOR_SALE",
+    "notes": "FOR SALE row across all 12 months in table.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "17",
+    "name": "Sufian",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026. 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "18",
+    "name": "Fahmi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "19",
+    "name": "Hisham",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "20",
+    "name": "Azizi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "21",
+    "name": "Apie",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived name (unclear). Only one payment captured for 2026.",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "22",
+    "name": "Johari",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "23",
+    "name": "Fairuz",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "24",
+    "name": "Zaidi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
     "status": "EXEMPT",
-    "notes": "Delete sample rows after adding real data."
+    "notes": "POWER SUPLY CCTV - utility exempt row in table.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "25",
+    "name": "Zakimi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "26",
+    "name": "Fadhil",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "27",
+    "name": "Azudin",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "notes": "OCR-derived. No payments captured for 2026 (paid Jan-Mar in 2025). 2025 payments OCR-derived.",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      }
+    ]
+  },
+  {
+    "unitNumber": "28",
+    "name": "Radzi",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2025,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2025,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 5,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 6,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 7,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 8,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 9,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 10,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 11,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 12,
+        "amountSen": 5000
+      }
+    ],
+    "notes": "2025 payments OCR-derived."
+  },
+  {
+    "unitNumber": "29",
+    "name": "",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "FOR_SALE",
+    "notes": "OCR-derived. No name or payments captured; assumed vacant/FOR SALE.",
+    "monthlyPayments": []
+  },
+  {
+    "unitNumber": "30",
+    "name": "Hafezah",
+    "streetBlock": "Jalan Restu 2",
+    "addressLine1": "Taman Desa Restu",
+    "city": "Sepang",
+    "state": "Selangor",
+    "zipCode": "43900",
+    "status": "ACTIVE",
+    "monthlyPayments": [
+      {
+        "year": 2026,
+        "month": 1,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 2,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 3,
+        "amountSen": 5000
+      },
+      {
+        "year": 2026,
+        "month": 4,
+        "amountSen": 5000
+      }
+    ]
   }
 ]
