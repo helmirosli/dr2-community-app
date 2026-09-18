@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { hashSync } from "bcryptjs";
+
 import { clearCoreData, prisma } from "./_client";
 
 type OfficialResident = {
@@ -32,6 +34,15 @@ async function main() {
   const residents = loadResidentsFile();
 
   await clearCoreData();
+
+  await prisma.user.create({
+    data: {
+      name: "Helmi Rosli",
+      email: "helmirosli@gmail.com",
+      passwordHash: hashSync("Admin88!"),
+      role: "ADMIN",
+    },
+  });
 
   for (const resident of residents) {
     await prisma.resident.upsert({
