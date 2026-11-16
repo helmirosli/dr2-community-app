@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Send, ShieldAlert, Clock } from "lucide-react";
+import { Send, ShieldAlert } from "lucide-react";
 
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
+import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { getDictionary } from "@/lib/i18n";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
@@ -16,61 +17,8 @@ type StatusPageProps = {
   searchParams: Promise<{ year?: string }>;
 };
 
-type PendingSubmission = {
-  unitNumber: string;
-  amountSen: number;
-  coverageStartYear: number;
-  coverageStartMonth: number;
-  coverageEndYear: number;
-  coverageEndMonth: number;
-};
-
-type PendingMonthInfo = {
-  appliedSen: number;
-  isCarryForward: boolean;
-  totalPending: number;
-};
-
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;
-}
-
-function getPendingSubmissionsMap(submissions: PendingSubmission[]): Map<string, PendingMonthInfo> {
-  const map = new Map<string, PendingMonthInfo>();
-  const DEFAULT_MONTHLY_FEE_SEN = 5000; // RM50
-
-  for (const sub of submissions) {
-    let remainingAmountSen = sub.amountSen;
-    let currentYear = sub.coverageStartYear;
-    let currentMonth = sub.coverageStartMonth;
-    let isFirstMonth = true;
-
-    // Distribute amount across months with automatic carry-forward
-    while (remainingAmountSen > 0 && currentYear <= sub.coverageEndYear + 1) {
-      const appliedSen = Math.min(DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
-      const key = `${sub.unitNumber}:${currentYear}:${currentMonth}`;
-
-      map.set(key, {
-        appliedSen,
-        isCarryForward: !isFirstMonth,
-        totalPending: sub.amountSen,
-      });
-
-      remainingAmountSen -= appliedSen;
-      isFirstMonth = false;
-
-      currentMonth += 1;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear += 1;
-      }
-
-      // Stop if we've gone way beyond the intended coverage period
-      if (currentYear > sub.coverageEndYear + 2) break;
-    }
-  }
-
-  return map;
 }
 
 export default async function StatusPage({ searchParams }: StatusPageProps) {

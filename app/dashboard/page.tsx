@@ -8,7 +8,6 @@ import {
   FileText,
   Inbox,
   Plus,
-  ReceiptText,
   Users,
   XCircle,
 } from "lucide-react";
@@ -16,7 +15,7 @@ import {
 import { approveSubmission, rejectSubmission } from "@/lib/actions/review-submissions";
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
-import { formatRM } from "@/lib/money";
+import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { FileViewer } from "@/app/components/file-viewer";
@@ -94,14 +93,14 @@ export default async function DashboardPage() {
 
   const currentMonth = now.getMonth() + 1; // 1–12
   const currentMonthFeeCollection = currentMonthFeePayments._sum.amountSen ?? 0;
-  const monthlyTarget = residentCount * 5000; // RM50 per active resident
+  const monthlyTarget = residentCount * DEFAULT_MONTHLY_FEE_SEN;
   const collectionProgress = monthlyTarget > 0
     ? Math.min(100, Math.round((currentMonthFeeCollection / monthlyTarget) * 100))
     : 0;
 
   // Year-to-date: Jan → current month inclusive
   const ytdCollected  = ytdFeePayments._sum.amountSen ?? 0;
-  const ytdTarget     = currentMonth * residentCount * 5000; // months elapsed × RM50
+  const ytdTarget     = currentMonth * residentCount * DEFAULT_MONTHLY_FEE_SEN; // months elapsed
   const ytdProgress   = ytdTarget > 0
     ? Math.min(100, Math.round((ytdCollected / ytdTarget) * 100))
     : 0;

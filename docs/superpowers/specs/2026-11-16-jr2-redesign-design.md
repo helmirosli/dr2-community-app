@@ -145,8 +145,8 @@ A toggle between **Peta** (a tile grid in house-number order, coloured by status
 
 ## 6. Re-engineering (code changes that aren't visual)
 
-1. **One fee source.** Replace the literal `5000` in `app/dashboard/page.tsx` (×2), `app/(public)/status/page.tsx`, and `app/reports/page.tsx` with a single `getMonthlyFeeSen(date)` in `lib/money.ts`. It reads the active `FeePlan` and falls back to `DEFAULT_MONTHLY_FEE_SEN`.
-2. **One allocator.** The status page's own carry-forward loop is deleted, and it calls `lib/payments/coverage.ts`.
+1. **One fee source.** Every literal `5000` in app code now uses `DEFAULT_MONTHLY_FEE_SEN` from `lib/money.ts`. (Done in phase 0. Reading the `FeePlan` table is deferred until the fee actually changes, since today it never does.)
+2. **One allocator.** `buildMonthlyCoverageRows` in `lib/payments/coverage.ts` is the only allocator: official payments, approved submissions, and the pending preview on `/status` and `/reports` (`getPendingSubmissionsMap`). Guarded by `npm run check:coverage`. (Done in phase 0.)
 3. **Delete dead code.** `app/components/search-select.tsx` has 0 imports. Merge `searchable-select` and `searchable-dropdown` into one combobox if their APIs fit (builder's call).
 4. **Route groups** `(public)` / `(admin)` replace the global `LayoutWrapper` auth check (§4).
 5. **Shared `StatusPill` + `HouseTile` components** drive the status language from §3, used by status, home, dashboard, residents and reports.
