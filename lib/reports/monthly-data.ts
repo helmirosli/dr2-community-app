@@ -47,6 +47,9 @@ export async function getMonthlyReport({ year, month, includeInactive }: Monthly
     extraOutstandingCount: resident.assignments.filter((item) => item.amountPaid < item.amountDue).length,
   }));
 
+  // unitNumber is a string; sort 1, 2, … 10 rather than 1, 10, 11, 2.
+  reportInput.sort((a, b) => a.unitNumber.localeCompare(b.unitNumber, undefined, { numeric: true }));
+
   return buildMonthlyReport(reportInput, year, month);
 }
 

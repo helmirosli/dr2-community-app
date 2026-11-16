@@ -1,11 +1,17 @@
 import { AdminPage, PageHeader } from "@/app/components/page-header";
+import { redirect } from "next/navigation";
+
 import { requireDashboardUser } from "@/lib/auth";
 import { FileUploadForm } from "./file-upload-form";
 
 export const runtime = "nodejs";
 
+// KIV: upload & compare is on hold. Flip to true to bring the page back (the form and actions are untouched).
+const UPLOAD_ENABLED = false;
+
 export default async function FileUploadPage() {
   await requireDashboardUser();
+  if (!UPLOAD_ENABLED) redirect("/reports");
 
   return (
     <AdminPage width="narrow">

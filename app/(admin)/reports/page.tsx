@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { FileSpreadsheet, FileText, Search, Upload } from "lucide-react";
+import { FileSpreadsheet, FileText, Search } from "lucide-react";
 
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { StatusPill, stateStyles } from "@/app/components/status";
@@ -166,10 +165,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               <FileText size={15} />
               {t.reports.pdf}
             </a>
-            <Link className="ui-button-secondary" href="/reports/file-upload">
-              <Upload size={15} />
-              {t.reports.upload}
-            </Link>
+            {/* Upload (file comparison) is on hold (KIV); route redirects to /reports. */}
           </>
         }
       />

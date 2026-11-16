@@ -160,7 +160,7 @@ export async function buildMonthlyReportPdf(
   const emptyRow = ["No residents match this report filter.", "", "", "", "", "", ""];
 
   const docDefinition: Record<string, unknown> = {
-    pageOrientation: "landscape",
+    pageOrientation: "portrait",
     pageSize: "A4",
     pageMargins: [28, 40, 28, 40],
     defaultStyle: { font: "Roboto", fontSize: 9 },
@@ -309,6 +309,11 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
   return Buffer.from(arrayBuffer);
 }
 
+/** "50" for RM50.00, "12.50" for RM12.50: narrow portrait columns state "Amounts in RM" once in the header. */
+function compactRM(amountSen: number) {
+  return amountSen % 100 === 0 ? String(amountSen / 100) : (amountSen / 100).toFixed(2);
+}
+
 export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   configurePdfFonts();
   const { rows: unsortedRows, specialCollections, year } = data;
@@ -356,9 +361,10 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
           fontSize: 7,
         }))
       : row.months.map((amountSen, i) => ({
+          // Portrait page: amounts in RM without decimals ("50"), unit stated once in the header.
           text:
             amountSen !== null
-              ? `RM${(amountSen / 100).toFixed(2)}`
+              ? compactRM(amountSen)
               : row.monthStatusOverrides[i] === "FOR_SALE"
                 ? "FOR SALE"
                 : row.monthStatusOverrides[i] === "MOVED_OUT"
@@ -384,12 +390,12 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
             }))
           : specialCollections.length > 0
             ? specialCollections.map(() => ({
-                text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "",
+                text: row.extraOutstandingSen > 0 ? compactRM(row.extraOutstandingSen) : row.extraDueSen > 0 ? "PAID" : "",
                 alignment: "center" as const,
                 color: row.extraOutstandingSen > 0 ? "#d97706" : "#16a34a",
                 fontSize: 7,
               }))
-            : [{ text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
+            : [{ text: row.extraOutstandingSen > 0 ? compactRM(row.extraOutstandingSen) : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
 
     return [
       { text: idx + 1, alignment: "center", fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },
@@ -404,20 +410,22 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   const noWidth = 12;
   const unitWidth = 28;
   const nameWidth = 46;
-  const remaining = 595 - 28 - 28 - noWidth - unitWidth - nameWidth;
+  // A4 portrait (595pt) minus margins; pdfmake adds 2+2pt padding and a 0.5pt rule per column on top of each width.
+  const perColumnChrome = 4.5;
+  const remaining = 595 - 20 - 20 - noWidth - unitWidth - nameWidth - totalCols * perColumnChrome - 1;
   const monthWidth = Math.floor(remaining / (12 + extraColCount));
   const widths = [noWidth, unitWidth, nameWidth, ...Array(12 + extraColCount).fill(monthWidth)];
 
   const docDefinition: Record<string, unknown> = {
-    pageOrientation: "landscape",
+    pageOrientation: "portrait",
     pageSize: "A4",
-    pageMargins: [28, 40, 28, 40],
+    pageMargins: [20, 36, 20, 36],
     defaultStyle: { font: "Roboto", fontSize: 7 },
     info: { title: `JR2 resident fee ${year}`, author: "JR2 Desa Restu" },
     content: [
       { text: "JR2 Desa Restu", style: "brand" },
       { text: `Resident fee payment status — ${year}`, style: "title" },
-      { text: `Total: ${rows.length} units    |    Blank = not paid yet    |    FOR SALE = vacant unit`, style: "subtitle", margin: [0, 3, 0, 10] },
+      { text: `Total: ${rows.length} units    |    Amounts in RM    |    Blank = not paid yet    |    FOR SALE = vacant unit`, style: "subtitle", margin: [0, 3, 0, 10] },
       {
         table: {
           headerRows: 1,
