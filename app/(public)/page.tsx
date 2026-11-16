@@ -13,9 +13,14 @@ const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{
 
 export default async function HomePage() {
   const now = new Date();
-  const [t, report, collections] = await Promise.all([
+  const [t, report, lastReport, collections] = await Promise.all([
     getDictionary(),
     getMonthlyReport({ year: now.getFullYear(), month: now.getMonth() + 1, includeInactive: false }),
+    getMonthlyReport({
+      year: now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear(),
+      month: now.getMonth() === 0 ? 12 : now.getMonth(),
+      includeInactive: false,
+    }),
     prisma.specialCollection.findMany({
       where: { status: "ACTIVE" },
       orderBy: { createdAt: "desc" },
@@ -24,8 +29,13 @@ export default async function HomePage() {
     }),
   ]);
 
-  const total = report.rows.length;
-  const paid = report.rows.filter((r) => r.selectedStatus === "PAID" || r.selectedStatus === "UPFRONT").length;
+  const countPaid = (r: typeof report) => r.rows.filter((row) => row.selectedStatus === "PAID" || row.selectedStatus === "UPFRONT").length;
+  // Early in the month almost nobody has paid yet, so lead with last month and show this month underneath.
+  const leadWithLast = now.getDate() <= 7;
+  const lead = leadWithLast ? lastReport : report;
+  const other = leadWithLast ? report : lastReport;
+  const total = lead.rows.length;
+  const paid = countPaid(lead);
   const pct = total ? Math.round((paid / total) * 100) : 0;
 
   const bank = {
@@ -64,7 +74,7 @@ export default async function HomePage() {
       <section className="bg-[var(--paper)] py-16 text-[var(--ink)] sm:py-24">
         <div className="mx-auto grid max-w-5xl gap-5 px-4 sm:grid-cols-6">
           <div className="grid gap-4 rounded-[28px] bg-white p-7 sm:col-span-4">
-            <p className="text-sm font-semibold text-[var(--ink-2)]">{t.home.thisMonth}</p>
+            <p className="text-sm font-semibold text-[var(--ink-2)]">{leadWithLast ? t.home.lastMonth : t.home.thisMonth}</p>
             <p className="font-heading text-[clamp(2.6rem,7vw,4.5rem)] font-extrabold leading-none tracking-tight">
               <span className="text-blend">{paid}</span>
               <span className="text-[#c7c7cc]"> / {total}</span>
@@ -73,6 +83,9 @@ export default async function HomePage() {
             <div className="h-2 overflow-hidden rounded-full bg-[#e8e8ed]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
               <div className="h-full rounded-full bg-[image:var(--blend)]" style={{ width: `${pct}%` }} />
             </div>
+            <p className="text-sm text-[var(--ink-2)]">
+              {leadWithLast ? t.home.thisMonth : t.home.lastMonth}: {countPaid(other)} / {other.rows.length}
+            </p>
           </div>
 
           <div className="grid content-start gap-3 sm:col-span-2">

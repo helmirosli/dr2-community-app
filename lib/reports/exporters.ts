@@ -52,7 +52,7 @@ export async function buildMonthlyReportWorkbook(
   month: number,
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "DR2 Community";
+  workbook.creator = "JR2 Desa Restu";
   workbook.created = new Date(year, month - 1, 1);
 
   const sheet = workbook.addWorksheet(`Report ${monthLabel(year, month)}`);
@@ -165,11 +165,11 @@ export async function buildMonthlyReportPdf(
     pageMargins: [28, 40, 28, 40],
     defaultStyle: { font: "Roboto", fontSize: 9 },
     info: {
-      title: `DR2 monthly report ${periodLabel}`,
-      author: "DR2 Community",
+      title: `JR2 monthly report ${periodLabel}`,
+      author: "JR2 Desa Restu",
     },
     content: [
-      { text: "DR2 Community", style: "brand" },
+      { text: "JR2 Desa Restu", style: "brand" },
       { text: `Resident fee status — ${periodLabel}`, style: "title" },
       {
         text: `Residents: ${summary.residentCount}    Paid: ${summary.paidCount + summary.upfrontCount}    Partial: ${summary.partialCount}    Unpaid: ${summary.unpaidCount}    Outstanding: ${formatRM(summary.outstandingAmountSen)}`,
@@ -217,7 +217,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
   });
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "DR2 Community";
+  workbook.creator = "JR2 Desa Restu";
 
   const sheet = workbook.addWorksheet(`${year}`);
 
@@ -413,9 +413,9 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
     pageSize: "A4",
     pageMargins: [28, 40, 28, 40],
     defaultStyle: { font: "Roboto", fontSize: 7 },
-    info: { title: `DR2 resident fee ${year}`, author: "DR2 Community" },
+    info: { title: `JR2 resident fee ${year}`, author: "JR2 Desa Restu" },
     content: [
-      { text: "DR2 Community", style: "brand" },
+      { text: "JR2 Desa Restu", style: "brand" },
       { text: `Resident fee payment status — ${year}`, style: "title" },
       { text: `Total: ${rows.length} units    |    Blank = not paid yet    |    FOR SALE = vacant unit`, style: "subtitle", margin: [0, 3, 0, 10] },
       {

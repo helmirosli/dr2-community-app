@@ -47,8 +47,8 @@ const ms: Dictionary = {
     collections: "Kutipan",
     reports: "Laporan",
     settings: "Tetapan",
-    brandName: "Komuniti DR2",
-    brandTagline: "Sistem Yuran Penduduk",
+    brandName: "JR2 Desa Restu",
+    brandTagline: "Yuran pondok pengawal",
   },
   locale: {
     switchTo: "EN",
@@ -56,7 +56,7 @@ const ms: Dictionary = {
   },
   login: {
     welcomeTo: "Selamat datang ke",
-    communityName: "Komuniti DR2",
+    communityName: "JR2 Desa Restu",
     tagline: "Urus penduduk, pembayaran, dan kutipan komuniti untuk kejiranan anda.",
     title: "Log masuk ke papan pemuka",
     subtitle: "Akses Admin & AJK sahaja",
@@ -71,7 +71,7 @@ const ms: Dictionary = {
   dashboard: {
     operations: "operasi",
     title: "Papan pemuka yuran penduduk",
-    subtitle: "Pantau kutipan bulanan, semak penyerahan penduduk, dan sediakan laporan pembayaran untuk penduduk komuniti DR2.",
+    subtitle: "Pantau kutipan bulanan, semak penyerahan penduduk, dan sediakan laporan pembayaran untuk penduduk JR2 Desa Restu.",
     publicForm: "Borang awam",
     reports: "Laporan",
     recordPayment: "Rekod pembayaran",
@@ -118,7 +118,7 @@ const ms: Dictionary = {
   residents: {
     inventory: "Inventori penduduk",
     title: "Rekod isi rumah",
-    subtitle: "Urus nombor unit, kenalan penduduk, status, dan sejarah pembayaran untuk isi rumah DR2.",
+    subtitle: "Urus nombor unit, kenalan penduduk, status, dan sejarah pembayaran untuk isi rumah JR2.",
     addResident: "Tambah penduduk",
     totalResidents: "Jumlah penduduk",
     activeHouseholds: "Isi rumah aktif",
@@ -287,6 +287,7 @@ const ms: Dictionary = {
     statusTitle: "Papan status",
     statusDesc: "Semua rumah, setiap bulan dalam tahun ini.",
     thisMonth: "Kutipan bulan ini",
+    lastMonth: "Kutipan bulan lepas",
     housesPaid: "{paid} / {total} rumah sudah bayar",
     specialTitle: "Kutipan khas",
     perHouse: "{amount} setiap rumah",
@@ -468,7 +469,7 @@ const ms: Dictionary = {
     residentPortal: "Portal Penduduk",
     status: "Status",
     submit: "Hantar",
-    footer: "Sistem Yuran Penduduk Komuniti DR2",
+    footer: "Yuran Pondok Pengawal JR2 Desa Restu",
   },
 } as const;
 

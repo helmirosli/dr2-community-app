@@ -124,7 +124,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
 
   const holdLabel = (status: string, override: string | null) => {
     const s = override ?? status;
-    return s === "FOR_SALE" ? "FOR SALE" : s === "MOVED_OUT" ? "MOVED OUT" : s === "EXEMPT" ? "EXEMPT" : "";
+    return s === "FOR_SALE" ? t.residents.forSale : s === "MOVED_OUT" ? t.residents.movedOut : s === "EXEMPT" ? t.residents.exempt : "";
   };
 
   return (
@@ -210,7 +210,15 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                           className={`grid min-h-8 min-w-12 place-items-center rounded-lg px-1 text-[11px] font-semibold ${stateStyles[state].tile}`}
                           title={t.states[state]}
                         >
-                          {pending ? fmtCell(pending.appliedSen) : state === "hold" ? holdLabel(row.status, row.monthStatusOverrides[i]) : amountSen ? fmtCell(amountSen) : ""}
+                          {pending
+                            ? fmtCell(pending.appliedSen)
+                            : state === "hold"
+                              ? holdLabel(row.status, row.monthStatusOverrides[i])
+                              : state === "paid" || state === "ahead"
+                                ? "✓"
+                                : amountSen
+                                  ? fmtCell(amountSen)
+                                  : ""}
                         </span>
                       </td>
                     ))}

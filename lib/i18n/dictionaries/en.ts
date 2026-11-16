@@ -45,8 +45,8 @@ const en = {
     collections: "Collections",
     reports: "Reports",
     settings: "Settings",
-    brandName: "DR2 Community",
-    brandTagline: "Resident Fee System",
+    brandName: "JR2 Desa Restu",
+    brandTagline: "Guardhouse fee",
   },
   locale: {
     switchTo: "BM",
@@ -54,7 +54,7 @@ const en = {
   },
   login: {
     welcomeTo: "Welcome to",
-    communityName: "DR2 Community",
+    communityName: "JR2 Desa Restu",
     tagline: "Manage residents, payments, and community collections for your neighbourhood.",
     title: "Sign in to dashboard",
     subtitle: "Admin & AJK committee access only",
@@ -69,7 +69,7 @@ const en = {
   dashboard: {
     operations: "operations",
     title: "Resident fee dashboard",
-    subtitle: "Monitor monthly collection, review resident submissions, and prepare shareable payment reports for DR2 community residents.",
+    subtitle: "Monitor monthly collection, review resident submissions, and prepare shareable payment reports for JR2 Desa Restu residents.",
     publicForm: "Public form",
     reports: "Reports",
     recordPayment: "Record payment",
@@ -116,7 +116,7 @@ const en = {
   residents: {
     inventory: "Resident inventory",
     title: "Household records",
-    subtitle: "Manage unit numbers, resident contacts, status, and payment history for DR2 households.",
+    subtitle: "Manage unit numbers, resident contacts, status, and payment history for JR2 households.",
     addResident: "Add resident",
     totalResidents: "Total residents",
     activeHouseholds: "Active households",
@@ -328,6 +328,7 @@ const en = {
     statusTitle: "Status board",
     statusDesc: "Every house, every month of the year.",
     thisMonth: "Collection this month",
+    lastMonth: "Collection last month",
     housesPaid: "{paid} / {total} houses paid",
     specialTitle: "Special collection",
     perHouse: "{amount} per house",
@@ -466,7 +467,7 @@ const en = {
     residentPortal: "Resident Portal",
     status: "Status",
     submit: "Submit",
-    footer: "DR2 Community Resident Fee System",
+    footer: "JR2 Desa Restu guardhouse fee",
   },
 } as const;
 
