@@ -84,10 +84,13 @@ export async function getYearGridData({
     prisma.specialCollection.findMany({
       where: {
         status: { in: ["ACTIVE", "CLOSED"] },
+        // A collection belongs to the year of its due date or event date; one with no dates belongs
+        // to the year it was created. (Previously every ACTIVE collection appeared in every year, e.g.
+        // "Roof Maintenance 2026" showed up on the 2025 grid and exports.)
         OR: [
           { dueDate: { gte: yearStart, lt: yearEnd } },
           { eventStartDate: { gte: yearStart, lt: yearEnd } },
-          { status: "ACTIVE" },
+          { dueDate: null, eventStartDate: null, createdAt: { gte: yearStart, lt: yearEnd } },
         ],
       },
       select: { id: true, title: true },
