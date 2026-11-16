@@ -54,6 +54,7 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
           coverages: {
             orderBy: [{ year: "asc" }, { month: "asc" }],
           },
+          specialCollection: { select: { id: true, title: true } },
         },
       },
       tenants: {
@@ -242,22 +243,46 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
                 <tr>
                   <th>Date</th>
                   <th className="text-right">Amount</th>
-                  <th>Coverage</th>
+                  <th>For</th>
                   <th>Proof</th>
                 </tr>
               </thead>
               <tbody>
                 {resident.payments.map((payment) => {
-                  const coverageRange =
-                    payment.coverages.length > 0
-                      ? `${monthLabel(payment.coverages[0].year, payment.coverages[0].month)} – ${monthLabel(payment.coverages[payment.coverages.length - 1].year, payment.coverages[payment.coverages.length - 1].month)}`
-                      : "-";
+                  const first = payment.coverages[0];
+                  const last = payment.coverages[payment.coverages.length - 1];
+                  const months = !first
+                    ? null
+                    : first.year === last.year && first.month === last.month
+                      ? monthLabel(first.year, first.month)
+                      : `${monthLabel(first.year, first.month)} – ${monthLabel(last.year, last.month)}`;
 
                   return (
                     <tr key={payment.id}>
                       <td className="whitespace-nowrap tabular-nums text-[var(--ink)]">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
                       <td className="whitespace-nowrap text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(payment.amountSen)}</td>
-                      <td className="text-[var(--ink-2)]">{coverageRange}</td>
+                      <td>
+                        {/* What the payment was for: monthly fee months, or which special collection. */}
+                        {payment.paymentType === "SPECIAL_COLLECTION" ? (
+                          payment.specialCollection ? (
+                            <span className="flex flex-wrap items-center gap-2">
+                              <span className="ui-chip bg-[#e2f7e1] text-[#1c7a33]">Collection</span>
+                              <Link href={`/special-collections/${payment.specialCollection.id}`} className="font-medium text-[var(--ink)] hover:text-[var(--blue)] hover:underline">
+                                {payment.specialCollection.title}
+                              </Link>
+                            </span>
+                          ) : (
+                            <span className="ui-chip bg-[#fff4d6] text-[#8a6300]" title="Recorded before payments were linked to collections">
+                              Collection not recorded
+                            </span>
+                          )
+                        ) : (
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="ui-chip bg-[#ddf5fd] text-[#0b6e8e]">Monthly</span>
+                            <span className="text-[var(--ink-2)]">{months ?? "—"}</span>
+                          </span>
+                        )}
+                      </td>
                       <td>
                         {payment.uploads.length > 0 ? <FileViewer files={payment.uploads} /> : <span className="text-[var(--ink-2)]">—</span>}
                       </td>
