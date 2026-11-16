@@ -1,22 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
-  --muted: #64748b;
+  /* JR2 palette, sampled from public/jr2-logo.jpeg (see docs/superpowers/specs/2026-11-16-jr2-redesign-design.md §3) */
+  --night: #050a1a;
+  --night-2: #0b1636;
+  --night-3: #13224a;
+  --lime: #8ee53f;
+  --leaf: #2eb84a;
+  --cyan: #22c7f2;
+  --blue: #2463e8;
+  --blend: linear-gradient(100deg, #8ee53f, #2eb84a 30%, #22c7f2 65%, #2463e8);
+  --paper: #f5f5f7;
+  --ink: #1d1d1f;
+  --ink-2: #6e6e73;
+  --due: #ff5a36;
+  --amber: #e0a100;
+  --hold: #8e9aaf;
 
-  --brand-50: #e9f1ff;
-  --brand-100: #cfe0ff;
-  --brand-500: #0b5fff;
-  --brand-600: #084de0;
-  --brand-700: #053a9b;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted: var(--ink-2);
 
-  --success-50: #e9f9ef;
-  --success-600: #137a3d;
-  --danger-50: #fff0f2;
-  --danger-600: #c81e40;
-  --warning-50: #fff8e6;
-  --warning-600: #9a6a00;
+  /* Legacy names used across the admin pages, remapped onto the JR2 blue. */
+  --brand-50: #eaf1fe;
+  --brand-100: #d3e2fd;
+  --brand-500: var(--blue);
+  --brand-600: #1b52c9;
+  --brand-700: #173f9c;
+
+  --success-50: #e2f7e1;
+  --success-600: #1c7a33;
+  --danger-50: #ffe6e0;
+  --danger-600: #c2341a;
+  --warning-50: #fff4d6;
+  --warning-600: #8a6300;
 }
 
 @theme inline {
@@ -31,6 +48,16 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible { outline-color: var(--cyan); }
+
+.text-blend {
+  background: var(--blend);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .bg-brand { background: var(--brand-500); }
@@ -38,13 +65,13 @@ body {
 .bg-brand-50 { background: var(--brand-50); }
 .text-brand-700 { color: var(--brand-700); }
 
-h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, sans-serif; }
+h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, sans-serif; letter-spacing: -0.02em; }
 
 .ui-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.125rem;
   background: #fff;
-  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .ui-label {
@@ -60,7 +87,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .ui-textarea {
   width: 100%;
   border: 1px solid #cbd5e1;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem;
   background: #fff;
   padding: 0.625rem 0.875rem;
   color: #0f172a;
@@ -71,8 +98,8 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .ui-select:focus,
 .ui-textarea:focus {
   outline: none;
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.14);
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34, 199, 242, 0.25);
 }
 
 .ui-textarea { min-height: 6rem; }
@@ -95,7 +122,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   justify-content: center;
   gap: 0.5rem;
   min-height: 2.75rem;
-  border-radius: 0.625rem;
+  border-radius: 999px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -107,7 +134,9 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   color: #fff;
 }
 .ui-button-primary:hover { background: var(--brand-600); }
-.ui-button-primary:focus { outline: none; box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.2); }
+.ui-button-primary:focus-visible,
+.ui-button-secondary:focus-visible,
+.ui-button-danger:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 
 .ui-button-secondary {
   border: 1px solid #cbd5e1;
@@ -120,7 +149,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   background: var(--danger-600);
   color: #fff;
 }
-.ui-button-danger:hover { background: #a31334; }
+.ui-button-danger:hover { background: #a32a14; }
 
 .ui-button-primary:disabled,
 .ui-button-secondary:disabled,
@@ -138,13 +167,13 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 }
 
 .ui-alert-success {
-  border-color: #bbf7d0;
+  border-color: #b7e8bd;
   background: var(--success-50);
   color: var(--success-600);
 }
 
 .ui-alert-error {
-  border-color: #fecdd3;
+  border-color: #ffc9bc;
   background: var(--danger-50);
   color: var(--danger-600);
 }

@@ -240,7 +240,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Pending submissions queue */}
-        <section className="ui-card overflow-hidden">
+        <section id="semak" className="ui-card scroll-mt-20 overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <div>
               <h2 className="text-base font-semibold text-slate-900">{t.dashboard.submissionQueue}</h2>

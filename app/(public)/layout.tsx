@@ -1,21 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getDictionary } from "@/lib/i18n";
-import { getCurrentUser } from "@/lib/auth";
 import { PublicLayoutClient } from "./public-layout-client";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const [t, user] = await Promise.all([getDictionary(), getCurrentUser()]);
-
-  if (user) {
-    return (
-      <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-        <div className="mx-auto grid w-full max-w-4xl gap-6">
-          {children}
-        </div>
-      </main>
-    );
-  }
+  const t = await getDictionary();
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
