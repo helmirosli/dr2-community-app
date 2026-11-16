@@ -1,344 +1,373 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, Check, FileText } from "lucide-react";
 
-import {
-  createPublicSubmission,
-  type PublicSubmissionState,
-} from "@/lib/actions/public-submissions";
+import { createPublicSubmission, type PublicSubmissionState } from "@/lib/actions/public-submissions";
+import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { useDictionary } from "@/lib/i18n/context";
-import { SearchableSelect } from "@/app/components/searchable-select";
 import { TurnstileWidget, type TurnstileHandle } from "./turnstile-widget";
 
-const initialState: PublicSubmissionState = {
-  ok: false,
-  message: "",
-};
+export type SubmitHouse = { unit: string; name: string; paidUntil: string | null; nextYear: number; nextMonth: number };
+type SpecialCollection = { id: string; title: string; amountPerResident: number };
+type Bank = { name: string; holder: string; account: string };
 
-const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
-  value: String(i + 1),
-  label: new Date(2000, i).toLocaleString("en", { month: "long" }),
-}));
+const initialState: PublicSubmissionState = { ok: false, message: "" };
+const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
-type SpecialCollection = { id: string; title: string };
+function addMonths(year: number, month: number, n: number) {
+  const index = year * 12 + (month - 1) + n;
+  return { year: Math.floor(index / 12), month: (index % 12) + 1 };
+}
 
-export function SubmitPaymentForm({ specialCollections }: { specialCollections: SpecialCollection[] }) {
+export function SubmitPaymentForm({
+  houses,
+  initialUnit,
+  specialCollections,
+  bank,
+}: {
+  houses: SubmitHouse[];
+  initialUnit: string;
+  specialCollections: SpecialCollection[];
+  bank: Bank;
+}) {
   const [state, action, pending] = useActionState(createPublicSubmission, initialState);
-  const { t } = useDictionary();
-  const errorDialogRef = useRef<HTMLDialogElement>(null);
-  const successDialogRef = useRef<HTMLDialogElement>(null);
+  const { t, locale } = useDictionary();
+  const f = t.submitFlow;
   const turnstileRef = useRef<TurnstileHandle>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [paymentType, setPaymentType] = useState("MONTHLY_FEE");
 
-  const paymentTypeOptions = [
-    { value: "MONTHLY_FEE", label: t.publicSubmit.monthlyFeeOption },
-    { value: "SPECIAL_COLLECTION", label: t.publicSubmit.specialCollectionOption },
-  ];
+  const [step, setStep] = useState(1);
+  const [unit, setUnit] = useState(initialUnit);
+  const [paymentType, setPaymentType] = useState<"MONTHLY_FEE" | "SPECIAL_COLLECTION">("MONTHLY_FEE");
+  const [count, setCount] = useState(1);
+  const [otherAmount, setOtherAmount] = useState(false);
+  const [customAmount, setCustomAmount] = useState("");
+  const [collectionId, setCollectionId] = useState(specialCollections[0]?.id ?? "");
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toLocaleDateString("en-CA"));
+  const [preview, setPreview] = useState<{ url: string | null; name: string } | null>(null);
+  const [error, setError] = useState("");
 
-  const paymentMethodOptions = [
-    { value: "BANK_TRANSFER", label: t.publicSubmit.bankTransfer },
-    { value: "DUITNOW_QR", label: t.publicSubmit.duitnowQr },
-  ];
+  const house = houses.find((h) => h.unit === unit.trim());
+  const monthFmt = useMemo(() => new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", { month: "short", year: "2-digit" }), [locale]);
+  const label = (ym: { year: number; month: number }) => monthFmt.format(new Date(ym.year, ym.month - 1, 1));
 
-  const collectionOptions = specialCollections.map((c) => ({
-    value: c.id,
-    label: c.title,
-  }));
+  const start = house ? { year: house.nextYear, month: house.nextMonth } : null;
+  const chips = start ? Array.from({ length: 12 }, (_, i) => addMonths(start.year, start.month, i)) : [];
+  const end = start ? addMonths(start.year, start.month, count - 1) : null;
+  const untilDecember = start ? 12 - start.month + 1 : 1;
+  const collection = specialCollections.find((c) => c.id === collectionId);
 
-  const isSpecialCollection = paymentType === "SPECIAL_COLLECTION";
+  const amountSen =
+    paymentType === "SPECIAL_COLLECTION"
+      ? collection?.amountPerResident ?? 0
+      : otherAmount
+        ? Math.round((Number(customAmount) || 0) * 100)
+        : count * DEFAULT_MONTHLY_FEE_SEN;
 
   useEffect(() => {
-    if (state.message && !state.ok) {
-      errorDialogRef.current?.showModal();
-    }
+    if (state.message && !state.ok) turnstileRef.current?.reset();
   }, [state]);
 
-  useEffect(() => {
-    if (state.message && state.ok) {
-      successDialogRef.current?.showModal();
-    }
-  }, [state]);
+  useEffect(() => () => void (preview?.url && URL.revokeObjectURL(preview.url)), [preview]);
+
+  const goNext = () => {
+    if (step === 1 && !house) return setError(f.houseUnknown);
+    if (step === 2 && (amountSen <= 0 || !paymentDate || (paymentType === "SPECIAL_COLLECTION" && !collection))) return setError(f.fixFirst);
+    setError("");
+    setStep((s) => s + 1);
+  };
+
+  if (state.ok) {
+    const ref = state.reference ?? "";
+    const share = `https://wa.me/?text=${encodeURIComponent(fill(f.shareText, { unit, ref }))}`;
+    return (
+      <div className="grid justify-items-center gap-4 rounded-[28px] bg-white p-8 text-center ring-1 ring-black/5">
+        {/* eslint-disable-next-line @next/next/no-img-element -- static decorative art */}
+        <img src="/art/a4-submit-success.webp" alt="" width={300} height={225} className="w-60" />
+        <h2 className="font-heading text-3xl font-bold tracking-tight">{f.doneTitle}</h2>
+        {ref && (
+          <p className="rounded-full bg-[var(--paper)] px-4 py-1.5 text-sm">
+            {f.doneRef} <strong className="font-heading tracking-wider">{ref}</strong>
+          </p>
+        )}
+        <p className="max-w-sm text-[var(--ink-2)]">{f.doneBody}</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-3">
+          <a href={share} target="_blank" rel="noopener noreferrer" className="rounded-full bg-[#25d366] px-5 py-2.5 font-semibold text-white">
+            {f.share}
+          </a>
+          <a href={`/rumah/${encodeURIComponent(unit)}`} className="rounded-full px-5 py-2.5 font-semibold text-[var(--blue)] ring-1 ring-black/10">
+            {f.viewHouse}
+          </a>
+        </div>
+        <a href="/submit" className="text-sm text-[var(--blue)] hover:underline">
+          {f.another} ›
+        </a>
+      </div>
+    );
+  }
+
+  const steps = [f.stepHouse, f.stepPayment, f.stepProof];
+  const chip = (active: boolean) =>
+    `rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-[var(--ink)] text-white" : "bg-[var(--paper)] text-[var(--ink)] hover:bg-[#e8e8ed]"}`;
 
   return (
-    <>
-      {/* Error dialog */}
-      <dialog
-        ref={errorDialogRef}
-        className="m-auto w-full max-w-md rounded-xl border border-red-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
-      >
-        <div className="p-6">
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="text-red-600" size={20} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-slate-900">
-                Unable to Process Submission
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{state.message}</p>
-            </div>
+    <form action={action} className="grid gap-5 rounded-[28px] bg-white p-6 ring-1 ring-black/5 sm:p-8">
+      <input aria-hidden="true" className="hidden" name="website" tabIndex={-1} autoComplete="off" />
+      <input type="hidden" name="unitNumber" value={unit.trim()} />
+      <input type="hidden" name="residentName" value={house?.name ?? ""} />
+      <input type="hidden" name="paymentType" value={paymentType} />
+      <input type="hidden" name="method" value="BANK_TRANSFER" />
+      <input type="hidden" name="amount" value={(amountSen / 100).toFixed(2)} />
+      <input type="hidden" name="paymentDate" value={paymentDate} />
+      <input type="hidden" name="specialCollectionId" value={paymentType === "SPECIAL_COLLECTION" ? collectionId : ""} />
+      {(() => {
+        const now = new Date();
+        const s = paymentType === "MONTHLY_FEE" && start ? start : { year: now.getFullYear(), month: now.getMonth() + 1 };
+        const e = paymentType === "MONTHLY_FEE" && end ? end : s;
+        return (
+          <>
+            <input type="hidden" name="coverageStartYear" value={s.year} />
+            <input type="hidden" name="coverageStartMonth" value={s.month} />
+            <input type="hidden" name="coverageEndYear" value={e.year} />
+            <input type="hidden" name="coverageEndMonth" value={e.month} />
+          </>
+        );
+      })()}
+
+      {/* Step indicator */}
+      <ol className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+        {steps.map((name, i) => (
+          <li key={name} className="grid gap-1.5" aria-current={step === i + 1 ? "step" : undefined}>
+            <span className={`h-1 rounded-full ${step > i ? "bg-[image:var(--blend)]" : "bg-[#e8e8ed]"}`} />
+            <span className={step === i + 1 ? "text-[var(--ink)]" : "text-[#aeaeb2]"}>
+              {i + 1}. {name}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {/* Step 1: house */}
+      <div hidden={step !== 1} className="grid gap-3">
+        <label className="ui-label" htmlFor="unit">
+          {f.houseLabel}
+        </label>
+        <input
+          id="unit"
+          list="house-list"
+          inputMode="numeric"
+          autoComplete="off"
+          value={unit}
+          onChange={(e) => {
+            setUnit(e.target.value);
+            setCount(1);
+            setError("");
+          }}
+          className="ui-input font-heading !text-2xl font-bold"
+          placeholder="12"
+        />
+        <datalist id="house-list">
+          {houses.map((h) => (
+            <option key={h.unit} value={h.unit}>
+              {h.name}
+            </option>
+          ))}
+        </datalist>
+        {house && (
+          <p className="rounded-2xl bg-[var(--paper)] px-4 py-3 text-sm">
+            <strong>
+              No. {house.unit} · {house.name}
+            </strong>
+            <br />
+            <span className="text-[var(--ink-2)]">{house.paidUntil ? fill(f.paidUntil, { month: house.paidUntil }) : f.noPayment}</span>
+          </p>
+        )}
+      </div>
+
+      {/* Step 2: payment */}
+      <div hidden={step !== 2} className="grid gap-5">
+        <div className="grid grid-cols-2 gap-1 rounded-full bg-[var(--paper)] p-1" role="group">
+          {(["MONTHLY_FEE", "SPECIAL_COLLECTION"] as const).map((type) => (
             <button
-              className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-              onClick={() => errorDialogRef.current?.close()}
+              key={type}
               type="button"
+              aria-pressed={paymentType === type}
+              onClick={() => setPaymentType(type)}
+              className={`rounded-full py-2 text-sm font-semibold ${paymentType === type ? "bg-white shadow-sm" : "text-[var(--ink-2)]"}`}
             >
-              <X size={18} />
+              {type === "MONTHLY_FEE" ? f.monthly : f.special}
             </button>
-          </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
-              onClick={() => {
-                errorDialogRef.current?.close();
-                turnstileRef.current?.reset();
-              }}
-              type="button"
-            >
-              OK
-            </button>
-          </div>
+          ))}
         </div>
-      </dialog>
 
-      {/* Success dialog */}
-      <dialog
-        ref={successDialogRef}
-        className="m-auto w-full max-w-md rounded-xl border border-emerald-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
-      >
-        <div className="p-6">
-          <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <CheckCircle className="text-emerald-600" size={20} />
+        {paymentType === "MONTHLY_FEE" ? (
+          <div className="grid gap-3">
+            <p className="text-sm font-semibold">{f.whichMonths}</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className={chip(count === 1)} onClick={() => setCount(1)}>
+                {f.quick1}
+              </button>
+              <button type="button" className={chip(count === 3)} onClick={() => setCount(3)}>
+                {f.quick3}
+              </button>
+              {untilDecember > 3 && (
+                <button type="button" className={chip(count === untilDecember)} onClick={() => setCount(untilDecember)}>
+                  {f.quickDec}
+                </button>
+              )}
             </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-slate-900">
-                Submission Received
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{state.message}</p>
+            <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+              {chips.map((m, i) => (
+                <button
+                  key={`${m.year}-${m.month}`}
+                  type="button"
+                  aria-pressed={i < count}
+                  onClick={() => setCount(i + 1)}
+                  className={`rounded-xl py-2 text-xs font-semibold transition ${
+                    i < count ? "bg-[#e2f7e1] text-[#1c7a33] ring-1 ring-inset ring-[var(--leaf)]" : "bg-[var(--paper)] text-[var(--ink-2)]"
+                  }`}
+                >
+                  {label(m)}
+                </button>
+              ))}
             </div>
-            <button
-              className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-              onClick={() => successDialogRef.current?.close()}
-              type="button"
-            >
-              <X size={18} />
-            </button>
+            {start && end && (
+              <p className="text-sm text-[var(--ink-2)]">{fill(f.monthsSelected, { n: count, from: label(start), to: label(end) })}</p>
+            )}
           </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              onClick={() => {
-                successDialogRef.current?.close();
-                formRef.current?.reset();
-                turnstileRef.current?.reset();
-                setPaymentType("MONTHLY_FEE");
-              }}
-              type="button"
-            >
-              OK
-            </button>
+        ) : specialCollections.length ? (
+          <div className="grid gap-2">
+            {specialCollections.map((c) => (
+              <label
+                key={c.id}
+                className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${
+                  collectionId === c.id ? "ring-2 ring-[var(--blue)]" : "ring-black/10"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <input type="radio" name="collectionChoice" checked={collectionId === c.id} onChange={() => setCollectionId(c.id)} />
+                  <span className="font-semibold">{c.title}</span>
+                </span>
+                <span className="text-sm text-[var(--ink-2)]">{formatRM(c.amountPerResident)}</span>
+              </label>
+            ))}
           </div>
+        ) : (
+          <p className="rounded-2xl bg-[#fff4d6] px-4 py-3 text-sm text-[#8a6300]">{f.noSpecial}</p>
+        )}
+
+        <div className="grid gap-1 rounded-2xl bg-[var(--paper)] p-5 text-center">
+          <p className="text-sm text-[var(--ink-2)]">{f.amountDue}</p>
+          <p className="text-blend font-heading text-5xl font-extrabold tracking-tight">{formatRM(amountSen)}</p>
         </div>
-      </dialog>
 
-      <form action={action} className="grid gap-6" ref={formRef}>
-        <input aria-hidden="true" className="hidden" name="website" tabIndex={-1} />
-
-        {/* Resident Information */}
-        <div>
-          <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.residentInfo}</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="ui-label">
-              {t.publicSubmit.unitNumber}
-              <input
-                className="ui-input"
-                name="unitNumber"
-                placeholder={t.publicSubmit.unitPlaceholder}
-                required
-              />
+        {paymentType === "MONTHLY_FEE" && (
+          <div className="grid gap-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={otherAmount} onChange={(e) => setOtherAmount(e.target.checked)} />
+              {f.otherAmount}
             </label>
-            <div className="grid gap-2 text-sm font-medium text-slate-700">
-              {t.publicSubmit.paymentType}
-              <SearchableSelect
-                name="paymentType"
-                options={paymentTypeOptions}
-                defaultValue="MONTHLY_FEE"
-                required
-                onChange={(val) => setPaymentType(val)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Special Collection selector — only shown when SPECIAL_COLLECTION selected */}
-        {isSpecialCollection && (
-          <div>
-            <h3 className="mb-4 font-semibold text-slate-900">Collection</h3>
-            {collectionOptions.length > 0 ? (
-              <div className="grid gap-2 text-sm font-medium text-slate-700">
-                Select Collection
-                <SearchableSelect
-                  name="specialCollectionId"
-                  options={collectionOptions}
-                  defaultValue={collectionOptions[0]?.value}
-                  required
+            {otherAmount && (
+              <label className="ui-label">
+                {f.amountLabel}
+                <input
+                  className="ui-input"
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
                 />
-              </div>
-            ) : (
-              <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                There are no active special collections at this time. Please contact AJK for more information.
-              </p>
+              </label>
             )}
           </div>
         )}
 
-        {/* Payment Information */}
-        <div>
-          <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.paymentInfo}</h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="ui-label">
-              {t.publicSubmit.amount}
-              <input
-                className="ui-input"
-                min="0.01"
-                name="amount"
-                placeholder={t.publicSubmit.amountPlaceholder}
-                required
-                step="0.01"
-                type="number"
-              />
-            </label>
-            <label className="ui-label">
-              {t.publicSubmit.paymentDate}
-              <input
-                className="ui-input"
-                name="paymentDate"
-                required
-                type="date"
-              />
-            </label>
-            <div className="grid gap-2 text-sm font-medium text-slate-700">
-              {t.publicSubmit.paymentMethod}
-              <SearchableSelect
-                name="method"
-                options={paymentMethodOptions}
-                defaultValue="BANK_TRANSFER"
-                required
-              />
-            </div>
-          </div>
-        </div>
+        <label className="ui-label">
+          {f.paidOn}
+          <input className="ui-input" type="date" value={paymentDate} max={new Date().toLocaleDateString("en-CA")} onChange={(e) => setPaymentDate(e.target.value)} />
+        </label>
 
-        {/* Coverage Period — only shown for MONTHLY_FEE */}
-        {!isSpecialCollection && (
-          <div>
-            <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.coveragePeriod}</h3>
-            <p className="mb-4 text-sm text-slate-600">{t.publicSubmit.coveragePeriodDesc}</p>
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="grid gap-2 text-sm font-medium text-slate-700">
-                {t.publicSubmit.startMonth}
-                <SearchableSelect
-                  name="coverageStartMonth"
-                  options={MONTH_OPTIONS}
-                  defaultValue={String(new Date().getMonth() + 1)}
-                  required
-                />
-              </div>
-              <label className="ui-label">
-                {t.publicSubmit.startYear}
-                <input
-                  className="ui-input"
-                  defaultValue={new Date().getFullYear()}
-                  name="coverageStartYear"
-                  required
-                  type="number"
-                />
-              </label>
-              <div className="grid gap-2 text-sm font-medium text-slate-700">
-                {t.publicSubmit.endMonth}
-                <SearchableSelect
-                  name="coverageEndMonth"
-                  options={MONTH_OPTIONS}
-                  defaultValue={String(new Date().getMonth() + 1)}
-                  required
-                />
-              </div>
-              <label className="ui-label">
-                {t.publicSubmit.endYear}
-                <input
-                  className="ui-input"
-                  defaultValue={new Date().getFullYear()}
-                  name="coverageEndYear"
-                  required
-                  type="number"
-                />
-              </label>
-            </div>
-          </div>
+        <div className="rounded-2xl px-4 py-3 text-sm ring-1 ring-black/10">
+          <p className="text-[var(--ink-2)]">{f.payTo}</p>
+          <p className="font-semibold">
+            {bank.name} · {bank.holder}
+          </p>
+          <p className="font-heading text-lg font-bold tracking-wide">{bank.account}</p>
+          <p className="mt-1 text-xs text-[var(--ink-2)]">{t.home.reference.replace("12", unit.trim() || "12")}</p>
+        </div>
+      </div>
+
+      {/* Step 3: proof */}
+      <div hidden={step !== 3} className="grid gap-4">
+        <label className="grid cursor-pointer justify-items-center gap-2 rounded-2xl border-2 border-dashed border-[#d2d2d7] p-6 text-center hover:border-[var(--cyan)]">
+          {preview?.url ? (
+            // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
+            <img src={preview.url} alt="" className="max-h-56 rounded-xl" />
+          ) : preview ? (
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <FileText size={18} aria-hidden="true" /> {preview.name}
+            </span>
+          ) : (
+            <span className="font-semibold">{f.proofLabel}</span>
+          )}
+          <span className="text-xs text-[var(--ink-2)]">{f.proofHint}</span>
+          <input
+            type="file"
+            name="proofFile"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            required
+            className="sr-only"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              setPreview(file ? { url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null, name: file.name } : null);
+            }}
+          />
+        </label>
+        <label className="ui-label">
+          {f.phone}
+          <input className="ui-input" name="phone" type="tel" inputMode="tel" autoComplete="tel" />
+        </label>
+        <label className="ui-label">
+          {f.reference}
+          <input className="ui-input" name="referenceNo" />
+        </label>
+        <label className="ui-label">
+          {f.notes}
+          <textarea className="ui-textarea" name="notes" rows={2} />
+        </label>
+        <TurnstileWidget ref={turnstileRef} />
+      </div>
+
+      {(error || (state.message && !state.ok)) && (
+        <p role="alert" className="ui-alert-error flex items-start gap-2">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+          {error || state.message}
+        </p>
+      )}
+
+      <div className="flex items-center justify-between gap-3">
+        {step > 1 ? (
+          <button type="button" className="ui-button-secondary" onClick={() => (setError(""), setStep((s) => s - 1))}>
+            {f.back}
+          </button>
+        ) : (
+          <span />
         )}
-
-        {/* Hidden coverage fields for SPECIAL_COLLECTION (use current month as placeholder) */}
-        {isSpecialCollection && (
-          <>
-            <input type="hidden" name="coverageStartMonth" value={new Date().getMonth() + 1} />
-            <input type="hidden" name="coverageStartYear" value={new Date().getFullYear()} />
-            <input type="hidden" name="coverageEndMonth" value={new Date().getMonth() + 1} />
-            <input type="hidden" name="coverageEndYear" value={new Date().getFullYear()} />
-          </>
+        {step < 3 ? (
+          <button type="button" className="ui-button-primary min-w-32" onClick={goNext}>
+            {f.next}
+          </button>
+        ) : (
+          <button type="submit" className="ui-button-primary min-w-32" disabled={pending}>
+            {pending ? f.sending : (
+              <>
+                <Check size={16} aria-hidden="true" /> {f.send}
+              </>
+            )}
+          </button>
         )}
-
-        {/* Additional Information */}
-        <div>
-          <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.additionalInfo}</h3>
-          <div className="grid gap-4">
-            <label className="ui-label">
-              {t.publicSubmit.referenceNo}
-              <input
-                className="ui-input"
-                name="referenceNo"
-                placeholder={t.publicSubmit.referencePlaceholder}
-              />
-            </label>
-            <label className="ui-label">
-              {t.publicSubmit.notes}
-              <textarea
-                className="ui-textarea min-h-24"
-                name="notes"
-                placeholder={t.publicSubmit.notesPlaceholder}
-              />
-            </label>
-          </div>
-        </div>
-
-        {/* Payment Proof */}
-        <div>
-          <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.paymentProof}</h3>
-          <p className="mb-4 text-sm text-slate-600">{t.publicSubmit.paymentProofDesc}</p>
-          <label className="ui-label">
-            {t.publicSubmit.uploadProof}
-            <input
-              accept="application/pdf,image/jpeg,image/png,image/webp"
-              className="ui-file-input text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
-              name="proofFile"
-              type="file"
-            />
-          </label>
-          <p className="mt-2 text-xs text-slate-500">{t.publicSubmit.uploadHint}</p>
-        </div>
-
-        {/* Turnstile */}
-        <div>
-          <h3 className="mb-4 font-semibold text-slate-900">{t.publicSubmit.verification}</h3>
-          <TurnstileWidget ref={turnstileRef} />
-        </div>
-
-        {/* Submit button */}
-        <button className="ui-button-primary" disabled={pending} type="submit">
-          {pending ? t.publicSubmit.submitting : t.publicSubmit.submitForReview}
-        </button>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }

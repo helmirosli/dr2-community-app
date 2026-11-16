@@ -11,6 +11,8 @@ import { publicSubmissionSchema } from "@/lib/validation";
 export type PublicSubmissionState = {
   ok: boolean;
   message: string;
+  /** Short code shown to the resident on success (last 6 chars of the submission id). */
+  reference?: string;
 };
 
 export async function createPublicSubmission(
@@ -144,8 +146,10 @@ export async function createPublicSubmission(
     }
   }
 
+  let reference = "";
+
   try {
-    await prisma.publicPaymentSubmission.create({
+    const created = await prisma.publicPaymentSubmission.create({
       data: {
         unitNumber: parsed.data.unitNumber,
         residentName: parsed.data.residentName || "",
@@ -167,7 +171,9 @@ export async function createPublicSubmission(
             }
           : undefined,
       },
+      select: { id: true },
     });
+    reference = created.id.slice(-6).toUpperCase();
   } catch (error) {
     console.error("createPublicSubmission failed:", error);
     if (storedUpload) {
@@ -181,9 +187,11 @@ export async function createPublicSubmission(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/status");
 
   return {
     ok: true,
     message: "Submission received. Admin or AJK will review it before marking payment as paid.",
+    reference,
   };
 }
