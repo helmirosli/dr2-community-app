@@ -29,7 +29,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   ]);
 
   return (
-    <AdminPage width="narrow">
+    <AdminPage>
       <PageHeader
         title="Record official payment"
         subtitle="Record monthly fees, backdated payments, upfront payments, or special collections for an active resident."

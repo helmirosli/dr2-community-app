@@ -38,7 +38,7 @@ export default async function EditSpecialCollectionPage({ params }: EditPageProp
   sortByUnit(residents);
 
   return (
-    <AdminPage width="narrow">
+    <AdminPage>
       <PageHeader title={collection.title} subtitle="Edit collection" back={{ href: `/special-collections/${id}`, label: "Back to collection" }} />
 
       <SpecialCollectionForm

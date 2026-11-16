@@ -17,7 +17,7 @@ export default async function NewSpecialCollectionPage() {
   });
 
   return (
-    <AdminPage width="narrow">
+    <AdminPage>
       <PageHeader
         title="Create special collection"
         subtitle="Set up a one-time collection like festival guarded service or emergency repairs. Assign to all active households or select specific ones."

@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useActionState, useEffect, useRef, useMemo, useTransition } from "react";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CalendarDays, Check, CheckCircle, FileText, ImageUp, Landmark, Loader2, QrCode, Sparkles, X, type LucideIcon } from "lucide-react";
 
 import { createPayment, getResidentSnapshot, type PaymentFormState, type ResidentSnapshot } from "@/lib/actions/payments";
 import { SearchableDropdown } from "@/app/components/searchable-dropdown";
-import { FileInput } from "@/app/components/file-input";
 
 const initialState: PaymentFormState = { ok: false, message: "" };
 
@@ -16,14 +16,16 @@ const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
   label: new Date(2000, i).toLocaleString("en", { month: "long" }),
 }));
 
-const PAYMENT_TYPE_OPTIONS = [
-  { value: "MONTHLY_FEE",         label: "Monthly resident fee" },
-  { value: "SPECIAL_COLLECTION",  label: "Special collection" },
+type TileOption = { value: string; title: string; hint: string; icon: LucideIcon; tone: string };
+
+const PAYMENT_TYPES: TileOption[] = [
+  { value: "MONTHLY_FEE", title: "Monthly fee", hint: "RM50 per month", icon: CalendarDays, tone: "text-[#1c7a33] bg-[#e2f7e1]" },
+  { value: "SPECIAL_COLLECTION", title: "Special collection", hint: "One-off, e.g. Raya guard", icon: Sparkles, tone: "text-[#8a6300] bg-[#fff4d6]" },
 ];
 
-const PAYMENT_METHOD_OPTIONS = [
-  { value: "BANK_TRANSFER", label: "Bank transfer" },
-  { value: "DUITNOW_QR",   label: "DuitNow / QR" },
+const PAYMENT_METHODS: TileOption[] = [
+  { value: "BANK_TRANSFER", title: "Bank transfer", hint: "Online / ATM transfer", icon: Landmark, tone: "text-[#0b6e8e] bg-[#ddf5fd]" },
+  { value: "DUITNOW_QR", title: "DuitNow / QR", hint: "Scanned QR code", icon: QrCode, tone: "text-[#5d6779] bg-[#eef0f4]" },
 ];
 
 type PaymentResident = { id: string; unitNumber: string; name: string };
@@ -40,11 +42,57 @@ function monthCount(sy: number, sm: number, ey: number, em: number) {
   return n > 0 ? n : 0;
 }
 
+function TileGroup({
+  name,
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  name: string;
+  label: string;
+  options: TileOption[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="grid gap-2.5 sm:grid-cols-2" role="radiogroup" aria-label={label}>
+      {options.map((o) => {
+        const selected = value === o.value;
+        const Icon = o.icon;
+        return (
+          <label
+            key={o.value}
+            className={`relative flex cursor-pointer items-center gap-3 rounded-2xl p-3.5 ring-1 transition ${
+              selected ? "bg-white ring-2 ring-[var(--blue)] shadow-[0_6px_20px_-10px_rgba(36,99,232,0.5)]" : "bg-[var(--paper)] ring-transparent hover:ring-black/10"
+            }`}
+          >
+            <input type="radio" name={name} value={o.value} checked={selected} onChange={() => onChange(o.value)} className="sr-only" required />
+            <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${o.tone}`}>
+              <Icon size={18} aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-[var(--ink)]">{o.title}</span>
+              <span className="block text-xs text-[var(--ink-2)]">{o.hint}</span>
+            </span>
+            {selected && (
+              <span className="absolute right-3 top-3 grid size-5 place-items-center rounded-full bg-[var(--blue)] text-white">
+                <Check size={12} strokeWidth={3} aria-hidden="true" />
+              </span>
+            )}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 export function PaymentForm({ residents, specialCollections, selectedResidentId }: PaymentFormProps) {
   const now = new Date();
   const [state, action, pending] = useActionState(createPayment, initialState);
   const [isPeeking, startPeek] = useTransition();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const proofRef = useRef<HTMLInputElement>(null);
 
   const [paymentType,   setPaymentType]   = useState("MONTHLY_FEE");
   const [residentId,    setResidentId]    = useState(selectedResidentId ?? "");
@@ -55,6 +103,12 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
   const [startMonth, setStartMonth] = useState(now.getMonth() + 1);
   const [endYear,    setEndYear]    = useState(now.getFullYear());
   const [endMonth,   setEndMonth]   = useState(now.getMonth() + 1);
+
+  // Presentational state for the receipt preview.
+  const [method, setMethod] = useState("BANK_TRANSFER");
+  const [paymentDate, setPaymentDate] = useState(now.toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" })) // local date, not UTC;
+  const [typedAmount, setTypedAmount] = useState<{ forExpected: string; value: string } | null>(null);
+  const [proof, setProof] = useState<{ url: string | null; name: string } | null>(null);
 
   const isSpecialCollection = paymentType === "SPECIAL_COLLECTION";
 
@@ -111,6 +165,27 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
     if (state.message && !state.ok) dialogRef.current?.showModal();
   }, [state]);
 
+  useEffect(() => () => void (proof?.url && URL.revokeObjectURL(proof.url)), [proof]);
+
+  const months = monthCount(startYear, startMonth, endYear, endMonth);
+  const coverageLabel =
+    months === 0
+      ? "Check the months"
+      : startYear === endYear
+        ? startMonth === endMonth
+          ? `${MONTH_LABELS[startMonth - 1]} ${startYear}`
+          : `${MONTH_LABELS[startMonth - 1]} – ${MONTH_LABELS[endMonth - 1]} ${endYear}`
+        : `${MONTH_LABELS[startMonth - 1]} ${startYear} – ${MONTH_LABELS[endMonth - 1]} ${endYear}`;
+  const resident = residents.find((r) => r.id === residentId);
+  const collection = specialCollections.find((c) => c.id === selectedCollectionId);
+  const amountShown = typedAmount?.forExpected === expectedAmount ? typedAmount.value : expectedAmount;
+  const amountNumber = Number(amountShown) || 0;
+
+  const clearProof = () => {
+    setProof(null);
+    if (proofRef.current) proofRef.current.value = "";
+  };
+
   return (
     <>
       {/* Error dialog */}
@@ -124,7 +199,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
               <AlertCircle className="text-[#c2341a]" size={20} />
             </div>
             <div className="flex-1">
-              <h3 className="font-heading text-base font-bold text-[var(--ink)]">Unable to Record Payment</h3>
+              <h3 className="font-heading text-base font-bold text-[var(--ink)]">Unable to record payment</h3>
               <p className="mt-2 text-sm leading-6 text-[var(--ink-2)]">{state.message}</p>
             </div>
           </div>
@@ -136,11 +211,14 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
         </div>
       </dialog>
 
-      <form action={action} className="grid gap-5">
-        <div className="ui-card overflow-hidden">
+      <form action={action} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="grid gap-6">
           {/* Resident */}
-          <section className="ui-form-section">
-            <h2 className="ui-section-title">Resident</h2>
+          <section className="ui-card grid gap-4 p-6">
+            <div>
+              <h2 className="ui-section-title">Resident</h2>
+              <p className="ui-hint mt-0.5">Search by house number or name.</p>
+            </div>
             <SearchableDropdown
               name="residentId"
               options={residentOptions}
@@ -159,13 +237,18 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
 
             {!isPeeking && snapshot && (
               <div className="grid gap-3 rounded-2xl bg-[var(--paper)] p-4">
-                <div>
-                  <p className="font-semibold text-[var(--ink)]">Unit {snapshot.unitNumber} · {snapshot.name}</p>
-                  <p className="ui-hint mt-0.5">
-                    {snapshot.latestCoverage
-                      ? `Last paid: ${MONTH_LABELS[snapshot.latestCoverage.month - 1]} ${snapshot.latestCoverage.year}`
-                      : "No payments recorded"}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[image:var(--blend)] font-heading text-lg font-extrabold text-[#06210b]">
+                    {snapshot.unitNumber}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-[var(--ink)]">{snapshot.name}</p>
+                    <p className="ui-hint">
+                      {snapshot.latestCoverage
+                        ? `Last paid: ${MONTH_LABELS[snapshot.latestCoverage.month - 1]} ${snapshot.latestCoverage.year}`
+                        : "No payments recorded"}
+                    </p>
+                  </div>
                 </div>
 
                 {snapshot.outstandingMonths.length > 0 ? (
@@ -206,22 +289,69 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
             )}
           </section>
 
-          {/* Payment: type, collection, amount, date, method, reference */}
-          <section className="ui-form-section">
-            <h2 className="ui-section-title">Payment</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="ui-label">
-                Type
-                <SearchableDropdown
-                  name="paymentType"
-                  options={PAYMENT_TYPE_OPTIONS}
-                  value={paymentType}
-                  onChange={setPaymentType}
-                  required
-                />
-              </div>
+          {/* What it's for */}
+          <section className="ui-card grid gap-5 p-6">
+            <div>
+              <h2 className="ui-section-title">What is it for?</h2>
+              <p className="ui-hint mt-0.5">Monthly fees cover months; special collections are one-off.</p>
+            </div>
+            <TileGroup name="paymentType" label="Payment type" options={PAYMENT_TYPES} value={paymentType} onChange={setPaymentType} />
 
-              {isSpecialCollection && (
+            {!isSpecialCollection ? (
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="ui-label">
+                    From
+                    <SearchableDropdown
+                      name="coverageStartMonth"
+                      options={MONTH_OPTIONS}
+                      value={String(startMonth)}
+                      onChange={(v) => setStartMonth(Number(v))}
+                      required
+                    />
+                  </div>
+                  <label className="ui-label">
+                    Year
+                    <input
+                      className="ui-input"
+                      inputMode="numeric"
+                      name="coverageStartYear"
+                      onChange={(e) => setStartYear(Number(e.target.value))}
+                      required
+                      type="number"
+                      value={startYear}
+                    />
+                  </label>
+                  <div className="ui-label">
+                    To
+                    <SearchableDropdown
+                      name="coverageEndMonth"
+                      options={MONTH_OPTIONS}
+                      value={String(endMonth)}
+                      onChange={(v) => setEndMonth(Number(v))}
+                      required
+                    />
+                  </div>
+                  <label className="ui-label">
+                    Year
+                    <input
+                      className="ui-input"
+                      inputMode="numeric"
+                      name="coverageEndYear"
+                      onChange={(e) => setEndYear(Number(e.target.value))}
+                      required
+                      type="number"
+                      value={endYear}
+                    />
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <>
+                <input type="hidden" name="coverageStartMonth" value={now.getMonth() + 1} />
+                <input type="hidden" name="coverageStartYear"  value={now.getFullYear()} />
+                <input type="hidden" name="coverageEndMonth"   value={now.getMonth() + 1} />
+                <input type="hidden" name="coverageEndYear"    value={now.getFullYear()} />
                 <div className="ui-label">
                   Collection
                   {collectionOptions.length > 0 ? (
@@ -238,163 +368,198 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
                     </p>
                   )}
                 </div>
-              )}
+                {selectedCollectionId && snapshot && (() => {
+                  const col = snapshot.assignedCollections.find((c) => c.id === selectedCollectionId);
+                  if (!col) return null;
+                  return (
+                    <div className="rounded-2xl bg-[#ddf5fd] px-4 py-3 text-sm">
+                      <span className="text-[var(--ink-2)]">Outstanding for this resident: </span>
+                      <span className="font-semibold tabular-nums text-[#0b6e8e]">RM{(col.outstanding / 100).toFixed(2)}</span>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
+
+            <div className="grid gap-1 rounded-2xl bg-[var(--paper)] p-5 text-center">
+              <p className="text-sm text-[var(--ink-2)]">
+                {isSpecialCollection
+                  ? collection ? collection.title : "Pick a collection"
+                  : months > 0 ? `${months} month${months !== 1 ? "s" : ""} · ${coverageLabel}` : "End month is before start month"}
+              </p>
+              <p className="text-blend font-heading text-5xl font-extrabold tracking-tight tabular-nums">
+                RM{expectedAmount || "0.00"}
+              </p>
+              <p className="text-xs text-[var(--ink-2)]">Expected amount</p>
             </div>
+          </section>
 
-            {isSpecialCollection && selectedCollectionId && snapshot && (() => {
-              const col = snapshot.assignedCollections.find((c) => c.id === selectedCollectionId);
-              if (!col) return null;
-              return (
-                <div className="rounded-2xl bg-[#ddf5fd] px-4 py-3 text-sm">
-                  <span className="text-[var(--ink-2)]">Outstanding for this resident: </span>
-                  <span className="font-semibold tabular-nums text-[#0b6e8e]">RM{(col.outstanding / 100).toFixed(2)}</span>
-                </div>
-              );
-            })()}
-
-            <div className="grid gap-4 sm:grid-cols-3">
+          {/* Amount & method */}
+          <section className="ui-card grid gap-4 p-6">
+            <h2 className="ui-section-title">Payment</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
               <label className="ui-label">
-                Amount (RM)
-                <input
-                  className="ui-input"
-                  defaultValue={expectedAmount}
-                  key={expectedAmount}
-                  min="1"
-                  name="amount"
-                  required
-                  step="0.01"
-                  type="number"
-                />
+                Amount received
+                <span className="relative">
+                  <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-heading text-lg font-bold text-[var(--ink-2)]">RM</span>
+                  <input
+                    className="ui-input !py-3 !pl-14 font-heading !text-lg font-bold tabular-nums"
+                    defaultValue={expectedAmount}
+                    key={expectedAmount}
+                    inputMode="decimal"
+                    min="1"
+                    name="amount"
+                    onChange={(e) => setTypedAmount({ forExpected: expectedAmount, value: e.target.value })}
+                    required
+                    step="0.01"
+                    type="number"
+                  />
+                </span>
               </label>
               <label className="ui-label">
                 Payment date
                 <input
-                  className="ui-input"
-                  defaultValue={now.toISOString().slice(0, 10)}
+                  className="ui-input !py-3"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
                   name="paymentDate"
                   required
                   type="date"
                 />
               </label>
-              <div className="ui-label">
-                Method
-                <SearchableDropdown
-                  name="method"
-                  options={PAYMENT_METHOD_OPTIONS}
-                  defaultValue="BANK_TRANSFER"
-                  required
-                />
-              </div>
             </div>
+
+            {!isSpecialCollection && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-2xl bg-[var(--paper)] p-3.5 text-sm text-[var(--ink)]">
+                <input className="mt-0.5 size-4" name="allowAdjustment" type="checkbox" />
+                <span>
+                  <span className="block font-medium">Allow adjusted amount</span>
+                  <span className="block text-xs text-[var(--ink-2)]">Tick when the payment doesn&apos;t exactly match RM50 per month.</span>
+                </span>
+              </label>
+            )}
+
+            <div className="grid gap-2">
+              <p className="ui-label">Method</p>
+              <TileGroup name="method" label="Payment method" options={PAYMENT_METHODS} value={method} onChange={setMethod} />
+            </div>
+
             <label className="ui-label">
-              Reference number
-              <input className="ui-input" name="referenceNo" placeholder="e.g. TXN123456" />
+              <span>Reference number <span className="font-normal text-[var(--ink-2)]">(optional)</span></span>
+              <input className="ui-input" name="referenceNo" placeholder="e.g. TXN123456" autoComplete="off" />
             </label>
           </section>
 
-          {/* Coverage months (monthly only) */}
-          {!isSpecialCollection ? (
-            <section className="ui-form-section">
-              <div>
-                <h2 className="ui-section-title">Coverage months</h2>
-                <p className="ui-hint mt-1">Select the months this payment covers.</p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-4">
-                <div className="ui-label">
-                  Start month
-                  <SearchableDropdown
-                    name="coverageStartMonth"
-                    options={MONTH_OPTIONS}
-                    value={String(startMonth)}
-                    onChange={(v) => setStartMonth(Number(v))}
-                    required
-                  />
-                </div>
-                <label className="ui-label">
-                  Start year
-                  <input
-                    className="ui-input"
-                    name="coverageStartYear"
-                    onChange={(e) => setStartYear(Number(e.target.value))}
-                    required
-                    type="number"
-                    value={startYear}
-                  />
-                </label>
-                <div className="ui-label">
-                  End month
-                  <SearchableDropdown
-                    name="coverageEndMonth"
-                    options={MONTH_OPTIONS}
-                    value={String(endMonth)}
-                    onChange={(v) => setEndMonth(Number(v))}
-                    required
-                  />
-                </div>
-                <label className="ui-label">
-                  End year
-                  <input
-                    className="ui-input"
-                    name="coverageEndYear"
-                    onChange={(e) => setEndYear(Number(e.target.value))}
-                    required
-                    type="number"
-                    value={endYear}
-                  />
-                </label>
-              </div>
-
-              {expectedAmount && (
-                <div className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--paper)] px-4 py-3 text-sm">
-                  <span className="text-[var(--ink-2)]">
-                    {monthCount(startYear, startMonth, endYear, endMonth)} month{monthCount(startYear, startMonth, endYear, endMonth) !== 1 ? "s" : ""} · expected
-                  </span>
-                  <span className="font-heading font-bold tabular-nums text-[var(--ink)]">RM{expectedAmount}</span>
-                </div>
-              )}
-
-              <label className="flex items-start gap-3 rounded-2xl bg-[var(--paper)] p-3 text-sm font-medium text-[var(--ink)]">
-                <input className="mt-0.5" name="allowAdjustment" type="checkbox" />
-                <span>Allow adjusted amount (when payment doesn&apos;t exactly match RM50 per month)</span>
-              </label>
-            </section>
-          ) : (
-            <>
-              <input type="hidden" name="coverageStartMonth" value={now.getMonth() + 1} />
-              <input type="hidden" name="coverageStartYear"  value={now.getFullYear()} />
-              <input type="hidden" name="coverageEndMonth"   value={now.getMonth() + 1} />
-              <input type="hidden" name="coverageEndYear"    value={now.getFullYear()} />
-            </>
-          )}
-
           {/* Proof & notes */}
-          <section className="ui-form-section">
-            <h2 className="ui-section-title">Proof &amp; notes</h2>
-            <div className="ui-label">
-              Receipt / proof (optional)
-              <FileInput name="proofFile" />
+          <section className="ui-card grid gap-4 p-6">
+            <div>
+              <h2 className="ui-section-title">Proof &amp; notes</h2>
+              <p className="ui-hint mt-0.5">Optional, but a receipt makes audits painless.</p>
+            </div>
+            <div className="grid gap-2">
+              <label className="grid min-h-36 cursor-pointer place-items-center gap-2 rounded-2xl border-2 border-dashed border-[#d2d2d7] bg-[var(--paper)] p-6 text-center transition hover:border-[var(--cyan)] hover:bg-white">
+                {proof?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
+                  <img src={proof.url} alt="Selected receipt" className="max-h-56 rounded-xl" />
+                ) : proof ? (
+                  <span className="flex items-center gap-2 text-sm font-semibold text-[var(--ink)]">
+                    <FileText size={18} aria-hidden="true" /> {proof.name}
+                  </span>
+                ) : (
+                  <>
+                    <span className="grid size-12 place-items-center rounded-2xl bg-[#ddf5fd] text-[#0b6e8e]">
+                      <ImageUp size={22} aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-semibold text-[var(--ink)]">Tap to attach the receipt</span>
+                  </>
+                )}
+                <span className="text-xs text-[var(--ink-2)]">PDF, JPG, PNG or WebP · max 10 MB</span>
+                <input
+                  ref={proofRef}
+                  type="file"
+                  name="proofFile"
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    setProof(file ? { url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null, name: file.name } : null);
+                  }}
+                />
+              </label>
+              {proof && (
+                <button type="button" onClick={clearProof} className="flex min-h-10 items-center gap-1.5 justify-self-start rounded-full px-3 text-sm font-medium text-[#c2341a] hover:bg-[#ffe6e0]">
+                  <X size={14} aria-hidden="true" /> Remove {proof.name}
+                </button>
+              )}
             </div>
             <label className="ui-label">
-              Notes (optional)
+              <span>Notes <span className="font-normal text-[var(--ink-2)]">(optional)</span></span>
               <textarea className="ui-textarea min-h-20" name="notes" />
             </label>
           </section>
+
+          {state.message && state.ok && (
+            <div className="ui-alert-success flex items-center gap-3">
+              <CheckCircle size={16} />
+              <p>{state.message}</p>
+            </div>
+          )}
+
+          {/* Sticky save bar (sits above the mobile tab bar) */}
+          <div className="sticky bottom-[76px] z-10 flex items-center justify-end gap-2 rounded-[22px] bg-white/90 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 backdrop-blur-xl lg:bottom-4">
+            <Link href="/payments" className="rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--ink-2)] hover:bg-black/5">
+              Cancel
+            </Link>
+            <button className="ui-button-primary min-w-40" disabled={pending || residents.length === 0} type="submit">
+              {pending ? "Recording…" : "Record payment"}
+            </button>
+          </div>
         </div>
 
-        {state.message && state.ok && (
-          <div className="ui-alert-success flex items-center gap-3">
-            <CheckCircle size={16} />
-            <p>{state.message}</p>
+        {/* Live receipt */}
+        <aside className="grid gap-4 lg:sticky lg:top-24">
+          <div className="relative overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white">
+            <div aria-hidden="true" className="absolute -right-10 -top-10 size-40 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,0.35),transparent_70%)]" />
+            <p className="text-xs font-medium uppercase tracking-wider text-[#8e9ab8]">Receipt preview</p>
+            <div className="mt-4 flex items-center gap-4">
+              <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-[image:var(--blend)] font-heading text-2xl font-extrabold text-[#06210b]">
+                {resident?.unitNumber ?? "–"}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-heading text-lg font-bold">{resident?.name ?? "Pick a resident"}</p>
+                <p className="text-sm text-[#c7cedd]">{isSpecialCollection ? "Special collection" : "Monthly fee"}</p>
+              </div>
+            </div>
+            <p className="mt-5 font-heading text-4xl font-extrabold tracking-tight tabular-nums">RM{amountNumber.toFixed(2)}</p>
+            {expectedAmount && amountNumber > 0 && Number(expectedAmount) !== amountNumber && (
+              <p className="mt-1 text-xs text-[#ffd479]">Expected RM{expectedAmount}</p>
+            )}
+            <dl className="mt-4 grid gap-2 border-t border-dashed border-white/15 pt-4 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[#8e9ab8]">{isSpecialCollection ? "Collection" : "Months"}</dt>
+                <dd className="truncate text-right font-semibold">
+                  {isSpecialCollection ? (collection?.title ?? "—") : months > 0 ? `${coverageLabel} (${months})` : "—"}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[#8e9ab8]">Method</dt>
+                <dd className="font-semibold">{PAYMENT_METHODS.find((m) => m.value === method)?.title}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[#8e9ab8]">Paid on</dt>
+                <dd className="font-semibold tabular-nums">{paymentDate || "—"}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <dt className="text-[#8e9ab8]">Proof</dt>
+                <dd className="font-semibold">{proof ? "Attached" : "None"}</dd>
+              </div>
+            </dl>
           </div>
-        )}
-
-        <button
-          className="ui-button-primary w-full py-3 text-base"
-          disabled={pending || residents.length === 0}
-          type="submit"
-        >
-          {pending ? "Recording..." : "Record payment"}
-        </button>
+          <div className="hidden justify-items-center rounded-[28px] bg-white p-5 ring-1 ring-black/5 lg:grid">
+            {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
+            <img src="/art/a4-submit-success.webp" alt="" width={300} height={225} className="animate-float w-48" />
+          </div>
+        </aside>
       </form>
     </>
   );
