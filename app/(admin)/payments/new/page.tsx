@@ -30,7 +30,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   ]);
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-4xl gap-6">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
           <Link href="/payments" className="transition-colors hover:text-slate-700">

@@ -25,7 +25,7 @@ export default async function EditResidentPage({ params }: EditResidentPageProps
   }
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-3xl gap-6">
         <header>
           <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${resident.id}`}>

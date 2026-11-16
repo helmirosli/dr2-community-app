@@ -37,7 +37,7 @@ export default async function EditSpecialCollectionPage({ params }: EditPageProp
   const assignedIds = assigned.map((a) => a.residentId);
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-3xl gap-6">
         <Link className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/special-collections/${id}`}>
           <ArrowLeft aria-hidden="true" size={16} />

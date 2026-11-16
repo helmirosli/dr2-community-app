@@ -28,7 +28,7 @@ export default async function ResidentVehicleListPage({ params }: ResidentVehicl
   }
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-col gap-4 rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div>

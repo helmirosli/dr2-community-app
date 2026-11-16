@@ -11,7 +11,7 @@ export default async function NewResidentPage() {
   await requireDashboardUser();
 
   return (
-    <main className="min-h-screen bg-[#f6fafb] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-3xl gap-6">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
           <Link href="/residents" className="transition-colors hover:text-slate-700">
