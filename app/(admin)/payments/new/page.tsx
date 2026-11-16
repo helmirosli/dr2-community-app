@@ -1,8 +1,6 @@
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { PaymentForm } from "../payment-form";
 
 export const dynamic = "force-dynamic";
@@ -30,30 +28,17 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   ]);
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-4xl gap-6">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <Link href="/payments" className="transition-colors hover:text-slate-700">
-            Operations
-          </Link>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">Record Payment</span>
-        </nav>
-        <header>
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href="/payments">Payment records</Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Record official payment</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Record monthly fees, backdated payments, upfront payments, or special collections for an active resident.
-          </p>
-        </header>
-        {residents.length > 0 ? (
-          <PaymentForm residents={residents} specialCollections={specialCollections} selectedResidentId={params?.residentId} />
-        ) : (
-          <div className="rounded-lg border border-cyan-950/10 bg-white p-6 text-sm text-slate-600 shadow-sm">
-            Add at least one active resident before recording payments.
-          </div>
-        )}
-      </div>
-    </main>
+    <AdminPage width="narrow">
+      <PageHeader
+        title="Record official payment"
+        subtitle="Record monthly fees, backdated payments, upfront payments, or special collections for an active resident."
+        back={{ href: "/payments", label: "Payment records" }}
+      />
+      {residents.length > 0 ? (
+        <PaymentForm residents={residents} specialCollections={specialCollections} selectedResidentId={params?.residentId} />
+      ) : (
+        <div className="ui-card ui-empty">Add at least one active resident before recording payments.</div>
+      )}
+    </AdminPage>
   );
 }

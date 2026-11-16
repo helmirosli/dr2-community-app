@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight, Edit } from "lucide-react";
+import { Edit, Search } from "lucide-react";
 import { TablePagination } from "@/app/components/table-pagination";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { formatRM } from "@/lib/money";
@@ -24,10 +25,9 @@ function statusLabel(status: string) {
   return "Draft";
 }
 
-function statusDot(status: string) {
-  if (status === "ACTIVE") return "bg-emerald-500";
-  if (status === "CLOSED") return "bg-slate-400";
-  return "bg-slate-400";
+function statusChip(status: string) {
+  if (status === "ACTIVE") return "bg-[#e2f7e1] text-[#1c7a33]";
+  return "bg-[#eef0f4] text-[#5d6779]";
 }
 
 export default async function SpecialCollectionDetailPage({ params, searchParams }: DetailPageProps) {
@@ -113,202 +113,164 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <Link href="/special-collections" className="transition-colors hover:text-slate-700">
-            Special Collections
-          </Link>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">{collection.title}</span>
-        </nav>
-
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`size-2 rounded-full ${statusDot(collection.status)}`} />
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                {statusLabel(collection.status)}
-              </span>
-              {collection.dueDate && (
-                <>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-xs text-slate-500">
-                    Due {collection.dueDate.toLocaleDateString("en-MY")}
-                  </span>
-                </>
-              )}
-            </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight">{collection.title}</h1>
-            {collection.description && (
-              <p className="mt-1 text-sm text-slate-500">{collection.description}</p>
-            )}
-          </div>
-          <Link className="ui-button-primary shrink-0" href={`/special-collections/${id}/edit`}>
+    <AdminPage>
+      <PageHeader
+        title={collection.title}
+        subtitle={collection.description || undefined}
+        back={{ href: "/special-collections", label: "Special Collections" }}
+        actions={
+          <Link className="ui-button-primary" href={`/special-collections/${id}/edit`}>
             <Edit aria-hidden="true" size={15} />
             Edit
           </Link>
-        </div>
+        }
+      />
 
-        {/* Progress card */}
-        <div className="ui-card p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex-1">
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-xs text-slate-500">Collected</p>
-                  <p className="text-2xl font-bold text-slate-900">{formatRM(totalPaid)}</p>
-                </div>
-                <p className="text-lg font-bold text-cyan-700">{progressPct}%</p>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className="h-full rounded-full bg-cyan-600 transition-all"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
+      {/* Progress card */}
+      <section className="ui-card grid gap-5 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--ink-2)]">
+          <span className={`ui-chip ${statusChip(collection.status)}`}>{statusLabel(collection.status)}</span>
+          {collection.dueDate && <span>Due {collection.dueDate.toLocaleDateString("en-MY")}</span>}
+        </div>
+        <div>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-sm text-[var(--ink-2)]">Collected</p>
+              <p className="font-heading text-3xl font-bold tracking-tight tabular-nums text-[var(--ink)]">{formatRM(totalPaid)}</p>
             </div>
+            <p className="font-heading text-lg font-bold tabular-nums text-[var(--ink)]">{progressPct}%</p>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Per household</p>
-              <p className="mt-1 font-semibold text-slate-900">{formatRM(collection.amountPerResident)}</p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Assigned</p>
-              <p className="mt-1 font-semibold text-slate-900">{allAssignments.length} households</p>
-            </div>
-            <div className="rounded-lg bg-emerald-50 p-3">
-              <p className="text-xs text-emerald-600">Paid</p>
-              <p className="mt-1 font-semibold text-emerald-800">{paidCount} households</p>
-            </div>
-            <div className={`rounded-lg p-3 ${outstanding > 0 ? "bg-amber-50" : "bg-slate-50"}`}>
-              <p className={`text-xs ${outstanding > 0 ? "text-amber-600" : "text-slate-500"}`}>Outstanding</p>
-              <p className={`mt-1 font-semibold ${outstanding > 0 ? "text-amber-800" : "text-slate-900"}`}>
-                {formatRM(outstanding)}
-              </p>
-            </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#eef0f4]">
+            <div className="h-full rounded-full bg-[var(--leaf)]" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-2xl bg-[var(--paper)] p-3">
+            <p className="text-xs text-[var(--ink-2)]">Per household</p>
+            <p className="mt-1 font-semibold tabular-nums text-[var(--ink)]">{formatRM(collection.amountPerResident)}</p>
+          </div>
+          <div className="rounded-2xl bg-[var(--paper)] p-3">
+            <p className="text-xs text-[var(--ink-2)]">Assigned</p>
+            <p className="mt-1 font-semibold tabular-nums text-[var(--ink)]">{allAssignments.length} households</p>
+          </div>
+          <div className="rounded-2xl bg-[#e2f7e1] p-3">
+            <p className="text-xs text-[#1c7a33]">Paid</p>
+            <p className="mt-1 font-semibold tabular-nums text-[#1c7a33]">{paidCount} households</p>
+          </div>
+          <div className={`rounded-2xl p-3 ${outstanding > 0 ? "bg-[#fff4d6] text-[#8a6300]" : "bg-[var(--paper)] text-[var(--ink)]"}`}>
+            <p className={`text-xs ${outstanding > 0 ? "" : "text-[var(--ink-2)]"}`}>Outstanding</p>
+            <p className="mt-1 font-semibold tabular-nums">{formatRM(outstanding)}</p>
+          </div>
+        </div>
+      </section>
 
-        {/* Assignment table */}
-        <section className="ui-card overflow-hidden">
-          {/* Table controls */}
-          <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-base font-semibold text-slate-900">
-              Household assignments
-              <span className="ml-2 text-sm font-normal text-slate-500">{allAssignments.length} total</span>
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Search */}
-              <form method="GET" action={`/special-collections/${id}`} className="flex items-center gap-2">
-                <input type="hidden" name="perPage" value={perPage} />
-                <input type="hidden" name="filter" value={filter} />
-                <input type="hidden" name="page" value="1" />
-                <input
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  name="search"
-                  defaultValue={search}
-                  placeholder="Search unit or name..."
-                />
-              </form>
-              {/* Status filter pills */}
-              <div className="flex items-center gap-1">
-                {(["all", "paid", "outstanding"] as const).map((f) => (
-                  <Link
-                    key={f}
-                    href={filterLink(f)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition ${
-                      filter === f
-                        ? "bg-cyan-700 text-white"
-                        : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {f === "all" ? "All" : f === "paid" ? "Paid" : "Outstanding"}
-                  </Link>
-                ))}
-              </div>
+      {/* Assignment table */}
+      <section className="ui-card overflow-hidden">
+        <div className="ui-toolbar justify-between">
+          <h2 className="ui-section-title">
+            Household assignments
+            <span className="ml-2 font-sans text-sm font-normal text-[var(--ink-2)]">{allAssignments.length} total</span>
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <form method="GET" action={`/special-collections/${id}`} className="ui-search">
+              <input type="hidden" name="perPage" value={perPage} />
+              <input type="hidden" name="filter" value={filter} />
+              <input type="hidden" name="page" value="1" />
+              <Search aria-hidden="true" size={16} className="text-[var(--ink-2)]" />
+              <input name="search" defaultValue={search} placeholder="Search unit or name..." aria-label="Search unit or name" />
+            </form>
+            <div className="flex items-center gap-1 rounded-full bg-[var(--paper)] p-1">
+              {(["all", "paid", "outstanding"] as const).map((f) => (
+                <Link
+                  key={f}
+                  href={filterLink(f)}
+                  className={`inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold transition ${
+                    filter === f
+                      ? "bg-white text-[var(--ink)] shadow-sm"
+                      : "text-[var(--ink-2)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  {f === "all" ? "All" : f === "paid" ? "Paid" : "Outstanding"}
+                </Link>
+              ))}
             </div>
           </div>
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-160 border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <div className="overflow-x-auto">
+          <table className="ui-table min-w-160">
+            <thead>
+              <tr>
+                <th>Unit</th>
+                <th>Resident</th>
+                <th className="text-right">Due</th>
+                <th className="text-right">Paid</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assignments.length > 0 ? (
+                assignments.map((assignment) => {
+                  const bal = assignment.amountDue - assignment.amountPaid;
+                  const isPaid = bal <= 0;
+                  return (
+                    <tr key={assignment.id}>
+                      <td className="font-semibold text-[var(--ink)]">{assignment.resident.unitNumber}</td>
+                      <td className="text-[var(--ink)]">{assignment.resident.name}</td>
+                      <td className="text-right tabular-nums text-[var(--ink-2)]">{formatRM(assignment.amountDue)}</td>
+                      <td className="text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(assignment.amountPaid)}</td>
+                      <td>
+                        {isPaid ? (
+                          <span className="ui-chip bg-[#e2f7e1] text-[#1c7a33]">Paid</span>
+                        ) : (
+                          <span className="ui-chip bg-[#fff4d6] text-[#8a6300] tabular-nums">{formatRM(bal)} left</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Unit</th>
-                  <th className="px-5 py-3 font-semibold">Resident</th>
-                  <th className="px-5 py-3 font-semibold">Due</th>
-                  <th className="px-5 py-3 font-semibold">Paid</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {assignments.length > 0 ? (
-                  assignments.map((assignment) => {
-                    const bal = assignment.amountDue - assignment.amountPaid;
-                    const isPaid = bal <= 0;
-                    return (
-                      <tr className="transition hover:bg-cyan-50/40" key={assignment.id}>
-                        <td className="px-5 py-3 font-semibold text-slate-900">{assignment.resident.unitNumber}</td>
-                        <td className="px-5 py-3 text-slate-700">{assignment.resident.name}</td>
-                        <td className="px-5 py-3 text-slate-700">{formatRM(assignment.amountDue)}</td>
-                        <td className="px-5 py-3 font-semibold text-slate-900">{formatRM(assignment.amountPaid)}</td>
-                        <td className="px-5 py-3">
-                          {isPaid ? (
-                            <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
-                              Paid
-                            </span>
-                          ) : (
-                            <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-100">
-                              {formatRM(bal)} left
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td className="px-5 py-10 text-center text-slate-500" colSpan={5}>
+                  <td colSpan={5}>
+                    <div className="ui-empty">
                       {search ? `No results for "${search}"` : "No households match this filter."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          <TablePagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            perPage={perPage}
-            rangeStart={totalCount === 0 ? 0 : (currentPage - 1) * perPage + 1}
-            rangeEnd={Math.min(currentPage * perPage, totalCount)}
-            perPageOptions={PAGE_SIZE_OPTIONS}
-            pageLink={pageLink}
-          />
-        </section>
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          perPage={perPage}
+          rangeStart={totalCount === 0 ? 0 : (currentPage - 1) * perPage + 1}
+          rangeEnd={Math.min(currentPage * perPage, totalCount)}
+          perPageOptions={PAGE_SIZE_OPTIONS}
+          pageLink={pageLink}
+        />
+      </section>
 
-        {/* Dates */}
-        {(collection.eventStartDate || collection.eventEndDate) && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {collection.eventStartDate && (
-              <div className="ui-card p-4">
-                <p className="text-xs font-medium text-slate-500">Event start date</p>
-                <p className="mt-1 font-semibold text-slate-900">{collection.eventStartDate.toLocaleDateString("en-MY")}</p>
-              </div>
-            )}
-            {collection.eventEndDate && (
-              <div className="ui-card p-4">
-                <p className="text-xs font-medium text-slate-500">Event end date</p>
-                <p className="mt-1 font-semibold text-slate-900">{collection.eventEndDate.toLocaleDateString("en-MY")}</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </main>
+      {/* Dates */}
+      {(collection.eventStartDate || collection.eventEndDate) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {collection.eventStartDate && (
+            <div className="ui-card p-4">
+              <p className="text-xs text-[var(--ink-2)]">Event start date</p>
+              <p className="mt-1 font-semibold text-[var(--ink)]">{collection.eventStartDate.toLocaleDateString("en-MY")}</p>
+            </div>
+          )}
+          {collection.eventEndDate && (
+            <div className="ui-card p-4">
+              <p className="text-xs text-[var(--ink-2)]">Event end date</p>
+              <p className="mt-1 font-semibold text-[var(--ink)]">{collection.eventEndDate.toLocaleDateString("en-MY")}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </AdminPage>
   );
 }

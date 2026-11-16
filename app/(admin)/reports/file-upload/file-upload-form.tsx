@@ -28,19 +28,19 @@ export function FileUploadForm() {
 
   return (
     <div className="space-y-6">
-      <form action={action} className="ui-card p-6">
-        <div className="grid gap-6">
+      <form action={action} className="ui-card overflow-hidden">
+        <div className="ui-form-section">
           <label className="ui-label">
             <span>Select CSV or Excel file</span>
             <input
               accept=".csv,.xlsx,.xls"
-              className="ui-file-input text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+              className="ui-file-input text-sm file:mr-4 file:rounded-full file:border-0 file:bg-[var(--blue)] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               name="file"
               onChange={handleFileChange}
               required
               type="file"
             />
-            <span className="text-xs text-slate-500">CSV (.csv) or Excel (.xlsx, .xls) files only. Max 5MB.</span>
+            <span className="ui-hint">CSV (.csv) or Excel (.xlsx, .xls) files only. Max 5MB.</span>
           </label>
 
           {state.message && (
@@ -58,7 +58,7 @@ export function FileUploadForm() {
             </div>
           )}
 
-          <button className="ui-button-primary" disabled={pending || !fileName} type="submit">
+          <button className="ui-button-primary w-fit" disabled={pending || !fileName} type="submit">
             <Upload size={18} />
             {pending ? "Analyzing..." : "Analyze File"}
           </button>

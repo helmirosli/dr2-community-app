@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
 import { requireDashboardUser } from "@/lib/auth";
@@ -22,16 +22,9 @@ export default async function EditVehiclePage({ params }: EditVehiclePageProps) 
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
-        <header className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/vehicles`}>
-            Back to vehicles
-          </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Edit vehicle</h1>
-        </header>
-        <VehicleForm residentId={residentId} vehicle={vehicle} />
-      </div>
-    </main>
+    <AdminPage width="narrow">
+      <PageHeader title="Edit vehicle" back={{ href: `/residents/${residentId}/vehicles`, label: "Back to vehicles" }} />
+      <VehicleForm residentId={residentId} vehicle={vehicle} />
+    </AdminPage>
   );
 }

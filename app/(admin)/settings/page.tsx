@@ -1,4 +1,6 @@
-import { ArrowRight, ChevronRight, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
+
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -40,100 +42,87 @@ export default async function SettingsPage() {
   };
 
   return (
-    <main className="px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-4xl gap-6 [&>*]:min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <span>Administration</span>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">{t.settings.title}</span>
-        </nav>
+    <AdminPage width="narrow">
+      <PageHeader title={t.settings.title} subtitle={t.settings.subtitle} />
 
-        {/* Header */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">{t.settings.administration}</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{t.settings.title}</h1>
-        </div>
+      {/* My account */}
+      <section className="grid gap-3">
+        <h2 className="ui-section-title">My Account</h2>
+        <ChangePasswordForm userId={currentUser.id} passwordHash={currentUserPasswordHash} />
+      </section>
 
-        {/* My account */}
-        <div>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-500">My Account</h2>
-          <ChangePasswordForm userId={currentUser.id} passwordHash={currentUserPasswordHash} />
-        </div>
+      {/* User management — admin only */}
+      {currentUser.role === "ADMIN" && (
+        <section className="grid gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="ui-section-title flex items-center gap-1.5">
+              <Shield size={16} className="text-[var(--ink-2)]" />
+              {t.settings.userManagement}
+            </h2>
+            <span className="ui-hint">{users.length} user{users.length !== 1 ? "s" : ""}</span>
+          </div>
 
-        {/* User management — admin only */}
-        {currentUser.role === "ADMIN" && (
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">
-                <span className="flex items-center gap-1.5"><Shield size={14} />{t.settings.userManagement}</span>
-              </h2>
-              <span className="text-xs text-slate-400">{users.length} user{users.length !== 1 ? "s" : ""}</span>
-            </div>
+          <UserForm />
 
-            <div className="grid gap-4">
-              <UserForm />
-
-              <div className="ui-card overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left text-sm">
-                    <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                      <tr>
-                        <th className="px-5 py-3 font-semibold">{t.settings.name}</th>
-                        <th className="px-5 py-3 font-semibold">{t.settings.email}</th>
-                        <th className="px-5 py-3 font-semibold">{t.settings.role}</th>
-                        <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {users.map((user) => (
-                        <tr className="transition hover:bg-slate-50" key={user.id}>
-                          <td className="px-5 py-3 font-semibold text-slate-900">
-                            {user.name}
-                            {user.id === currentUser.id && (
-                              <span className="ml-2 text-xs font-normal text-slate-400 italic">{t.settings.thisIsYou}</span>
-                            )}
-                          </td>
-                          <td className="px-5 py-3 text-slate-600">{user.email}</td>
-                          <td className="px-5 py-3">
-                            {user.id === currentUser.id ? (
-                              <span className="inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-100">
-                                {roleLabels[user.role] || user.role}
-                              </span>
-                            ) : (
-                              <UserRoleSelect userId={user.id} currentRole={user.role} />
-                            )}
-                          </td>
-                          <td className="px-5 py-3">
-                            {user.id !== currentUser.id && (
-                              <DeleteUserButton userId={user.id} userName={user.name} />
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+          <div className="ui-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="ui-table min-w-160">
+                <thead>
+                  <tr>
+                    <th>{t.settings.name}</th>
+                    <th>{t.settings.email}</th>
+                    <th>{t.settings.role}</th>
+                    <th>{t.common.actions}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id}>
+                      <td className="font-semibold text-[var(--ink)]">
+                        {user.name}
+                        {user.id === currentUser.id && (
+                          <span className="ml-2 text-xs font-normal text-[var(--ink-2)]">{t.settings.thisIsYou}</span>
+                        )}
+                      </td>
+                      <td className="text-[var(--ink-2)]">{user.email}</td>
+                      <td>
+                        {user.id === currentUser.id ? (
+                          <span className="ui-chip bg-[#ddf5fd] text-[#0b6e8e]">
+                            {roleLabels[user.role] || user.role}
+                          </span>
+                        ) : (
+                          <UserRoleSelect userId={user.id} currentRole={user.role} />
+                        )}
+                      </td>
+                      <td>
+                        {user.id !== currentUser.id && (
+                          <DeleteUserButton userId={user.id} userName={user.name} />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
+        </section>
+      )}
 
-        {/* Info cards */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="ui-card p-4">
-            <h3 className="text-sm font-semibold text-slate-900">{t.settings.rolesExplained}</h3>
-            <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
-              <li><span className="font-semibold text-slate-900">Admin</span> — {t.settings.adminDesc}</li>
-              <li><span className="font-semibold text-slate-900">AJK</span> — {t.settings.ajkDesc}</li>
-              <li><span className="font-semibold text-slate-900">Viewer</span> — {t.settings.viewerDesc}</li>
-            </ul>
-          </div>
-          <div className="ui-card p-4">
-            <h3 className="text-sm font-semibold text-slate-900">{t.settings.securityNote}</h3>
-            <p className="mt-2 text-xs text-slate-600">{t.settings.securityNoteDesc}</p>
-          </div>
+      {/* Info cards */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="ui-card p-5">
+          <h3 className="ui-section-title">{t.settings.rolesExplained}</h3>
+          <ul className="mt-3 grid gap-1.5 text-sm text-[var(--ink-2)]">
+            <li><span className="font-semibold text-[var(--ink)]">Admin</span> — {t.settings.adminDesc}</li>
+            <li><span className="font-semibold text-[var(--ink)]">AJK</span> — {t.settings.ajkDesc}</li>
+            <li><span className="font-semibold text-[var(--ink)]">Viewer</span> — {t.settings.viewerDesc}</li>
+          </ul>
+        </div>
+        <div className="ui-card p-5">
+          <h3 className="ui-section-title">{t.settings.securityNote}</h3>
+          <p className="mt-2 text-sm text-[var(--ink-2)]">{t.settings.securityNoteDesc}</p>
         </div>
       </div>
-    </main>
+    </AdminPage>
   );
 }

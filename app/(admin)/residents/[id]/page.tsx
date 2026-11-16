@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Car, ChevronRight, CreditCard, Edit, MapPin, Phone, ReceiptText, Shield, Users } from "lucide-react";
+import { Car, CreditCard, Edit, MapPin, Phone, ReceiptText, Shield, Users } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
+import { getDictionary } from "@/lib/i18n";
 import { formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
+import { monthState } from "@/lib/status";
 import { FileViewer } from "@/app/components/file-viewer";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
+import { StatusPill } from "@/app/components/status";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -24,6 +28,7 @@ function statusLabel(status: string) {
 
 export default async function ResidentDetailPage({ params }: ResidentDetailPageProps) {
   await requireDashboardUser();
+  const t = await getDictionary();
 
   const { id } = await params;
   const resident = await prisma.resident.findUnique({
@@ -66,260 +71,206 @@ export default async function ResidentDetailPage({ params }: ResidentDetailPageP
 
   const latestCoverage = resident.coverages[0];
 
-  // Status badge color mapping
+  // This month's state from the coverages already loaded (newest 12 rows). If every loaded row is
+  // later than this month (long prepayment), the list doesn't reach it, so we skip the pill.
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  const thisMonth = now.getMonth() + 1;
+  const oldestLoaded = resident.coverages[resident.coverages.length - 1];
+  const thisMonthKnown =
+    resident.coverages.length < 12 || (!!oldestLoaded && oldestLoaded.year * 12 + oldestLoaded.month <= thisYear * 12 + thisMonth);
+  const thisMonthState = monthState({
+    amountSen: resident.coverages
+      .filter((c) => c.year === thisYear && c.month === thisMonth)
+      .reduce((sum, c) => sum + c.amountApplied, 0),
+    residentStatus: resident.status,
+    isFuture: false,
+  });
+
+  // Record-state chip colours (spec §3 tokens)
   const statusColors: Record<string, string> = {
-    ACTIVE: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
-    FOR_SALE: "bg-amber-50 text-amber-800 ring-amber-600/20",
-    MOVED_OUT: "bg-slate-100 text-slate-600 ring-slate-400/30",
-    EXEMPT: "bg-cyan-50 text-cyan-800 ring-cyan-600/20",
+    ACTIVE: "bg-[#e2f7e1] text-[#1c7a33]",
+    FOR_SALE: "bg-[#fff4d6] text-[#8a6300]",
+    MOVED_OUT: "bg-[#eef0f4] text-[#5d6779]",
+    EXEMPT: "bg-[#ddf5fd] text-[#0b6e8e]",
   };
   const badgeClass = statusColors[resident.status] || statusColors.ACTIVE;
 
+  const stats = [
+    { icon: Shield, label: "Status", value: statusLabel(resident.status) },
+    { icon: CreditCard, label: "Paid until", value: latestCoverage ? monthLabel(latestCoverage.year, latestCoverage.month) : "—" },
+    { icon: ReceiptText, label: "Payments", value: resident.payments.length },
+    {
+      icon: Users,
+      label: "Occupancy",
+      value: `${resident.tenants.length} tenant${resident.tenants.length !== 1 ? "s" : ""} · ${resident.vehicles.length} vehicle${resident.vehicles.length !== 1 ? "s" : ""}`,
+    },
+  ];
+
+  const hasLine = resident.addressLine1 || resident.addressLine2;
+  const hasCity = resident.city || resident.state || resident.zipCode;
+
   return (
-    <main className="min-h-screen bg-[#f8fafa] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-5xl gap-6">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <Link href="/residents" className="transition-colors hover:text-slate-700">
-            Resident Management
-          </Link>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">{resident.unitNumber}</span>
-        </nav>
-
-        {/* ── Hero header ─────────────────────────────────────────── */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm">
-          <Link
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
-            href="/residents"
-          >
-            <svg aria-hidden className="lucide lucide-arrow-left size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            Back to residents
-          </Link>
-
-          <div className="mt-4 flex flex-col gap-1 sm:items-center sm:flex-row sm:items-start lg:gap-6">
-            {/* Unit number badge */}
-            <div className={`flex size-16 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white ring-1 ring-white/20 bg-cyan-700`}>
+    <AdminPage>
+      <PageHeader
+        back={{ href: "/residents", label: "Back to residents" }}
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            <span className="grid h-12 min-w-12 place-items-center rounded-2xl bg-[var(--ink)] px-2 text-xl text-white tabular-nums">
               {resident.unitNumber}
-            </div>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">{resident.name}</h1>
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${badgeClass}`}>
-                  {statusLabel(resident.status)}
-                </span>
+            </span>
+            <span className="min-w-0">{resident.name}</span>
+          </span>
+        }
+        subtitle={
+          <span className="flex flex-wrap items-center gap-2">
+            <span className={`ui-chip ${badgeClass}`}>{statusLabel(resident.status)}</span>
+            {thisMonthKnown && <StatusPill state={thisMonthState} label={`${t.house.thisMonth}: ${t.states[thisMonthState]}`} />}
+            {resident.streetBlock && <span className="text-sm">{resident.streetBlock}</span>}
+          </span>
+        }
+        actions={
+          <>
+            <Link className="ui-button-primary" href={`/residents/${resident.id}/edit`}>
+              <Edit size={15} aria-hidden="true" />
+              Edit
+            </Link>
+            <Link className="ui-button-secondary" href={`/payments/new?residentId=${resident.id}`}>
+              <ReceiptText size={15} aria-hidden="true" />
+              Payment
+            </Link>
+            <Link className="ui-button-secondary" href={`/residents/${resident.id}/tenants`}>
+              <Users size={15} aria-hidden="true" />
+              Tenants
+            </Link>
+            <Link className="ui-button-secondary" href={`/residents/${resident.id}/vehicles`}>
+              <Car size={15} aria-hidden="true" />
+              Vehicles
+            </Link>
+          </>
+        }
+      />
+
+      {/* Stat tiles */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map(({ icon: Icon, label, value }) => (
+          <div key={label} className="ui-card p-5">
+            <Icon className="size-5 text-[var(--ink-2)]" aria-hidden="true" />
+            <p className="mt-2 text-sm text-[var(--ink-2)]">{label}</p>
+            <p className="mt-0.5 font-heading text-lg font-bold tracking-tight tabular-nums text-[var(--ink)]">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Contact / address */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="ui-card overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-black/5 px-5 py-4">
+            <Phone className="size-5 text-[var(--ink-2)]" aria-hidden="true" />
+            <h2 className="ui-section-title">Contact &amp; Notes</h2>
+          </div>
+          <dl className="divide-y divide-black/5">
+            {[
+              { label: "Phone", value: resident.phone },
+              { label: "Email", value: resident.email },
+            ].map(({ label, value }) => (
+              <div key={label} className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-3 text-sm">
+                <dt className="text-[var(--ink-2)]">{label}</dt>
+                <dd className="min-w-0 break-words text-[var(--ink)]">{value ?? <span className="text-[var(--ink-2)]">Not provided</span>}</dd>
               </div>
-              <p className="mt-1 text-sm text-slate-500">
-                {resident.streetBlock && <><span className="font-medium text-slate-600">Block/Street:</span> {resident.streetBlock}</>}
-                {resident.phone && <span className="ms-4"><span className="font-medium text-slate-600">Phone:</span> {resident.phone}</span>}
-                {resident.email && <span className="ms-4"><span className="font-medium text-slate-600">Email:</span> <span className="text-slate-700">{resident.email}</span></span>}
-              </p>
+            ))}
+            <div className="grid grid-cols-[100px_1fr] items-start gap-2 px-5 py-3 text-sm">
+              <dt className="text-[var(--ink-2)]">Notes</dt>
+              <dd className="leading-relaxed text-[var(--ink)]">{resident.notes ?? <span className="text-[var(--ink-2)]">No notes recorded.</span>}</dd>
             </div>
-
-            {/* Action buttons */}
-            <div className="mt-4 flex flex-wrap gap-2 lg:mt-0">
-              <Link
-                className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-700 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800"
-                href={`/residents/${resident.id}/edit`}
-              >
-                <Edit size={15} />
-                Edit
-              </Link>
-              <Link
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                href={`/payments/new?residentId=${resident.id}`}
-              >
-                <ReceiptText size={15} />
-                Payment
-              </Link>
-              <Link
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                href={`/residents/${resident.id}/tenants`}
-              >
-                <Users size={15} />
-                Tenants
-              </Link>
-              <Link
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-                href={`/residents/${resident.id}/vehicles`}
-              >
-                <Car size={15} />
-                Vehicles
-              </Link>
-            </div>
+          </dl>
+          <div className="border-t border-black/5 px-5 py-3">
+            <Link className="text-sm font-semibold text-[var(--blue)] hover:underline" href={`/residents/${resident.id}/edit`}>
+              Edit contact →
+            </Link>
           </div>
-        </div>
+        </section>
 
-        {/* ── Stat cards ─────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* Status */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <Shield className="size-5 text-cyan-600" />
-            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-500">Status</p>
-            <p className="mt-1 text-lg font-semibold tracking-tight">{statusLabel(resident.status)}</p>
+        <section className="ui-card overflow-hidden">
+          <div className="flex items-center gap-2 border-b border-black/5 px-5 py-4">
+            <MapPin className="size-5 text-[var(--ink-2)]" aria-hidden="true" />
+            <h2 className="ui-section-title">Address</h2>
           </div>
-
-          {/* Paid until */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <CreditCard className="size-5 text-emerald-600" />
-            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-500">Paid until</p>
-            <p className="mt-1 text-lg font-semibold tracking-tight">
-              {latestCoverage ? monthLabel(latestCoverage.year, latestCoverage.month) : "—"}
-            </p>
-          </div>
-
-          {/* Total payments */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <ReceiptText className="size-5 text-sky-600" />
-            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-500">Payments</p>
-            <p className="mt-1 text-lg font-semibold tracking-tight">{resident.payments.length}</p>
-          </div>
-
-          {/* Tenants + Vehicles */}
-          <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
-            <Users className="size-5 text-violet-600" />
-            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-500">Occupancy</p>
-            <p className="mt-1 text-lg font-semibold tracking-tight">
-              {resident.tenants.length} tenant{resident.tenants.length !== 1 ? "s" : ""} · {resident.vehicles.length} vehicle{resident.vehicles.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-
-        {/* ── Content grid: contact / address ────────────────────── */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          {/* Contact & Notes */}
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
-              <Phone className="size-5 text-cyan-600" />
-              <h2 className="text-base font-semibold tracking-tight">Contact &amp; Notes</h2>
-            </div>
-            <dl className="divide-y divide-slate-100">
-              {[
-                { label: "Phone", value: resident.phone },
-                { label: "Email", value: resident.email },
-              ].map(({ label, value }) => (
-                <div key={label} className="grid grid-cols-[100px_1fr] items-center px-5 py-3 text-sm">
-                  <dt className="font-medium text-slate-500">{label}</dt>
-                  <dd className="text-slate-900">{value ?? <span className="text-slate-400">Not provided</span>}</dd>
-                </div>
-              ))}
-              <div className="grid grid-cols-[100px_1fr] items-start gap-2 px-5 py-3 text-sm">
-                <dt className="font-medium text-slate-500 mt-0.5">Notes</dt>
-                <dd className="leading-relaxed text-slate-700">{resident.notes ?? <span className="text-slate-400">No notes recorded.</span>}</dd>
+          <dl className="divide-y divide-black/5">
+            {hasLine && (
+              <div className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-3 text-sm">
+                <dt className="text-[var(--ink-2)]">Address</dt>
+                <dd className="text-[var(--ink)]">
+                  {resident.addressLine1}
+                  {resident.addressLine2 ? `, ${resident.addressLine2}` : ""}
+                </dd>
               </div>
-            </dl>
-            <div className="border-t border-slate-100 px-5 py-3">
-              <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-800" href={`/residents/${resident.id}/edit`}>
-                Edit contact →
-              </Link>
-            </div>
-          </div>
-
-          {/* Address */}
-          <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
-            <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
-              <MapPin className="size-5 text-cyan-600" />
-              <h2 className="text-base font-semibold tracking-tight">Address</h2>
-            </div>
-            <dl className="divide-y divide-slate-100">
-              {(() => {
-                const hasLine = resident.addressLine1 || resident.addressLine2;
-                const hasCity = resident.city || resident.state || resident.zipCode;
-                return (
-                  <>
-                    {hasLine && (
-                      <div className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-3 text-sm">
-                        <dt className="font-medium text-slate-500 mt-0.5">Address</dt>
-                        <dd className="text-slate-900">
-                          {resident.addressLine1}
-                          {resident.addressLine2 ? `, ${resident.addressLine2}` : ""}
-                        </dd>
-                      </div>
-                    )}
-                    {hasCity && (
-                      <div className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-3 text-sm">
-                        <dt className="font-medium text-slate-500 mt-0.5">Location</dt>
-                        <dd className="text-slate-900">
-                          {[resident.city, resident.state, resident.zipCode].filter(Boolean).join(", ")}
-                        </dd>
-                      </div>
-                    )}
-                    {!hasLine && !hasCity && (
-                      <div className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-4 text-sm">
-                        <dt className="font-medium text-slate-500 mt-0.5">&nbsp;</dt>
-                        <dd className="text-slate-400">No address recorded.</dd>
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
-            </dl>
-            <div className="border-t border-slate-100 px-5 py-3">
-              <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-800" href={`/residents/${resident.id}/edit`}>
-                Edit address →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Payment history ────────────────────────────────────── */}
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <CreditCard className="size-5 text-cyan-600" />
-              <h2 className="text-base font-semibold tracking-tight">Payment History</h2>
-            </div>
-            {resident.payments.length > 0 && (
-              <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-800" href={`/payments/new?residentId=${resident.id}`}>
-                + Record payment
-              </Link>
             )}
+            {hasCity && (
+              <div className="grid grid-cols-[100px_1fr] items-center gap-2 px-5 py-3 text-sm">
+                <dt className="text-[var(--ink-2)]">Location</dt>
+                <dd className="text-[var(--ink)]">{[resident.city, resident.state, resident.zipCode].filter(Boolean).join(", ")}</dd>
+              </div>
+            )}
+            {!hasLine && !hasCity && <p className="px-5 py-4 text-sm text-[var(--ink-2)]">No address recorded.</p>}
+          </dl>
+          <div className="border-t border-black/5 px-5 py-3">
+            <Link className="text-sm font-semibold text-[var(--blue)] hover:underline" href={`/residents/${resident.id}/edit`}>
+              Edit address →
+            </Link>
           </div>
-          {resident.payments.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50/80 text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold">Date</th>
-                    <th className="px-5 py-3 font-semibold">Amount</th>
-                    <th className="px-5 py-3 font-semibold">Coverage</th>
-                    <th className="px-5 py-3 font-semibold">Proof</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {resident.payments.map((payment) => {
-                    const coverageRange =
-                      payment.coverages.length > 0
-                        ? `${monthLabel(payment.coverages[0].year, payment.coverages[0].month)} – ${monthLabel(payment.coverages[payment.coverages.length - 1].year, payment.coverages[payment.coverages.length - 1].month)}`
-                        : "-";
+        </section>
+      </div>
 
-                    return (
-                      <tr key={payment.id} className="transition hover:bg-slate-50/60">
-                        <td className="whitespace-nowrap px-5 py-3 font-medium text-slate-700">
-                          {payment.paymentDate.toLocaleDateString("en-MY")}
-                        </td>
-                        <td className="px-5 py-3 font-semibold text-slate-900">
-                          {formatRM(payment.amountSen)}
-                        </td>
-                        <td className="px-5 py-3 text-slate-600">{coverageRange}</td>
-                        <td className="px-5 py-3">
-                          {payment.uploads.length > 0 ? (
-                            <FileViewer files={payment.uploads} />
-                          ) : (
-                            <span className="text-slate-400">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="py-10 text-center text-sm text-slate-500">No payment history recorded yet.</p>
+      {/* Payment history */}
+      <section className="ui-card overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <CreditCard className="size-5 text-[var(--ink-2)]" aria-hidden="true" />
+            <h2 className="ui-section-title">Payment History</h2>
+          </div>
+          {resident.payments.length > 0 && (
+            <Link className="text-sm font-semibold text-[var(--blue)] hover:underline" href={`/payments/new?residentId=${resident.id}`}>
+              + Record payment
+            </Link>
           )}
         </div>
+        {resident.payments.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="ui-table min-w-140">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th className="text-right">Amount</th>
+                  <th>Coverage</th>
+                  <th>Proof</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resident.payments.map((payment) => {
+                  const coverageRange =
+                    payment.coverages.length > 0
+                      ? `${monthLabel(payment.coverages[0].year, payment.coverages[0].month)} – ${monthLabel(payment.coverages[payment.coverages.length - 1].year, payment.coverages[payment.coverages.length - 1].month)}`
+                      : "-";
 
-      </div>
-    </main>
+                  return (
+                    <tr key={payment.id}>
+                      <td className="whitespace-nowrap tabular-nums text-[var(--ink)]">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
+                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(payment.amountSen)}</td>
+                      <td className="text-[var(--ink-2)]">{coverageRange}</td>
+                      <td>
+                        {payment.uploads.length > 0 ? <FileViewer files={payment.uploads} /> : <span className="text-[var(--ink-2)]">—</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="ui-empty">No payment history recorded yet.</div>
+        )}
+      </section>
+    </AdminPage>
   );
 }

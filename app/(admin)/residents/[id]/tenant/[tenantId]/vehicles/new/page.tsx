@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
 import { requireDashboardUser } from "@/lib/auth";
@@ -29,19 +29,13 @@ export default async function NewTenantVehiclePage({ params }: NewTenantVehicleP
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
-        <header className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants/${tenantId}/vehicles`}>
-            Back to vehicles
-          </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Add vehicle</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {tenant.name} — unit {resident.unitNumber}
-          </p>
-        </header>
-        <VehicleForm tenantId={tenantId} />
-      </div>
-    </main>
+    <AdminPage width="narrow">
+      <PageHeader
+        title="Add vehicle"
+        subtitle={`${tenant.name} — unit ${resident.unitNumber}`}
+        back={{ href: `/residents/${residentId}/tenant/${tenantId}/vehicles`, label: "Back to vehicles" }}
+      />
+      <VehicleForm tenantId={tenantId} />
+    </AdminPage>
   );
 }

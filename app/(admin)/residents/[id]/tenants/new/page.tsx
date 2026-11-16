@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
 import { requireDashboardUser } from "@/lib/auth";
@@ -23,19 +23,13 @@ export default async function NewTenantPage({ params }: NewTenantPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
-        <header className="rounded-lg border border-cyan-950/10 bg-white p-5 shadow-sm">
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${residentId}/tenants`}>
-            Back to tenants
-          </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Add tenant</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Unit {resident.unitNumber} — {resident.name}
-          </p>
-        </header>
-        <TenantForm residentId={residentId} />
-      </div>
-    </main>
+    <AdminPage width="narrow">
+      <PageHeader
+        title="Add tenant"
+        subtitle={`Unit ${resident.unitNumber} — ${resident.name}`}
+        back={{ href: `/residents/${residentId}/tenants`, label: "Back to tenants" }}
+      />
+      <TenantForm residentId={residentId} />
+    </AdminPage>
   );
 }

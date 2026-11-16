@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -8,6 +8,7 @@ import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { FileViewer } from "@/app/components/file-viewer";
 import { TablePagination } from "@/app/components/table-pagination";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -91,161 +92,118 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <span>Operations</span>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">{t.payments.title}</span>
-        </nav>
-
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">{t.payments.ledger}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight">{t.payments.title}</h1>
-          </div>
-          <Link className="ui-button-primary shrink-0" href="/payments/new">
+    <AdminPage>
+      <PageHeader
+        title={t.payments.title}
+        subtitle={t.payments.ledger}
+        actions={
+          <Link className="ui-button-primary" href="/payments/new">
             <Plus aria-hidden="true" size={16} />
             {t.payments.recordPayment}
           </Link>
+        }
+      />
+
+      {params.created && <div className="ui-alert-success">{t.payments.recordedSuccess}</div>}
+
+      <section className="ui-card overflow-hidden">
+        <form className="ui-toolbar" method="get">
+          <label className="ui-search">
+            <Search aria-hidden="true" size={16} className="text-[var(--ink-2)]" />
+            <input defaultValue={query} name="q" placeholder="Search unit, resident, reference..." />
+          </label>
+          <select className="ui-select w-auto!" name="type" defaultValue={typeFilter}>
+            <option value="">All types</option>
+            <option value="MONTHLY_FEE">{t.payments.monthlyFee}</option>
+            <option value="SPECIAL_COLLECTION">{t.payments.specialCollection}</option>
+          </select>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--ink-2)]">
+            <span>Date range:</span>
+            <label className="flex items-center gap-1.5">
+              <span>From</span>
+              <input className="ui-input w-auto!" defaultValue={params.from ?? ""} name="from" type="date" />
+            </label>
+            <label className="flex items-center gap-1.5">
+              <span>To</span>
+              <input className="ui-input w-auto!" defaultValue={params.to ?? ""} name="to" type="date" />
+            </label>
+          </div>
+          <button className="ui-button-primary" type="submit">{t.common.apply}</button>
+          {hasFilters && (
+            <Link className="text-sm font-medium text-[var(--blue)] hover:underline" href="/payments">Clear</Link>
+          )}
+        </form>
+
+        <p className="px-5 py-2 text-xs text-[var(--ink-2)]">
+          {totalCount} payment{totalCount !== 1 ? "s" : ""}
+          {hasFilters && " matching filters"}
+          {!hasFilters && " total"}
+        </p>
+
+        <div className="overflow-x-auto">
+          <table className="ui-table min-w-180">
+            <thead>
+              <tr>
+                <th>{t.dashboard.resident}</th>
+                <th>{t.payments.date}</th>
+                <th>{t.payments.type}</th>
+                <th>{t.payments.coverage}</th>
+                <th className="text-right">{t.payments.amount}</th>
+                <th>{t.payments.proof}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.length > 0 ? (
+                payments.map((payment) => {
+                  const first = payment.coverages[0];
+                  const last  = payment.coverages[payment.coverages.length - 1];
+                  const isMonthly = payment.paymentType === "MONTHLY_FEE";
+                  return (
+                    <tr key={payment.id}>
+                      <td>
+                        <p className="font-semibold text-[var(--ink)]">{payment.resident.unitNumber}</p>
+                        <p className="text-xs text-[var(--ink-2)]">{payment.resident.name}</p>
+                      </td>
+                      <td className="whitespace-nowrap tabular-nums text-[var(--ink-2)]">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
+                      <td>
+                        <span className={`ui-chip ${isMonthly ? "bg-[#ddf5fd] text-[#0b6e8e]" : "bg-[#eef0f4] text-[#5d6779]"}`}>
+                          {isMonthly ? t.payments.monthlyFee : t.payments.specialCollection}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap text-[var(--ink-2)]">
+                        {first && last
+                          ? `${monthLabel(first.year, first.month)} – ${monthLabel(last.year, last.month)}`
+                          : "—"}
+                      </td>
+                      <td className="whitespace-nowrap text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(payment.amountSen)}</td>
+                      <td>
+                        {payment.uploads.length > 0 ? <FileViewer files={payment.uploads} /> : <span className="text-[var(--ink-2)]">—</span>}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="ui-empty">{t.payments.noPayments}</div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {params.created && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-            {t.payments.recordedSuccess}
-          </div>
-        )}
-
-        <section className="ui-card overflow-hidden">
-          {/* Filter bar */}
-          <form className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4" method="get">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Search */}
-              <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 focus-within:ring-2 focus-within:ring-cyan-500 min-w-40">
-                <Search aria-hidden="true" className="shrink-0 text-slate-400" size={15} />
-                <input
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-                  defaultValue={query}
-                  name="q"
-                  placeholder="Search unit, resident, reference..."
-                />
-              </div>
-              {/* Type filter */}
-              <select
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                name="type"
-                defaultValue={typeFilter}
-              >
-                <option value="">All types</option>
-                <option value="MONTHLY_FEE">{t.payments.monthlyFee}</option>
-                <option value="SPECIAL_COLLECTION">{t.payments.specialCollection}</option>
-              </select>
-              <button className="ui-button-primary shrink-0" type="submit">{t.common.apply}</button>
-              {hasFilters && (
-                <Link className="text-sm text-slate-500 hover:text-slate-700" href="/payments">Clear</Link>
-              )}
-            </div>
-            {/* Date range */}
-            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
-              <span className="text-xs font-medium text-slate-500">Date range:</span>
-              <label className="flex items-center gap-1.5">
-                <span className="text-xs text-slate-500">From</span>
-                <input
-                  className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  defaultValue={params.from ?? ""}
-                  name="from"
-                  type="date"
-                />
-              </label>
-              <label className="flex items-center gap-1.5">
-                <span className="text-xs text-slate-500">To</span>
-                <input
-                  className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  defaultValue={params.to ?? ""}
-                  name="to"
-                  type="date"
-                />
-              </label>
-            </div>
-          </form>
-
-          {/* Showing summary */}
-          <div className="border-b border-slate-100 px-5 py-2 text-xs text-slate-500">
-            {totalCount} payment{totalCount !== 1 ? "s" : ""}
-            {hasFilters && " matching filters"}
-            {!hasFilters && " total"}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-180 border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.resident}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.date}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.type}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.coverage}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.amount}</th>
-                  <th className="px-5 py-3 font-semibold">{t.payments.proof}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {payments.length > 0 ? (
-                  payments.map((payment) => {
-                    const first = payment.coverages[0];
-                    const last  = payment.coverages[payment.coverages.length - 1];
-                    const isMonthly = payment.paymentType === "MONTHLY_FEE";
-                    return (
-                      <tr className="transition hover:bg-cyan-50/40" key={payment.id}>
-                        <td className="px-5 py-3">
-                          <p className="font-semibold text-slate-950">{payment.resident.unitNumber}</p>
-                          <p className="text-xs text-slate-500">{payment.resident.name}</p>
-                        </td>
-                        <td className="px-5 py-3 text-slate-600">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
-                        <td className="px-5 py-3">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
-                            isMonthly
-                              ? "bg-cyan-50 text-cyan-700 ring-cyan-100"
-                              : "bg-sky-50 text-sky-700 ring-sky-100"
-                          }`}>
-                            {isMonthly ? t.payments.monthlyFee : t.payments.specialCollection}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-slate-600">
-                          {first && last
-                            ? `${monthLabel(first.year, first.month)} – ${monthLabel(last.year, last.month)}`
-                            : "—"}
-                        </td>
-                        <td className="px-5 py-3 font-semibold text-slate-950">{formatRM(payment.amountSen)}</td>
-                        <td className="px-5 py-3">
-                          {payment.uploads.length > 0 ? <FileViewer files={payment.uploads} /> : <span className="text-slate-400">—</span>}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td className="px-5 py-12 text-center text-slate-500" colSpan={6}>
-                      {t.payments.noPayments}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <TablePagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalCount={totalCount}
-            perPage={perPage}
-            rangeStart={totalCount === 0 ? 0 : skip + 1}
-            rangeEnd={Math.min(skip + perPage, totalCount)}
-            perPageOptions={PER_PAGE_OPTIONS}
-            pageLink={pageLink}
-          />
-        </section>
-      </div>
-    </main>
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalCount={totalCount}
+          perPage={perPage}
+          rangeStart={totalCount === 0 ? 0 : skip + 1}
+          rangeEnd={Math.min(skip + perPage, totalCount)}
+          perPageOptions={PER_PAGE_OPTIONS}
+          pageLink={pageLink}
+        />
+      </section>
+    </AdminPage>
   );
 }

@@ -62,9 +62,9 @@ export default async function HomePage() {
           <img
             src="/art/a1-hero.webp"
             alt=""
-            width={1600}
-            height={900}
-            className="mx-auto mt-2 block w-full max-w-6xl [mask-image:radial-gradient(ellipse_70%_75%_at_50%_55%,#000_55%,transparent_100%)] sm:-mt-10"
+            width={1440}
+            height={800}
+            className="mx-auto mt-2 block w-full max-w-6xl [mask-composite:intersect] [mask-image:linear-gradient(to_bottom,transparent,#000_35%,#000_80%,transparent),linear-gradient(to_right,transparent,#000_18%,#000_82%,transparent)] sm:-mt-10"
             fetchPriority="high"
           />
         </picture>

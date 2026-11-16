@@ -30,29 +30,33 @@ export function VehicleForm({ residentId, vehicle }: VehicleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="mt-6 grid gap-5 rounded-lg border border-cyan-950/10 bg-white p-6 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
-          Make
-          <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={vehicle?.make ?? ""} name="make" required />
+    <form action={formAction} className="ui-card overflow-hidden">
+      <section className="ui-form-section">
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="ui-label">
+            Make
+            <input className="ui-input" defaultValue={vehicle?.make ?? ""} name="make" required />
+          </label>
+
+          <label className="ui-label">
+            Plate number
+            <input className="ui-input uppercase" defaultValue={vehicle?.plateNumber ?? ""} name="plateNumber" required />
+          </label>
+        </div>
+
+        <label className="ui-label">
+          Model
+          <input className="ui-input" defaultValue={vehicle?.model ?? ""} name="model" />
         </label>
+      </section>
 
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
-          Plate number
-          <input className="rounded-md border border-slate-300 px-3 py-2 uppercase" defaultValue={vehicle?.plateNumber ?? ""} name="plateNumber" required />
-        </label>
-      </div>
+      <section className="ui-form-section">
+        {state.message ? <p className="ui-alert-error">{state.message}</p> : null}
 
-      <label className="grid gap-2 text-sm font-medium text-slate-700">
-        Model
-        <input className="rounded-md border border-slate-300 px-3 py-2" defaultValue={vehicle?.model ?? ""} name="model" />
-      </label>
-
-      {state.message ? <p className="text-sm font-medium text-red-700">{state.message}</p> : null}
-
-      <button className="min-h-11 rounded-md bg-cyan-700 px-4 text-sm font-semibold text-white transition hover:bg-cyan-800 disabled:opacity-60" disabled={pending} type="submit">
-        {pending ? "Saving..." : vehicle?.id ? "Save vehicle" : "Create vehicle"}
-      </button>
+        <button className="ui-button-primary w-full sm:w-fit sm:justify-self-end" disabled={pending} type="submit">
+          {pending ? "Saving..." : vehicle?.id ? "Save vehicle" : "Create vehicle"}
+        </button>
+      </section>
     </form>
   );
 }

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
 import { requireDashboardUser } from "@/lib/auth";
@@ -25,19 +25,13 @@ export default async function EditResidentPage({ params }: EditResidentPageProps
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-3xl gap-6">
-        <header>
-          <Link className="text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/residents/${resident.id}`}>
-            Back to resident
-          </Link>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Edit {resident.unitNumber}</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Update household contact details, block, status, and notes.
-          </p>
-        </header>
-        <ResidentForm resident={resident} />
-      </div>
-    </main>
+    <AdminPage width="narrow">
+      <PageHeader
+        title={`Edit ${resident.unitNumber}`}
+        subtitle="Update household contact details, block, status, and notes."
+        back={{ href: `/residents/${resident.id}`, label: "Back to resident" }}
+      />
+      <ResidentForm resident={resident} />
+    </AdminPage>
   );
 }

@@ -21,11 +21,13 @@ export function UserForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={action} className="ui-card p-6">
-      <h3 className="text-lg font-semibold text-slate-900">Add new user</h3>
-      <p className="mt-1 text-sm text-slate-600">Create a new dashboard account with a specific role.</p>
+    <form action={action} className="ui-card ui-form-section">
+      <div>
+        <h3 className="ui-section-title">Add new user</h3>
+        <p className="ui-hint mt-1">Create a new dashboard account with a specific role.</p>
+      </div>
 
-      <div className="mt-6 grid gap-4">
+      <div className="grid gap-4">
         <label className="ui-label">
           Name
           <input
@@ -59,7 +61,7 @@ export function UserForm() {
               type={showPassword ? "text" : "password"}
             />
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+              className="absolute right-1 top-1/2 -translate-y-1/2 grid size-8 place-items-center text-[var(--ink-2)] hover:text-[var(--ink)]"
               onClick={() => setShowPassword(!showPassword)}
               type="button"
             >
@@ -97,7 +99,7 @@ export function UserForm() {
           </div>
         )}
 
-        <button className="ui-button-primary" disabled={pending} type="submit">
+        <button className="ui-button-primary w-fit" disabled={pending} type="submit">
           {pending ? "Creating..." : "Create user"}
         </button>
       </div>

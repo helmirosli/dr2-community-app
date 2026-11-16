@@ -35,10 +35,10 @@ export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
   if (isConfirming) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-medium text-red-700">Delete {userName}?</p>
+        <p className="text-xs font-medium text-[#c2341a]">Delete {userName}?</p>
         <div className="flex gap-2">
           <button
-            className="rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+            className="ui-button-danger min-h-10 px-3 text-xs"
             disabled={isLoading}
             onClick={handleDelete}
             type="button"
@@ -46,7 +46,7 @@ export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
             {isLoading ? "Deleting..." : "Confirm"}
           </button>
           <button
-            className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="ui-button-secondary min-h-10 px-3 text-xs"
             disabled={isLoading}
             onClick={() => setIsConfirming(false)}
             type="button"
@@ -55,7 +55,7 @@ export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
           </button>
         </div>
         {message && (
-          <p className={`text-xs font-medium ${message.startsWith("✓") ? "text-emerald-700" : "text-red-700"}`}>
+          <p className={`text-xs font-medium ${message.startsWith("✓") ? "text-[#1c7a33]" : "text-[#c2341a]"}`}>
             {message}
           </p>
         )}
@@ -65,7 +65,7 @@ export function DeleteUserButton({ userId, userName }: DeleteUserButtonProps) {
 
   return (
     <button
-      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+      className="inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-[#c2341a] transition hover:bg-[#ffe6e0]"
       onClick={() => setIsConfirming(true)}
       type="button"
     >

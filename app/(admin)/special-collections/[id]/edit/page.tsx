@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { SpecialCollectionForm } from "../../special-collection-form";
 
 export const dynamic = "force-dynamic";
@@ -37,33 +36,23 @@ export default async function EditSpecialCollectionPage({ params }: EditPageProp
   const assignedIds = assigned.map((a) => a.residentId);
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid max-w-3xl gap-6">
-        <Link className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-cyan-700 hover:text-cyan-900" href={`/special-collections/${id}`}>
-          <ArrowLeft aria-hidden="true" size={16} />
-          Back to collection
-        </Link>
+    <AdminPage width="narrow">
+      <PageHeader title={collection.title} subtitle="Edit collection" back={{ href: `/special-collections/${id}`, label: "Back to collection" }} />
 
-        <header>
-          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Edit collection</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{collection.title}</h1>
-        </header>
-
-        <SpecialCollectionForm
-          assignedResidents={assignedIds}
-          collection={{
-            id: collection.id,
-            title: collection.title,
-            description: collection.description,
-            amountPerResident: collection.amountPerResident,
-            dueDate: collection.dueDate ? collection.dueDate.toISOString().split("T")[0] : null,
-            eventStartDate: collection.eventStartDate ? collection.eventStartDate.toISOString().split("T")[0] : null,
-            eventEndDate: collection.eventEndDate ? collection.eventEndDate.toISOString().split("T")[0] : null,
-            status: collection.status,
-          }}
-          residents={residents}
-        />
-      </div>
-    </main>
+      <SpecialCollectionForm
+        assignedResidents={assignedIds}
+        collection={{
+          id: collection.id,
+          title: collection.title,
+          description: collection.description,
+          amountPerResident: collection.amountPerResident,
+          dueDate: collection.dueDate ? collection.dueDate.toISOString().split("T")[0] : null,
+          eventStartDate: collection.eventStartDate ? collection.eventStartDate.toISOString().split("T")[0] : null,
+          eventEndDate: collection.eventEndDate ? collection.eventEndDate.toISOString().split("T")[0] : null,
+          status: collection.status,
+        }}
+        residents={residents}
+      />
+    </AdminPage>
   );
 }

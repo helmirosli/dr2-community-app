@@ -177,3 +177,41 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   background: var(--danger-50);
   color: var(--danger-600);
 }
+
+/* ---- Admin building blocks (redesign polish pass) ---- */
+
+/* Tables: quiet header, hairline rows, hover tint. Use on <table>. */
+.ui-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.875rem; }
+.ui-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #fafafc; color: var(--ink-2);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.7rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.06); white-space: nowrap;
+}
+.ui-table tbody td { padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.05); vertical-align: middle; }
+.ui-table tbody tr:last-child td { border-bottom: 0; }
+.ui-table tbody tr:hover td { background: #fafafc; }
+
+/* Filter/search bar that sits on top of a card. */
+.ui-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+.ui-search {
+  display: flex; flex: 1 1 14rem; align-items: center; gap: 0.5rem; min-width: 0;
+  border-radius: 999px; background: var(--paper); padding: 0.55rem 1rem;
+}
+.ui-search:focus-within { outline: 3px solid rgba(34, 199, 242, 0.35); }
+.ui-search input { min-width: 0; flex: 1; background: transparent; outline: none; font-size: 0.9rem; }
+
+/* Card section title + form sections. */
+.ui-section-title { font-family: var(--font-heading), sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.ui-form-section { display: grid; gap: 1rem; padding: 1.5rem; }
+.ui-form-section + .ui-form-section { border-top: 1px solid rgba(0, 0, 0, 0.06); }
+.ui-hint { font-size: 0.8rem; color: var(--ink-2); }
+
+/* Small status chip for record states (Active, Draft, Closed…). */
+.ui-chip { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 600; }
+
+/* Empty state inside a card. */
+.ui-empty { display: grid; justify-items: center; gap: 0.5rem; padding: 3rem 1.5rem; text-align: center; color: var(--ink-2); }
+
+.ui-label { color: var(--ink); }
+.ui-select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #86868b 50%), linear-gradient(135deg, #86868b 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 2.25rem; }

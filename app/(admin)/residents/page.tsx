@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ChevronRight, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { SearchableSelect } from "@/app/components/searchable-select";
 import { TablePagination } from "@/app/components/table-pagination";
 import { HouseMap } from "./house-map";
@@ -33,11 +34,10 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
   }
 
   function statusStyle(status: string) {
-    if (status === "ACTIVE")    return "bg-emerald-50 text-emerald-700 ring-emerald-100";
-    if (status === "EXEMPT")    return "bg-sky-50 text-sky-700 ring-sky-100";
-    if (status === "FOR_SALE")  return "bg-amber-50 text-amber-700 ring-amber-100";
-    if (status === "MOVED_OUT") return "bg-slate-100 text-slate-500 ring-slate-200";
-    return "bg-slate-50 text-slate-600 ring-slate-100";
+    if (status === "ACTIVE")    return "bg-[#e2f7e1] text-[#1c7a33]";
+    if (status === "EXEMPT")    return "bg-[#ddf5fd] text-[#0b6e8e]";
+    if (status === "FOR_SALE")  return "bg-[#fff4d6] text-[#8a6300]";
+    return "bg-[#eef0f4] text-[#5d6779]";
   }
 
   const params = await searchParams;
@@ -89,58 +89,50 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
   const inactiveResidents = totalResidents - activeResidents - exemptResidents;
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-6 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-6 [&>*]:min-w-0">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500">
-          <span>Resident Management</span>
-          <ChevronRight size={14} />
-          <span className="font-medium text-slate-700">{t.residents.title}</span>
-        </nav>
-
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">{t.residents.inventory}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight">{t.residents.title}</h1>
-            <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500">
+    <AdminPage>
+        <PageHeader
+          title={t.residents.title}
+          subtitle={
+            <span className="flex flex-wrap gap-x-3 gap-y-1">
               <span>{totalResidents} total</span>
-              <span className="text-emerald-700">● {activeResidents} active</span>
-              {exemptResidents > 0 && <span className="text-sky-700">● {exemptResidents} exempt</span>}
-              {inactiveResidents > 0 && <span className="text-slate-400">● {inactiveResidents} inactive</span>}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {/* Peta / Senarai toggle (spec §5.8) */}
-            <div className="grid grid-cols-2 rounded-full bg-black/5 p-1 text-sm font-semibold" role="group">
-              <Link href="/residents?view=map" aria-current={isMap ? "page" : undefined} className={`rounded-full px-4 py-1.5 text-center ${isMap ? "bg-white shadow-sm" : "text-slate-500"}`}>
-                {t.today.map}
+              <span className="text-[#1c7a33]">● {activeResidents} active</span>
+              {exemptResidents > 0 && <span className="text-[#0b6e8e]">● {exemptResidents} exempt</span>}
+              {inactiveResidents > 0 && <span className="text-[#5d6779]">● {inactiveResidents} inactive</span>}
+            </span>
+          }
+          actions={
+            <>
+              {/* Peta / Senarai toggle (spec §5.8) */}
+              <div className="grid grid-cols-2 rounded-full bg-black/5 p-1 text-sm font-semibold" role="group">
+                <Link href="/residents?view=map" aria-current={isMap ? "page" : undefined} className={`grid min-h-9 place-items-center rounded-full px-4 ${isMap ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)]"}`}>
+                  {t.today.map}
+                </Link>
+                <Link href="/residents" aria-current={!isMap ? "page" : undefined} className={`grid min-h-9 place-items-center rounded-full px-4 ${!isMap ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)]"}`}>
+                  {t.today.list}
+                </Link>
+              </div>
+              <Link className="ui-button-primary" href="/residents/new">
+                <Plus aria-hidden="true" size={16} />
+                {t.residents.addResident}
               </Link>
-              <Link href="/residents" aria-current={!isMap ? "page" : undefined} className={`rounded-full px-4 py-1.5 text-center ${!isMap ? "bg-white shadow-sm" : "text-slate-500"}`}>
-                {t.today.list}
-              </Link>
-            </div>
-            <Link className="ui-button-primary" href="/residents/new">
-              <Plus aria-hidden="true" size={16} />
-              {t.residents.addResident}
-            </Link>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         {isMap ? <HouseMap t={t} /> : (
         /* Table card */
         <section className="ui-card overflow-hidden">
           {/* Filter bar */}
-          <form className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center" method="get">
-            <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 focus-within:ring-2 focus-within:ring-cyan-500">
-              <Search aria-hidden="true" className="shrink-0 text-slate-400" size={16} />
+          <form className="ui-toolbar" method="get">
+            <label className="ui-search">
+              <Search aria-hidden="true" size={16} className="shrink-0 text-[var(--ink-2)]" />
               <input
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
                 defaultValue={query}
                 name="q"
                 placeholder={t.residents.searchPlaceholder}
               />
-            </div>
-            <div className="sm:w-48">
+            </label>
+            <div className="w-full sm:w-48">
               <SearchableSelect
                 name="status"
                 defaultValue={selectedStatus}
@@ -154,7 +146,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               {t.common.apply}
             </button>
             {(query || selectedStatus) && (
-              <Link className="shrink-0 text-sm text-slate-500 hover:text-slate-700" href="/residents">
+              <Link className="shrink-0 text-sm font-medium text-[var(--blue)] hover:underline" href="/residents">
                 Clear
               </Link>
             )}
@@ -162,7 +154,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
 
           {/* Showing summary */}
           {(query || selectedStatus) && (
-            <p className="border-b border-slate-100 px-5 py-2 text-xs text-slate-500">
+            <p className="border-b border-black/5 px-5 py-2 text-xs text-[var(--ink-2)]">
               {totalCount} result{totalCount !== 1 ? "s" : ""}
               {query && <> for &ldquo;{query}&rdquo;</>}
               {selectedStatus && <> · {statusLabel(selectedStatus)}</>}
@@ -170,38 +162,38 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
           )}
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-180 border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <table className="ui-table min-w-180">
+              <thead>
                 <tr>
-                  <th className="px-5 py-3 font-semibold">{t.residents.unit}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.residentName}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.block}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.status}</th>
-                  <th className="px-5 py-3 font-semibold">{t.residents.records}</th>
-                  <th className="px-5 py-3 font-semibold">{t.common.actions}</th>
+                  <th>{t.residents.unit}</th>
+                  <th>{t.residents.residentName}</th>
+                  <th>{t.residents.block}</th>
+                  <th>{t.common.status}</th>
+                  <th>{t.residents.records}</th>
+                  <th>{t.common.actions}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {residents.length > 0 ? (
                   residents.map((resident) => (
-                    <tr className="transition hover:bg-cyan-50/40" key={resident.id}>
-                      <td className="px-5 py-3 font-semibold text-slate-950">{resident.unitNumber}</td>
-                      <td className="px-5 py-3">
-                        <p className="font-medium text-slate-950">{resident.name}</p>
-                        {resident.phone && <p className="mt-0.5 text-xs text-slate-500">{resident.phone}</p>}
+                    <tr key={resident.id}>
+                      <td className="font-heading font-bold tabular-nums text-[var(--ink)]">{resident.unitNumber}</td>
+                      <td>
+                        <p className="font-medium text-[var(--ink)]">{resident.name}</p>
+                        {resident.phone && <p className="mt-0.5 text-xs text-[var(--ink-2)]">{resident.phone}</p>}
                       </td>
-                      <td className="px-5 py-3 text-slate-600">{resident.streetBlock ?? "—"}</td>
-                      <td className="px-5 py-3">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${statusStyle(resident.status)}`}>
+                      <td className="text-[var(--ink-2)]">{resident.streetBlock ?? "—"}</td>
+                      <td>
+                        <span className={`ui-chip ${statusStyle(resident.status)}`}>
                           {statusLabel(resident.status)}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-slate-500">
-                        <span className="text-xs">{resident._count.payments}pay · {resident._count.coverages}mo</span>
+                      <td className="text-[var(--ink-2)]">
+                        <span className="text-xs tabular-nums">{resident._count.payments}pay · {resident._count.coverages}mo</span>
                       </td>
-                      <td className="px-5 py-3">
+                      <td>
                         <Link
-                          className="font-semibold text-cyan-700 hover:text-cyan-900"
+                          className="inline-flex min-h-10 items-center font-semibold text-[var(--blue)] hover:underline"
                           href={`/residents/${resident.id}`}
                         >
                           {t.common.view}
@@ -211,8 +203,8 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
                   ))
                 ) : (
                   <tr>
-                    <td className="px-5 py-12 text-center text-slate-500" colSpan={6}>
-                      {t.residents.noMatch}
+                    <td colSpan={6}>
+                      <div className="ui-empty">{t.residents.noMatch}</div>
                     </td>
                   </tr>
                 )}
@@ -235,7 +227,6 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
           />
         </section>
         )}
-      </div>
-    </main>
+    </AdminPage>
   );
 }

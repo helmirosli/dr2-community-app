@@ -28,9 +28,9 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
 
   if (!passwordHash) {
     return (
-      <div className="ui-card p-6">
-        <h3 className="text-lg font-semibold text-slate-900">Change password</h3>
-        <p className="mt-1 text-sm text-slate-600">
+      <div className="ui-card ui-form-section">
+        <h3 className="ui-section-title">Change password</h3>
+        <p className="ui-hint mt-1">
           Password reset is available to logged-in users.
         </p>
       </div>
@@ -38,15 +38,15 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
   }
 
   return (
-    <form action={action} className="ui-card p-6">
-      <h3 className="text-lg font-semibold text-slate-900">Change password</h3>
-      <p className="mt-1 text-sm text-slate-600">
-        Update your dashboard account password.
-      </p>
+    <form action={action} className="ui-card ui-form-section">
+      <div>
+        <h3 className="ui-section-title">Change password</h3>
+        <p className="ui-hint mt-1">Update your dashboard account password.</p>
+      </div>
 
       <input type="hidden" name="userId" value={userId} />
 
-      <div className="mt-6 grid gap-4">
+      <div className="grid gap-4">
         <label className="ui-label">
           Current password
           <div className="relative">
@@ -58,7 +58,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
               type={showCurrentPassword ? "text" : "password"}
             />
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+              className="absolute right-1 top-1/2 -translate-y-1/2 grid size-8 place-items-center text-[var(--ink-2)] hover:text-[var(--ink)]"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               type="button"
             >
@@ -78,7 +78,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
               type={showNewPassword ? "text" : "password"}
             />
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+              className="absolute right-1 top-1/2 -translate-y-1/2 grid size-8 place-items-center text-[var(--ink-2)] hover:text-[var(--ink)]"
               onClick={() => setShowNewPassword(!showNewPassword)}
               type="button"
             >
@@ -98,7 +98,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
               type={showConfirmPassword ? "text" : "password"}
             />
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+              className="absolute right-1 top-1/2 -translate-y-1/2 grid size-8 place-items-center text-[var(--ink-2)] hover:text-[var(--ink)]"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               type="button"
             >
@@ -122,7 +122,7 @@ export function ChangePasswordForm({ userId, passwordHash }: ChangePasswordFormP
           </div>
         )}
 
-        <button className="ui-button-primary self-start" disabled={pending} type="submit">
+        <button className="ui-button-primary w-fit" disabled={pending} type="submit">
           {pending ? "Updating..." : "Update password"}
         </button>
       </div>

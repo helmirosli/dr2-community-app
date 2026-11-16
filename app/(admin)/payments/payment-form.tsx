@@ -116,24 +116,20 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
       {/* Error dialog */}
       <dialog
         ref={dialogRef}
-        className="m-auto w-full max-w-md rounded-xl border border-red-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
+        className="m-auto w-full max-w-md rounded-[18px] bg-white p-0 shadow-xl backdrop:bg-black/40"
       >
         <div className="p-6">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="text-red-600" size={20} />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#ffe6e0]">
+              <AlertCircle className="text-[#c2341a]" size={20} />
             </div>
             <div className="flex-1">
-              <h3 className="text-base font-semibold text-slate-900">Unable to Record Payment</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{state.message}</p>
+              <h3 className="font-heading text-base font-bold text-[var(--ink)]">Unable to Record Payment</h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--ink-2)]">{state.message}</p>
             </div>
           </div>
           <div className="mt-6 flex justify-end">
-            <button
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-              onClick={() => dialogRef.current?.close()}
-              type="button"
-            >
+            <button className="ui-button-danger" onClick={() => dialogRef.current?.close()} type="button">
               OK
             </button>
           </div>
@@ -141,250 +137,239 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
       </dialog>
 
       <form action={action} className="grid gap-5">
+        <div className="ui-card overflow-hidden">
+          {/* Resident */}
+          <section className="ui-form-section">
+            <h2 className="ui-section-title">Resident</h2>
+            <SearchableDropdown
+              name="residentId"
+              options={residentOptions}
+              defaultValue={residentId}
+              placeholder="Search by unit or name..."
+              required
+              onChange={(v) => setResidentId(v)}
+            />
 
-        {/* ── Step 1: Resident ── */}
-        <div className="ui-card p-5">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500">1 · Select resident</h3>
-          <SearchableDropdown
-            name="residentId"
-            options={residentOptions}
-            defaultValue={residentId}
-            placeholder="Search by unit or name..."
-            required
-            onChange={(v) => setResidentId(v)}
-          />
+            {isPeeking && (
+              <div className="ui-hint flex items-center gap-2">
+                <Loader2 className="animate-spin" size={14} />
+                Loading resident info...
+              </div>
+            )}
 
-          {/* Resident snapshot */}
-          {isPeeking && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="animate-spin" size={14} />
-              Loading resident info...
-            </div>
-          )}
-
-          {!isPeeking && snapshot && (
-            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-start justify-between gap-3">
+            {!isPeeking && snapshot && (
+              <div className="grid gap-3 rounded-2xl bg-[var(--paper)] p-4">
                 <div>
-                  <p className="font-semibold text-slate-900">Unit {snapshot.unitNumber} · {snapshot.name}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="font-semibold text-[var(--ink)]">Unit {snapshot.unitNumber} · {snapshot.name}</p>
+                  <p className="ui-hint mt-0.5">
                     {snapshot.latestCoverage
                       ? `Last paid: ${MONTH_LABELS[snapshot.latestCoverage.month - 1]} ${snapshot.latestCoverage.year}`
                       : "No payments recorded"}
                   </p>
                 </div>
-              </div>
 
-              {snapshot.outstandingMonths.length > 0 ? (
-                <div className="mt-3">
-                  <p className="text-xs font-medium text-amber-700">
-                    {snapshot.outstandingMonths.length} outstanding month{snapshot.outstandingMonths.length > 1 ? "s" : ""} in {snapshot.currentYear}
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {snapshot.outstandingMonths.map((m) => (
-                      <span key={m} className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-800">
-                        {MONTH_LABELS[m - 1]}
-                      </span>
-                    ))}
+                {snapshot.outstandingMonths.length > 0 ? (
+                  <div>
+                    <p className="text-xs font-medium text-[#8a6300]">
+                      {snapshot.outstandingMonths.length} outstanding month{snapshot.outstandingMonths.length > 1 ? "s" : ""} in {snapshot.currentYear}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {snapshot.outstandingMonths.map((m) => (
+                        <span key={m} className="ui-chip bg-[#ffe6e0] text-[#c2341a]">
+                          {MONTH_LABELS[m - 1]}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="mt-2 text-xs font-medium text-emerald-700">✓ All months paid for {snapshot.currentYear}</p>
-              )}
-
-              {snapshot.assignedCollections.length > 0 && (
-                <div className="mt-3 border-t border-slate-200 pt-3">
-                  <p className="text-xs font-medium text-slate-500 mb-1.5">Assigned special collections</p>
-                  <div className="grid gap-1">
-                    {snapshot.assignedCollections.map((c) => (
-                      <div key={c.id} className="flex items-center justify-between text-xs">
-                        <span className="text-slate-700">{c.title}</span>
-                        {c.outstanding > 0 ? (
-                          <span className="font-semibold text-amber-700">RM{(c.outstanding / 100).toFixed(2)} left</span>
-                        ) : (
-                          <span className="font-semibold text-emerald-700">✓ Paid</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Step 2: Payment type & collection ── */}
-        <div className="ui-card p-5">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500">2 · Payment type</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="ui-label">
-              Type
-              <SearchableDropdown
-                name="paymentType"
-                options={PAYMENT_TYPE_OPTIONS}
-                value={paymentType}
-                onChange={setPaymentType}
-                required
-              />
-            </div>
-
-            {isSpecialCollection && (
-              <div className="ui-label">
-                Collection
-                {collectionOptions.length > 0 ? (
-                  <SearchableDropdown
-                    name="specialCollectionId"
-                    options={collectionOptions}
-                    value={selectedCollectionId}
-                    onChange={setSelectedCollectionId}
-                    required
-                  />
                 ) : (
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-                    No active special collections.
-                  </p>
+                  <p className="text-xs font-medium text-[#1c7a33]">✓ All months paid for {snapshot.currentYear}</p>
+                )}
+
+                {snapshot.assignedCollections.length > 0 && (
+                  <div className="border-t border-black/[0.06] pt-3">
+                    <p className="ui-hint mb-1.5 font-medium">Assigned special collections</p>
+                    <div className="grid gap-1">
+                      {snapshot.assignedCollections.map((c) => (
+                        <div key={c.id} className="flex items-center justify-between gap-3 text-xs">
+                          <span className="text-[var(--ink)]">{c.title}</span>
+                          {c.outstanding > 0 ? (
+                            <span className="ui-chip bg-[#fff4d6] text-[#8a6300]">RM{(c.outstanding / 100).toFixed(2)} left</span>
+                          ) : (
+                            <span className="ui-chip bg-[#e2f7e1] text-[#1c7a33]">✓ Paid</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Show selected collection details */}
-          {isSpecialCollection && selectedCollectionId && snapshot && (() => {
-            const col = snapshot.assignedCollections.find((c) => c.id === selectedCollectionId);
-            if (!col) return null;
-            return (
-              <div className="mt-3 rounded-lg bg-sky-50 px-4 py-3 text-sm">
-                <span className="text-slate-600">Outstanding for this resident: </span>
-                <span className="font-semibold text-sky-800">RM{(col.outstanding / 100).toFixed(2)}</span>
+          {/* Payment: type, collection, amount, date, method, reference */}
+          <section className="ui-form-section">
+            <h2 className="ui-section-title">Payment</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="ui-label">
+                Type
+                <SearchableDropdown
+                  name="paymentType"
+                  options={PAYMENT_TYPE_OPTIONS}
+                  value={paymentType}
+                  onChange={setPaymentType}
+                  required
+                />
               </div>
-            );
-          })()}
-        </div>
 
-        {/* ── Step 3: Payment details ── */}
-        <div className="ui-card p-5">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500">3 · Payment details</h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="ui-label">
-              Amount (RM)
-              <input
-                className="ui-input"
-                defaultValue={expectedAmount}
-                key={expectedAmount}
-                min="1"
-                name="amount"
-                required
-                step="0.01"
-                type="number"
-              />
-            </label>
-            <label className="ui-label">
-              Payment date
-              <input
-                className="ui-input"
-                defaultValue={now.toISOString().slice(0, 10)}
-                name="paymentDate"
-                required
-                type="date"
-              />
-            </label>
-            <div className="ui-label">
-              Method
-              <SearchableDropdown
-                name="method"
-                options={PAYMENT_METHOD_OPTIONS}
-                defaultValue="BANK_TRANSFER"
-                required
-              />
+              {isSpecialCollection && (
+                <div className="ui-label">
+                  Collection
+                  {collectionOptions.length > 0 ? (
+                    <SearchableDropdown
+                      name="specialCollectionId"
+                      options={collectionOptions}
+                      value={selectedCollectionId}
+                      onChange={setSelectedCollectionId}
+                      required
+                    />
+                  ) : (
+                    <p className="rounded-2xl bg-[#fff4d6] p-3 text-xs font-medium text-[#8a6300]">
+                      No active special collections.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-          <div className="mt-3">
+
+            {isSpecialCollection && selectedCollectionId && snapshot && (() => {
+              const col = snapshot.assignedCollections.find((c) => c.id === selectedCollectionId);
+              if (!col) return null;
+              return (
+                <div className="rounded-2xl bg-[#ddf5fd] px-4 py-3 text-sm">
+                  <span className="text-[var(--ink-2)]">Outstanding for this resident: </span>
+                  <span className="font-semibold tabular-nums text-[#0b6e8e]">RM{(col.outstanding / 100).toFixed(2)}</span>
+                </div>
+              );
+            })()}
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <label className="ui-label">
+                Amount (RM)
+                <input
+                  className="ui-input"
+                  defaultValue={expectedAmount}
+                  key={expectedAmount}
+                  min="1"
+                  name="amount"
+                  required
+                  step="0.01"
+                  type="number"
+                />
+              </label>
+              <label className="ui-label">
+                Payment date
+                <input
+                  className="ui-input"
+                  defaultValue={now.toISOString().slice(0, 10)}
+                  name="paymentDate"
+                  required
+                  type="date"
+                />
+              </label>
+              <div className="ui-label">
+                Method
+                <SearchableDropdown
+                  name="method"
+                  options={PAYMENT_METHOD_OPTIONS}
+                  defaultValue="BANK_TRANSFER"
+                  required
+                />
+              </div>
+            </div>
             <label className="ui-label">
               Reference number
               <input className="ui-input" name="referenceNo" placeholder="e.g. TXN123456" />
             </label>
-          </div>
-        </div>
+          </section>
 
-        {/* ── Step 4: Coverage period (monthly only) ── */}
-        {!isSpecialCollection ? (
-          <div className="ui-card p-5">
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500">4 · Coverage period</h3>
-            <p className="mb-4 text-sm text-slate-600">Select the months this payment covers.</p>
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="ui-label">
-                Start month
-                <SearchableDropdown
-                  name="coverageStartMonth"
-                  options={MONTH_OPTIONS}
-                  value={String(startMonth)}
-                  onChange={(v) => setStartMonth(Number(v))}
-                  required
-                />
+          {/* Coverage months (monthly only) */}
+          {!isSpecialCollection ? (
+            <section className="ui-form-section">
+              <div>
+                <h2 className="ui-section-title">Coverage months</h2>
+                <p className="ui-hint mt-1">Select the months this payment covers.</p>
               </div>
-              <label className="ui-label">
-                Start year
-                <input
-                  className="ui-input"
-                  name="coverageStartYear"
-                  onChange={(e) => setStartYear(Number(e.target.value))}
-                  required
-                  type="number"
-                  value={startYear}
-                />
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div className="ui-label">
+                  Start month
+                  <SearchableDropdown
+                    name="coverageStartMonth"
+                    options={MONTH_OPTIONS}
+                    value={String(startMonth)}
+                    onChange={(v) => setStartMonth(Number(v))}
+                    required
+                  />
+                </div>
+                <label className="ui-label">
+                  Start year
+                  <input
+                    className="ui-input"
+                    name="coverageStartYear"
+                    onChange={(e) => setStartYear(Number(e.target.value))}
+                    required
+                    type="number"
+                    value={startYear}
+                  />
+                </label>
+                <div className="ui-label">
+                  End month
+                  <SearchableDropdown
+                    name="coverageEndMonth"
+                    options={MONTH_OPTIONS}
+                    value={String(endMonth)}
+                    onChange={(v) => setEndMonth(Number(v))}
+                    required
+                  />
+                </div>
+                <label className="ui-label">
+                  End year
+                  <input
+                    className="ui-input"
+                    name="coverageEndYear"
+                    onChange={(e) => setEndYear(Number(e.target.value))}
+                    required
+                    type="number"
+                    value={endYear}
+                  />
+                </label>
+              </div>
+
+              {expectedAmount && (
+                <div className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--paper)] px-4 py-3 text-sm">
+                  <span className="text-[var(--ink-2)]">
+                    {monthCount(startYear, startMonth, endYear, endMonth)} month{monthCount(startYear, startMonth, endYear, endMonth) !== 1 ? "s" : ""} · expected
+                  </span>
+                  <span className="font-heading font-bold tabular-nums text-[var(--ink)]">RM{expectedAmount}</span>
+                </div>
+              )}
+
+              <label className="flex items-start gap-3 rounded-2xl bg-[var(--paper)] p-3 text-sm font-medium text-[var(--ink)]">
+                <input className="mt-0.5" name="allowAdjustment" type="checkbox" />
+                <span>Allow adjusted amount (when payment doesn&apos;t exactly match RM50 per month)</span>
               </label>
-              <div className="ui-label">
-                End month
-                <SearchableDropdown
-                  name="coverageEndMonth"
-                  options={MONTH_OPTIONS}
-                  value={String(endMonth)}
-                  onChange={(v) => setEndMonth(Number(v))}
-                  required
-                />
-              </div>
-              <label className="ui-label">
-                End year
-                <input
-                  className="ui-input"
-                  name="coverageEndYear"
-                  onChange={(e) => setEndYear(Number(e.target.value))}
-                  required
-                  type="number"
-                  value={endYear}
-                />
-              </label>
-            </div>
+            </section>
+          ) : (
+            <>
+              <input type="hidden" name="coverageStartMonth" value={now.getMonth() + 1} />
+              <input type="hidden" name="coverageStartYear"  value={now.getFullYear()} />
+              <input type="hidden" name="coverageEndMonth"   value={now.getMonth() + 1} />
+              <input type="hidden" name="coverageEndYear"    value={now.getFullYear()} />
+            </>
+          )}
 
-            {expectedAmount && (
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-brand-50 px-4 py-3 text-sm">
-                <span className="text-slate-600">
-                  {monthCount(startYear, startMonth, endYear, endMonth)} month{monthCount(startYear, startMonth, endYear, endMonth) !== 1 ? "s" : ""} · expected
-                </span>
-                <span className="font-semibold text-slate-900">RM{expectedAmount}</span>
-              </div>
-            )}
-
-            <label className="mt-4 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm font-medium text-slate-700">
-              <input className="mt-0.5" name="allowAdjustment" type="checkbox" />
-              <span>Allow adjusted amount (when payment doesn&apos;t exactly match RM50 per month)</span>
-            </label>
-          </div>
-        ) : (
-          <>
-            <input type="hidden" name="coverageStartMonth" value={now.getMonth() + 1} />
-            <input type="hidden" name="coverageStartYear"  value={now.getFullYear()} />
-            <input type="hidden" name="coverageEndMonth"   value={now.getMonth() + 1} />
-            <input type="hidden" name="coverageEndYear"    value={now.getFullYear()} />
-          </>
-        )}
-
-        {/* ── Step 5: Proof & notes ── */}
-        <div className="ui-card p-5">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500">
-            {isSpecialCollection ? "4" : "5"} · Proof &amp; notes
-          </h3>
-          <div className="grid gap-4">
+          {/* Proof & notes */}
+          <section className="ui-form-section">
+            <h2 className="ui-section-title">Proof &amp; notes</h2>
             <div className="ui-label">
               Receipt / proof (optional)
               <FileInput name="proofFile" />
@@ -393,11 +378,11 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
               Notes (optional)
               <textarea className="ui-textarea min-h-20" name="notes" />
             </label>
-          </div>
+          </section>
         </div>
 
         {state.message && state.ok && (
-          <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="ui-alert-success flex items-center gap-3">
             <CheckCircle size={16} />
             <p>{state.message}</p>
           </div>
