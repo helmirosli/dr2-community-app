@@ -28,6 +28,10 @@ const ms: Dictionary = {
     actions: "Tindakan",
   },
   nav: {
+    goodMorning: "Selamat pagi",
+    goodAfternoon: "Selamat tengah hari",
+    goodEvening: "Selamat petang",
+    goodNight: "Selamat malam",
     today: "Hari ini",
     review: "Semak",
     houses: "Rumah",

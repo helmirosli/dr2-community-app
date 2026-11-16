@@ -102,16 +102,16 @@ export function GlobalHeaderSearch() {
   }
 
   return (
-    <div className="relative w-full max-w-md" ref={containerRef}>
+    <div className="relative w-full" ref={containerRef}>
       <form onSubmit={onSubmit} role="search">
-        <label className="flex h-10 items-center gap-2.5 rounded-full bg-white px-4 shadow-[0_1px_2px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.06] transition focus-within:ring-2 focus-within:ring-[var(--cyan)]">
-          <Search className="shrink-0 text-[var(--ink-2)]" size={16} aria-hidden="true" />
+        <label className="group flex h-10 items-center gap-2.5 rounded-xl bg-black/[0.045] px-3.5 transition-all duration-200 hover:bg-black/[0.06] focus-within:bg-white focus-within:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.25)] focus-within:ring-1 focus-within:ring-black/5">
+          <Search className="shrink-0 text-[#8e8e93] transition group-focus-within:text-[var(--blue)]" size={16} aria-hidden="true" />
           <span className="sr-only">Search</span>
           <input
             ref={inputRef}
             id="global-header-search"
             className="w-full bg-transparent text-sm text-[var(--ink)] outline-none placeholder:text-[#aeaeb2] [&::-webkit-search-cancel-button]:hidden"
-            placeholder="Search houses, residents, payments…"
+            placeholder="Search"
             type="search"
             autoComplete="off"
             role="combobox"
@@ -122,7 +122,7 @@ export function GlobalHeaderSearch() {
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={onKeyDown}
           />
-          <kbd className="hidden shrink-0 rounded-md bg-[var(--paper)] px-1.5 py-0.5 font-sans text-[11px] font-semibold text-[var(--ink-2)] sm:inline">
+          <kbd className="hidden shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 font-sans text-[11px] font-semibold text-[#8e8e93] shadow-[0_1px_0_rgba(0,0,0,0.06)] group-focus-within:hidden sm:inline">
             {isMac ? "⌘K" : "Ctrl K"}
           </kbd>
         </label>

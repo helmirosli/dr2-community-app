@@ -26,6 +26,10 @@ const en = {
     actions: "Actions",
   },
   nav: {
+    goodMorning: "Good morning",
+    goodAfternoon: "Good afternoon",
+    goodEvening: "Good evening",
+    goodNight: "Good evening",
     today: "Today",
     review: "Review",
     houses: "Houses",
