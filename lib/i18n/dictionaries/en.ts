@@ -378,6 +378,8 @@ const en = {
     monthly: "Monthly fee",
     special: "Special collection",
     noSpecial: "There is no active special collection right now.",
+    noSpecialForHouse: "No special collection is due for this house.",
+    balanceOf: "balance of {total}",
     whichMonths: "Which months?",
     quick1: "1 month",
     quick3: "3 months",

@@ -337,6 +337,8 @@ const ms: Dictionary = {
     monthly: "Yuran bulanan",
     special: "Kutipan khas",
     noSpecial: "Tiada kutipan khas yang aktif sekarang.",
+    noSpecialForHouse: "Tiada kutipan khas yang perlu dibayar untuk rumah ini.",
+    balanceOf: "baki daripada {total}",
     whichMonths: "Bulan mana?",
     quick1: "1 bulan",
     quick3: "3 bulan",

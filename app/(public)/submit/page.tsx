@@ -21,6 +21,16 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
     }),
   ]);
 
+  // What each house still owes per active special collection (due − paid). The form asks for this, not the full amount.
+  const assignments = await prisma.specialCollectionAssignment.findMany({
+    where: { specialCollection: { status: "ACTIVE" } },
+    select: { specialCollectionId: true, amountDue: true, amountPaid: true, resident: { select: { unitNumber: true } } },
+  });
+  const outstandingByUnit: Record<string, Record<string, number>> = {};
+  for (const a of assignments) {
+    (outstandingByUnit[a.resident.unitNumber] ??= {})[a.specialCollectionId] = Math.max(0, a.amountDue - a.amountPaid);
+  }
+
   // Step 1 needs: house list, paid-until, and the first month still owed (next after paid-until, never before this month's start of billing).
   const houses: SubmitHouse[] = report.rows
     .map((r) => {
@@ -52,6 +62,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
             houses={houses}
             initialUnit={unit ?? ""}
             specialCollections={specialCollections}
+            outstandingByUnit={outstandingByUnit}
             bank={{
               name: process.env.NEXT_PUBLIC_BANK_NAME ?? "—",
               holder: process.env.NEXT_PUBLIC_BANK_HOLDER ?? "—",

@@ -24,11 +24,13 @@ export function SubmitPaymentForm({
   houses,
   initialUnit,
   specialCollections,
+  outstandingByUnit,
   bank,
 }: {
   houses: SubmitHouse[];
   initialUnit: string;
   specialCollections: SpecialCollection[];
+  outstandingByUnit: Record<string, Record<string, number>>;
   bank: Bank;
 }) {
   const [state, action, pending] = useActionState(createPublicSubmission, initialState);
@@ -55,13 +57,18 @@ export function SubmitPaymentForm({
   const chips = start ? Array.from({ length: 12 }, (_, i) => addMonths(start.year, start.month, i)) : [];
   const end = start ? addMonths(start.year, start.month, count - 1) : null;
   const untilDecember = start ? 12 - start.month + 1 : 1;
-  const collection = specialCollections.find((c) => c.id === collectionId);
+  // Only collections this house still owes, priced at its remaining balance.
+  const owed = house ? (outstandingByUnit[house.unit] ?? {}) : {};
+  const houseCollections = specialCollections
+    .filter((c) => (owed[c.id] ?? 0) > 0)
+    .map((c) => ({ ...c, outstanding: owed[c.id] }));
+  const collection = houseCollections.find((c) => c.id === collectionId) ?? houseCollections[0];
 
   const amountSen =
-    paymentType === "SPECIAL_COLLECTION"
-      ? collection?.amountPerResident ?? 0
-      : otherAmount
-        ? Math.round((Number(customAmount) || 0) * 100)
+    otherAmount
+      ? Math.round((Number(customAmount) || 0) * 100)
+      : paymentType === "SPECIAL_COLLECTION"
+        ? collection?.outstanding ?? 0
         : count * DEFAULT_MONTHLY_FEE_SEN;
 
   useEffect(() => {
@@ -119,7 +126,7 @@ export function SubmitPaymentForm({
       <input type="hidden" name="method" value="BANK_TRANSFER" />
       <input type="hidden" name="amount" value={(amountSen / 100).toFixed(2)} />
       <input type="hidden" name="paymentDate" value={paymentDate} />
-      <input type="hidden" name="specialCollectionId" value={paymentType === "SPECIAL_COLLECTION" ? collectionId : ""} />
+      <input type="hidden" name="specialCollectionId" value={paymentType === "SPECIAL_COLLECTION" ? (collection?.id ?? "") : ""} />
       {(() => {
         const now = new Date();
         const s = paymentType === "MONTHLY_FEE" && start ? start : { year: now.getFullYear(), month: now.getMonth() + 1 };
@@ -234,25 +241,30 @@ export function SubmitPaymentForm({
               <p className="text-sm text-[var(--ink-2)]">{fill(f.monthsSelected, { n: count, from: label(start), to: label(end) })}</p>
             )}
           </div>
-        ) : specialCollections.length ? (
+        ) : houseCollections.length ? (
           <div className="grid gap-2">
-            {specialCollections.map((c) => (
+            {houseCollections.map((c) => (
               <label
                 key={c.id}
                 className={`flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 ring-1 ${
-                  collectionId === c.id ? "ring-2 ring-[var(--blue)]" : "ring-black/10"
+                  collection?.id === c.id ? "ring-2 ring-[var(--blue)]" : "ring-black/10"
                 }`}
               >
                 <span className="flex items-center gap-3">
-                  <input type="radio" name="collectionChoice" checked={collectionId === c.id} onChange={() => setCollectionId(c.id)} />
+                  <input type="radio" name="collectionChoice" checked={collection?.id === c.id} onChange={() => setCollectionId(c.id)} />
                   <span className="font-semibold">{c.title}</span>
                 </span>
-                <span className="text-sm text-[var(--ink-2)]">{formatRM(c.amountPerResident)}</span>
+                <span className="text-right text-sm text-[var(--ink-2)]">
+                  {formatRM(c.outstanding)}
+                  {c.outstanding < c.amountPerResident && (
+                    <span className="block text-xs">{fill(f.balanceOf, { total: formatRM(c.amountPerResident) })}</span>
+                  )}
+                </span>
               </label>
             ))}
           </div>
         ) : (
-          <p className="rounded-2xl bg-[#fff4d6] px-4 py-3 text-sm text-[#8a6300]">{f.noSpecial}</p>
+          <p className="rounded-2xl bg-[#fff4d6] px-4 py-3 text-sm text-[#8a6300]">{specialCollections.length ? f.noSpecialForHouse : f.noSpecial}</p>
         )}
 
         <div className="grid gap-1 rounded-2xl bg-[var(--paper)] p-5 text-center">
@@ -260,7 +272,7 @@ export function SubmitPaymentForm({
           <p className="text-blend font-heading text-5xl font-extrabold tracking-tight">{formatRM(amountSen)}</p>
         </div>
 
-        {paymentType === "MONTHLY_FEE" && (
+        {(paymentType === "MONTHLY_FEE" || collection) && (
           <div className="grid gap-2">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={otherAmount} onChange={(e) => setOtherAmount(e.target.checked)} />

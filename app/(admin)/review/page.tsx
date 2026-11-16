@@ -56,7 +56,19 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
 
   const isMonthly = item.paymentType === "MONTHLY_FEE";
   const months = isMonthly ? expandMonthRange(item.coverageStartYear, item.coverageStartMonth, item.coverageEndYear, item.coverageEndMonth) : [];
-  const expectedSen = isMonthly ? months.length * DEFAULT_MONTHLY_FEE_SEN : item.specialCollection?.amountPerResident ?? 0;
+  // Special collections: expect what this house still owes (due − already paid), not the full per-house amount.
+  const assignment =
+    !isMonthly && item.specialCollectionId
+      ? await prisma.specialCollectionAssignment.findFirst({
+          where: { specialCollectionId: item.specialCollectionId, resident: { unitNumber: item.unitNumber } },
+          select: { amountDue: true, amountPaid: true },
+        })
+      : null;
+  const expectedSen = isMonthly
+    ? months.length * DEFAULT_MONTHLY_FEE_SEN
+    : assignment
+      ? Math.max(0, assignment.amountDue - assignment.amountPaid)
+      : item.specialCollection?.amountPerResident ?? 0;
   const diff = item.amountSen - expectedSen;
   const hashes = item.uploads.map((u) => u.contentHash).filter((h): h is string => Boolean(h));
 
