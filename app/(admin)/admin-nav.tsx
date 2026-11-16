@@ -177,7 +177,7 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
             <form action={logout} className="flex-1">
               <LogoutButton />
             </form>
-            <LocaleToggle />
+            <LocaleToggle dark />
           </div>
         </div>
       </aside>
@@ -185,7 +185,7 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between bg-[var(--night)]/90 px-4 py-2.5 backdrop-blur-xl lg:hidden">
         <Brand size={30} />
-        <LocaleToggle />
+        <LocaleToggle dark />
       </header>
 
       {/* Mobile bottom tab bar */}

@@ -1,21 +1,23 @@
 import Link from "next/link";
-import { Send, ShieldAlert } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
 
-import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
+import { StatusPill, stateStyles } from "@/app/components/status";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
-import { getDictionary } from "@/lib/i18n";
-import { clampReportYear } from "@/lib/reports/monthly-data";
+import { getDictionary, getLocale } from "@/lib/i18n";
+import { clampReportYear, getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { prisma } from "@/lib/prisma";
+import { isFutureMonth, monthName, monthState, type MonthState } from "@/lib/status";
+import { StatusCards, type StatusCardRow } from "./status-cards";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 type StatusPageProps = {
   searchParams: Promise<{ year?: string }>;
 };
+
+const LEGEND: MonthState[] = ["paid", "ahead", "pending", "partial", "unpaid", "hold"];
 
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;
@@ -23,7 +25,7 @@ function fmtCell(amountSen: number) {
 
 export default async function StatusPage({ searchParams }: StatusPageProps) {
   const params = await searchParams;
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getLocale()]);
 
   const now = new Date();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
@@ -82,269 +84,194 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
   });
 
   const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
+  const extraCols = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
+
+  const report = await getMonthlyReport({ year: currentYear, month: currentMonth, includeInactive: true });
+  const paidUntilByUnit = new Map(
+    report.rows.map((r) => [
+      r.unitNumber,
+      r.paidUntilYear && r.paidUntilMonth ? monthName(locale, r.paidUntilYear, r.paidUntilMonth, "long") : null,
+    ]),
+  );
+
+  const view = rows.map((row) => ({
+    row,
+    cells: row.months.map((amountSen, i) => {
+      const pending = pendingMap.get(`${row.unitNumber}:${selectedYear}:${i + 1}`);
+      return {
+        amountSen,
+        pending,
+        state: monthState({
+          amountSen,
+          override: row.monthStatusOverrides[i],
+          residentStatus: row.status,
+          isFuture: isFutureMonth(selectedYear, i + 1, now),
+          pending: Boolean(pending),
+        }),
+      };
+    }),
+  }));
+
+  const cardRows: StatusCardRow[] = view.map(({ row, cells }) => {
+    const until = paidUntilByUnit.get(row.unitNumber);
+    return {
+      unit: row.unitNumber,
+      name: row.name,
+      states: cells.map((c) => c.state),
+      paidUntil: until ? t.statusBoard.paidUntil.replace("{month}", until) : t.statusBoard.noPayment,
+    };
+  });
+
+  const holdLabel = (status: string, override: string | null) => {
+    const s = override ?? status;
+    return s === "FOR_SALE" ? "FOR SALE" : s === "MOVED_OUT" ? "MOVED OUT" : s === "EXEMPT" ? "EXEMPT" : "";
+  };
 
   return (
-    <div className="grid gap-8">
-      {/* Header section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{t.publicStatus.title}</h1>
-          <p className="mt-3 text-base text-slate-600">
-            {t.publicStatus.subtitle.replace("{year}", String(selectedYear))}
-          </p>
+    <>
+      <section className="px-4 pb-12 pt-12 sm:pt-16">
+        <div className="mx-auto grid max-w-3xl justify-items-center gap-4 text-center">
+          <h1 className="font-heading text-[clamp(2.2rem,6vw,3.6rem)] font-bold leading-tight tracking-tight">{t.publicStatus.title}</h1>
+          <p className="max-w-xl text-[#a1a1a6]">{t.publicStatus.subtitle.replace("{year}", String(selectedYear))}</p>
+          <div className="flex items-center gap-3">
+            <Link aria-label={String(selectedYear - 1)} href={`?year=${selectedYear - 1}`} className="rounded-full p-2 hover:bg-white/10">
+              <ChevronLeft size={20} />
+            </Link>
+            <span className="font-heading text-2xl font-bold tabular-nums">{selectedYear}</span>
+            <Link aria-label={String(selectedYear + 1)} href={`?year=${selectedYear + 1}`} className="rounded-full p-2 hover:bg-white/10">
+              <ChevronRight size={20} />
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/submit"
-          className="ui-button-primary shrink-0"
-        >
-          <Send size={18} />
-          <span>{t.publicStatus.submitPayment}</span>
-        </Link>
-      </div>
+      </section>
 
-      {/* Year selector */}
-      <div className="ui-card p-4 sm:p-5">
-        <form className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4" method="get">
-          <label className="ui-label sm:flex sm:items-end sm:gap-3">
-            <span className="text-sm font-medium text-slate-700">{t.publicStatus.viewYear}</span>
-            <input
-              className="ui-input text-sm font-medium sm:w-32"
-              defaultValue={selectedYear}
-              max={2100}
-              min={2020}
-              name="year"
-              type="number"
+      <section className="bg-[var(--paper)] px-4 py-10 text-[var(--ink)] sm:py-14">
+        <div className="mx-auto grid max-w-7xl gap-6">
+          <div className="flex flex-wrap justify-center gap-2">
+            {LEGEND.map((s) => (
+              <StatusPill key={s} state={s} label={t.states[s]} />
+            ))}
+          </div>
+
+          {/* Phones: house cards */}
+          <div className="md:hidden">
+            <StatusCards
+              rows={cardRows}
+              labels={{
+                all: t.statusBoard.filterAll,
+                unpaid: t.statusBoard.filterUnpaid,
+                pending: t.statusBoard.filterPending,
+                search: t.statusBoard.search,
+                noMatch: t.statusBoard.noMatch,
+                states: t.states,
+              }}
             />
-          </label>
-          <button className="ui-button-primary" type="submit">
-            {t.common.update}
-          </button>
-        </form>
-      </div>
+          </div>
 
-      {/* Status table */}
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs" style={{ minWidth: `${16 + (hasExtra ? 1 : 0)}rem` }}>
-            <thead>
-              <tr className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
-                <th className="sticky left-0 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 text-center font-semibold">{t.publicStatus.no}</th>
-                <th className="sticky left-8 z-10 bg-gradient-to-r from-slate-800 to-slate-900 px-3 py-3 font-semibold">{t.publicStatus.unit}</th>
-                <th className="min-w-32 px-3 py-3 font-semibold">{t.publicStatus.name}</th>
-                {MONTH_LABELS.map((label, i) => (
-                  <th
-                    className={`px-2 py-3 text-center font-semibold text-white ${
-                      selectedYear === currentYear && i + 1 === currentMonth
-                        ? "bg-cyan-600"
-                        : "bg-slate-700"
-                    }`}
-                    key={label}
-                  >
-                    {label}
-                    <span className="block text-xs font-normal opacity-75">{String(selectedYear).slice(2)}</span>
-                  </th>
-                ))}
-                {specialCollections.length > 0 &&
-                  specialCollections.map((sc) => (
-                    <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white" key={sc.id}>
-                      {sc.title.toUpperCase()}
+          {/* Tablet and up: the familiar year grid */}
+          <div className="hidden max-h-[75vh] overflow-auto rounded-3xl bg-white ring-1 ring-black/5 md:block">
+            <table className="w-full border-separate border-spacing-0 text-left text-xs">
+              <thead className="sticky top-0 z-20">
+                <tr className="bg-[var(--night)] text-white">
+                  <th className="sticky left-0 z-10 bg-[var(--night)] px-3 py-3 font-semibold">{t.publicStatus.unit}</th>
+                  <th className="min-w-36 px-3 py-3 font-semibold">{t.publicStatus.name}</th>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <th
+                      key={i}
+                      className={`px-1.5 py-3 text-center font-semibold ${
+                        selectedYear === currentYear && i + 1 === currentMonth ? "text-[var(--lime)]" : "text-[#c7cedd]"
+                      }`}
+                    >
+                      {monthName(locale, selectedYear, i + 1)}
                     </th>
                   ))}
-                {hasExtra && specialCollections.length === 0 && (
-                  <th className="bg-amber-600 px-2 py-3 text-center font-semibold text-white">{t.publicStatus.extra}</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, rowIdx) => {
-                const rowBg = rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60";
-
-                return (
-                  <tr className={rowBg} key={row.unitNumber}>
-                    <td className={`sticky left-0 z-10 ${rowBg} border-b border-slate-100 px-3 py-2.5 text-center font-medium text-slate-400`}>
-                      {row.no}
+                  {specialCollections.map((sc) => (
+                    <th className="px-2 py-3 text-center font-semibold text-[#f5b400]" key={sc.id}>
+                      {sc.title}
+                    </th>
+                  ))}
+                  {hasExtra && specialCollections.length === 0 && (
+                    <th className="px-2 py-3 text-center font-semibold text-[#f5b400]">{t.publicStatus.extra}</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {view.map(({ row, cells }) => (
+                  <tr key={row.unitNumber} className="group">
+                    <td className="sticky left-0 z-10 border-b border-black/5 bg-white px-3 py-2 font-heading font-bold group-hover:bg-[#fafafa]">
+                      <Link href={`/rumah/${encodeURIComponent(row.unitNumber)}`} className="hover:text-[var(--blue)]">
+                        {row.unitNumber}
+                      </Link>
                     </td>
-                    <td className={`sticky left-8 z-10 ${rowBg} border-b border-slate-100 px-3 py-2.5 font-semibold text-slate-800`}>
-                      {row.unitNumber}
-                    </td>
-                    <td className={`min-w-32 border-b border-slate-100 px-3 py-2.5 font-medium text-slate-900`}>
-                      {row.name}
-                    </td>
-                    {row.isForSale ? (
-                      Array.from({
-                        length: 12 + (hasExtra ? specialCollections.length > 0 ? specialCollections.length : 1 : 0),
-                      }).map((_, i) => (
-                        <td className="border-b border-slate-100 bg-slate-100 px-2 py-2.5 text-center italic text-xs font-medium text-slate-400" key={i}>
-                          {row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : "EXEMPT"}
-                        </td>
-                      ))
-                    ) : (
-                      <>
-                        {row.months.map((amountSen, i) => {
-                          const monthOverride = row.monthStatusOverrides[i];
-                          const isFuture =
-                            selectedYear > currentYear ||
-                            (selectedYear === currentYear && i + 1 > currentMonth);
-                          const isPaid = (amountSen ?? 0) >= DEFAULT_MONTHLY_FEE_SEN;
-                          const isPartial = !isPaid && (amountSen ?? 0) > 0;
-                          const isUnpaidPast = !isPaid && !isPartial && !isFuture;
-                          const isExemptUnpaid = row.status === "EXEMPT" && amountSen === null;
-                          const isStatusOverride = monthOverride === "FOR_SALE" || monthOverride === "MOVED_OUT";
-
-                          const pendingKey = `${row.unitNumber}:${selectedYear}:${i + 1}`;
-                          const pendingSubmission = pendingMap.get(pendingKey);
-
-                          let cellClass = "border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium relative";
-                          let content: React.ReactNode = "";
-
-                          if (pendingSubmission) {
-                            cellClass += " bg-blue-50 text-blue-700 border-l-4 border-l-blue-500";
-                            content = (
-                              <div className="flex flex-col items-center gap-0.5">
-                                <span>{fmtCell(pendingSubmission.appliedSen)}</span>
-                                <span className="text-xs text-blue-600 font-semibold">
-                                  {pendingSubmission.isCarryForward ? "CARRY" : "PENDING"}
-                                </span>
-                              </div>
-                            );
-                          } else if (isPartial) {
-                            cellClass += " bg-amber-50 text-amber-700";
-                            content = fmtCell(amountSen ?? 0);
-                          } else if (isUnpaidPast) {
-                            cellClass += " bg-red-50";
-                            content = "";
-                          } else if (isStatusOverride) {
-                            cellClass += " bg-slate-100 italic text-slate-500";
-                            content =
-                              monthOverride === "FOR_SALE"
-                                ? "FOR SALE"
-                                : monthOverride === "MOVED_OUT"
-                                  ? "MOVED OUT"
-                                  : "";
-                          } else if (isExemptUnpaid) {
-                            cellClass += " bg-slate-100 italic text-slate-500";
-                            content = "EXEMPT";
-                          } else if (isPaid) {
-                            cellClass += " text-slate-600";
-                            content = fmtCell(amountSen ?? 0);
-                          } else {
-                            cellClass += " text-slate-400";
-                            content = "";
-                          }
-
+                    <td className="min-w-36 border-b border-black/5 px-3 py-2 font-medium group-hover:bg-[#fafafa]">{row.name}</td>
+                    {cells.map(({ amountSen, pending, state }, i) => (
+                      <td key={i} className="border-b border-black/5 p-1 text-center group-hover:bg-[#fafafa]">
+                        <span
+                          className={`grid min-h-8 min-w-12 place-items-center rounded-lg px-1 text-[11px] font-semibold ${stateStyles[state].tile}`}
+                          title={t.states[state]}
+                        >
+                          {pending ? fmtCell(pending.appliedSen) : state === "hold" ? holdLabel(row.status, row.monthStatusOverrides[i]) : amountSen ? fmtCell(amountSen) : ""}
+                        </span>
+                      </td>
+                    ))}
+                    {specialCollections.length > 0
+                      ? specialCollections.map((sc) => {
+                          const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
+                          const pendingAmountSen = pendingCollectionMap.get(`${row.unitNumber}:${sc.id}`) ?? 0;
+                          const state: MonthState | null = pendingAmountSen
+                            ? "pending"
+                            : !assignment
+                              ? null
+                              : assignment.outstanding > 0
+                                ? "partial"
+                                : "paid";
                           return (
-                            <td className={cellClass} key={i}>
-                              {content}
+                            <td key={sc.id} className="border-b border-black/5 p-1 text-center group-hover:bg-[#fafafa]">
+                              {state ? (
+                                <span className={`grid min-h-8 place-items-center rounded-lg px-1 text-[11px] font-semibold ${stateStyles[state].tile}`}>
+                                  {pendingAmountSen ? fmtCell(pendingAmountSen) : assignment && assignment.outstanding > 0 ? fmtCell(assignment.outstanding) : "✓"}
+                                </span>
+                              ) : (
+                                <span className="text-[#c7c7cc]">—</span>
+                              )}
                             </td>
                           );
-                        })}
-                        {specialCollections.length > 0
-                          ? specialCollections.map((sc) => {
-                              const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
-                              const pendingKey = `${row.unitNumber}:${sc.id}`;
-                              const pendingAmountSen = pendingCollectionMap.get(pendingKey) ?? 0;
-
-                              if (!assignment && !pendingAmountSen) {
-                                return (
-                                  <td className="border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium" key={sc.id}>
-                                    <span className="text-slate-300">—</span>
-                                  </td>
-                                );
-                              }
-
-                              const outstanding = assignment ? assignment.outstanding : 0;
-                              return (
-                                <td className={`border-b border-slate-100 px-2 py-2.5 text-center text-xs font-medium ${pendingAmountSen > 0 ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-amber-50"}`} key={sc.id}>
-                                  {outstanding > 0 && !pendingAmountSen && (
-                                    <div className="text-amber-700">RM{(outstanding / 100).toFixed(2)}</div>
-                                  )}
-                                  {outstanding === 0 && assignment && !pendingAmountSen && (
-                                    <span className="text-emerald-600">✓</span>
-                                  )}
-                                  {pendingAmountSen > 0 && (
-                                    <div className="flex flex-col items-center gap-0.5 mt-0.5">
-                                      <span className="text-blue-700">RM{(pendingAmountSen / 100).toFixed(2)}</span>
-                                      <span className="text-xs font-semibold text-blue-600">PENDING</span>
-                                    </div>
-                                  )}
-                                </td>
-                              );
-                            })
-                          : hasExtra && (
-                              <td className="border-b border-slate-100 bg-amber-50 px-2 py-2.5 text-center text-xs font-medium">
-                                {row.extraOutstandingSen > 0 ? (
-                                  <span className="text-amber-700">
-                                    RM{(row.extraOutstandingSen / 100).toFixed(2)}
-                                  </span>
-                                ) : row.extraDueSen > 0 ? (
-                                  <span className="text-emerald-600">✓</span>
-                                ) : (
-                                  <span className="text-slate-300">—</span>
-                                )}
-                              </td>
+                        })
+                      : extraCols > 0 && (
+                          <td className="border-b border-black/5 p-1 text-center">
+                            {row.extraOutstandingSen > 0 ? (
+                              <span className={`grid min-h-8 place-items-center rounded-lg text-[11px] font-semibold ${stateStyles.partial.tile}`}>
+                                {fmtCell(row.extraOutstandingSen)}
+                              </span>
+                            ) : row.extraDueSen > 0 ? (
+                              "✓"
+                            ) : (
+                              <span className="text-[#c7c7cc]">—</span>
                             )}
-                      </>
-                    )}
+                          </td>
+                        )}
                   </tr>
-                );
-              })}
-              {rows.length === 0 && (
-                <tr>
-                  <td className="border-b border-slate-100 px-5 py-10 text-center text-slate-500" colSpan={16}>
-                    {t.publicStatus.noRecords}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Legend and info */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
-          <h3 className="font-semibold text-slate-900">{t.publicStatus.legendTitle}</h3>
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="inline-block size-3 rounded-sm bg-white ring-1 ring-slate-300" />
-              <span className="text-sm text-slate-600">{t.publicStatus.paid}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-block size-3 rounded-sm bg-amber-50 ring-1 ring-amber-300" />
-              <span className="text-sm text-slate-600">{t.publicStatus.partial}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-block size-3 rounded-sm bg-red-50 ring-1 ring-red-300" />
-              <span className="text-sm text-slate-600">{t.publicStatus.unpaid}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-block size-3 rounded-sm bg-slate-100" />
-              <span className="text-sm text-slate-600">{t.publicStatus.notApplicable}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="inline-block size-3 rounded-sm bg-blue-50 ring-1 ring-blue-300" />
-                <span className="inline-block h-3 w-1 bg-blue-500 rounded-sm" />
-              </div>
-              <div>
-                <span className="text-sm text-slate-600">Pending Approval (awaiting admin verification)</span>
-                <p className="text-xs text-slate-500 mt-1">• PENDING = Initial month | CARRY = Overflow to next month(s)</p>
-                <p className="text-xs text-slate-500">• Example: RM70 for June = RM50 (June) + RM20 (July)</p>
-              </div>
-            </div>
+                ))}
+                {rows.length === 0 && (
+                  <tr>
+                    <td className="px-5 py-10 text-center text-[var(--ink-2)]" colSpan={14 + extraCols}>
+                      {t.publicStatus.noRecords}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
 
-        <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <ShieldAlert className="shrink-0 text-cyan-600" size={20} />
+          <div className="mx-auto flex max-w-2xl items-start gap-3 rounded-2xl bg-white p-5 ring-1 ring-black/5">
+            <ShieldAlert className="shrink-0 text-[var(--cyan)]" size={20} aria-hidden="true" />
             <div>
-              <h3 className="font-semibold text-cyan-900">{t.publicStatus.privacyTitle}</h3>
-              <p className="mt-2 text-sm text-cyan-800">{t.publicStatus.privacyDesc}</p>
+              <h2 className="font-semibold">{t.publicStatus.privacyTitle}</h2>
+              <p className="mt-1 text-sm text-[var(--ink-2)]">{t.publicStatus.privacyDesc}</p>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

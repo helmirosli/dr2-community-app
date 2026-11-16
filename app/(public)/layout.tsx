@@ -1,47 +1,42 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getDictionary } from "@/lib/i18n";
-import { PublicLayoutClient } from "./public-layout-client";
+import { LocaleToggle } from "@/app/components/locale-toggle";
 
+// Public "night side" shell (spec §3): sticky glass nav, full-bleed pages, light footer.
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const t = await getDictionary();
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      {/* Header */}
-      <header className="border-b border-white/50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-3 transition hover:opacity-80">
-            <Image
-              src="/jr2-logo.jpeg"
-              alt="JR2 Desa Restu"
-              width={40}
-              height={40}
-              className="rounded-lg ring-1 ring-slate-200"
-            />
-            <div>
-              <p className="text-sm font-bold tracking-tight text-slate-900">{t.nav.brandName}</p>
-              <p className="hidden text-xs text-slate-500 sm:block">{t.publicLayout.residentPortal}</p>
-            </div>
+    <div className="min-h-screen bg-[var(--night)] text-[#f5f5f7]">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--night)]/75 backdrop-blur-xl backdrop-saturate-150">
+        <div className="mx-auto flex h-12 max-w-6xl items-center gap-5 px-4 text-[13px] text-[#d2d2d7] sm:px-6">
+          <Link href="/" className="mr-auto flex items-center gap-2.5 hover:opacity-85">
+            <Image src="/jr2-logo.jpeg" alt="" width={26} height={26} className="rounded-full" priority />
+            <span className="whitespace-nowrap font-heading text-sm font-semibold text-white">{t.nav.brandName}</span>
           </Link>
-          <nav className="flex items-center gap-2 sm:gap-4">
-            <Link href="/status" className="ui-button-secondary">
-              {t.publicLayout.status}
-            </Link>
-            <Link href="/submit" className="ui-button-secondary">
-              {t.publicLayout.submit}
-            </Link>
-            <PublicLayoutClient />
-          </nav>
+          <Link href="/status" className="hidden hover:text-white sm:inline">
+            {t.publicLayout.status}
+          </Link>
+          <Link href="/submit" className="whitespace-nowrap rounded-full bg-[var(--lime)] px-3 py-1 font-semibold text-[#06210b] hover:brightness-105">
+            <span className="sm:hidden">{t.publicLayout.submit}</span>
+            <span className="hidden sm:inline">{t.home.submitTitle}</span>
+          </Link>
+          <LocaleToggle dark />
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">{children}</main>
+      <main>{children}</main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 sm:px-6">
-        <p>{t.publicLayout.footer} © {new Date().getFullYear()}</p>
+      <footer className="border-t border-black/5 bg-[var(--paper)] text-xs text-[var(--ink-2)]">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
+          <p>
+            {t.publicLayout.footer} © {new Date().getFullYear()}
+          </p>
+          <Link href="/login" className="text-[var(--blue)] hover:underline">
+            {t.home.staffLogin} ›
+          </Link>
+        </div>
       </footer>
     </div>
   );

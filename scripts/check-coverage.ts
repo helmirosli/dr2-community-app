@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { DEFAULT_MONTHLY_FEE_SEN as FEE } from "@/lib/money";
 import { buildMonthlyCoverageRows, getPendingSubmissionsMap } from "@/lib/payments/coverage";
+import { monthState } from "@/lib/status";
 
 const pick = (rows: ReturnType<typeof buildMonthlyCoverageRows>) =>
   rows.map((r) => `${r.year}-${r.month}:${r.amountApplied}:${r.status}`);
@@ -42,5 +43,18 @@ assert.deepEqual([...pending.entries()], [
   ["7:2025:2", { appliedSen: 5000, isCarryForward: true, totalPending: 12500 }],
   ["7:2025:3", { appliedSen: 2500, isCarryForward: true, totalPending: 12500 }],
 ]);
+
+// Status language used by every grid, tile and pill.
+const st = (amountSen: number | null, extra: Partial<Parameters<typeof monthState>[0]> = {}) =>
+  monthState({ amountSen, residentStatus: "ACTIVE", isFuture: false, ...extra });
+assert.equal(st(5000), "paid");
+assert.equal(st(5000, { isFuture: true }), "ahead");
+assert.equal(st(2000), "partial");
+assert.equal(st(null), "unpaid");
+assert.equal(st(null, { isFuture: true }), "upcoming");
+assert.equal(st(null, { pending: true }), "pending");
+assert.equal(st(null, { residentStatus: "EXEMPT" }), "hold");
+assert.equal(st(5000, { residentStatus: "FOR_SALE" }), "hold");
+assert.equal(st(null, { override: "MOVED_OUT" }), "hold");
 
 console.log("coverage self-check: ok");
