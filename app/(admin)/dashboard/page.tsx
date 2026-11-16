@@ -1,25 +1,23 @@
 import Link from "next/link";
 import {
-  AlertTriangle,
   Banknote,
   CalendarClock,
-  CheckCircle2,
   FileSpreadsheet,
   FileText,
   Inbox,
   Plus,
   Users,
-  XCircle,
 } from "lucide-react";
 
-import { approveSubmission, rejectSubmission } from "@/lib/actions/review-submissions";
 import { requireDashboardUser } from "@/lib/auth";
-import { getDictionary } from "@/lib/i18n";
+import { getDictionary, getLocale } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
-import { FileViewer } from "@/app/components/file-viewer";
-import { ApproveRejectButton } from "./approve-reject-button";
+import { HouseTile, StatusPill } from "@/app/components/status";
+import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
+import { getYearGridData } from "@/lib/reports/year-grid-data";
+import { monthState } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -36,7 +34,7 @@ export default async function DashboardPage() {
     currentMonthFeePayments,
     ytdFeePayments,
     activeCollectionAssignments,
-    recentSubmissions,
+    recentActivity,
   ] = await Promise.all([
     prisma.resident.count({ where: { status: "ACTIVE" } }),
     prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } }),
@@ -61,35 +59,44 @@ export default async function DashboardPage() {
       _sum: { amountDue: true, amountPaid: true },
       where: { specialCollection: { status: "ACTIVE" } },
     }),
-    prisma.publicPaymentSubmission.findMany({
-      where: { status: "PENDING_REVIEW" },
+    prisma.auditLog.findMany({
       orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        unitNumber: true,
-        residentName: true,
-        amountSen: true,
-        paymentType: true,
-        createdAt: true,
-        coverageStartYear: true,
-        coverageStartMonth: true,
-        coverageEndYear: true,
-        coverageEndMonth: true,
-        uploads: {
-          select: {
-            id: true,
-            originalFilename: true,
-            storagePath: true,
-            mimeType: true,
-            url: true,
-          },
-        },
-      },
+      take: 8,
+      select: { id: true, entityType: true, action: true, createdAt: true, createdBy: true },
     }),
   ]);
 
-  const t = await getDictionary();
+  const [t, locale, grid, residentIds, pendingThisMonth] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    getYearGridData({ year: now.getFullYear(), includeInactive: true }),
+    prisma.resident.findMany({ select: { id: true, unitNumber: true } }),
+    prisma.publicPaymentSubmission.findMany({
+      where: { status: "PENDING_REVIEW", paymentType: "MONTHLY_FEE" },
+      select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
+    }),
+  ]);
+  const idByUnit = new Map(residentIds.map((r) => [r.unitNumber, r.id]));
+  const pendingMap = getPendingSubmissionsMap(pendingThisMonth);
+  const monthIndex = now.getMonth();
+  const strip = [...grid.rows]
+    .sort((a, b) => Number(a.unitNumber) - Number(b.unitNumber) || a.unitNumber.localeCompare(b.unitNumber))
+    .map((row) => ({
+      unit: row.unitNumber,
+      id: idByUnit.get(row.unitNumber),
+      state: monthState({
+        amountSen: row.months[monthIndex],
+        override: row.monthStatusOverrides[monthIndex],
+        residentStatus: row.status,
+        isFuture: false,
+        pending: pendingMap.has(`${row.unitNumber}:${now.getFullYear()}:${monthIndex + 1}`),
+      }),
+    }));
+  const userIds = [...new Set(recentActivity.map((a) => a.createdBy).filter((v): v is string => Boolean(v)))];
+  const actors = new Map(
+    (await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } })).map((u) => [u.id, u.name]),
+  );
+  const timeFmt = new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
   const currentMonth = now.getMonth() + 1; // 1–12
   const currentMonthFeeCollection = currentMonthFeePayments._sum.amountSen ?? 0;
@@ -123,8 +130,8 @@ export default async function DashboardPage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">
               {monthLabel(now.getFullYear(), now.getMonth() + 1)} {now.getFullYear()}
             </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
-              {t.dashboard.title}
+            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-900">
+              {t.today.title}
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -143,23 +150,42 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Pending alert banner */}
-        {pendingSubmissions > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="shrink-0 text-amber-600" size={20} />
-              <p className="text-sm font-semibold text-amber-900">
-                {pendingSubmissions} submission{pendingSubmissions > 1 ? "s" : ""} waiting for review
-              </p>
-            </div>
-            <Link
-              className="shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
-              href="/payments"
-            >
-              Review all
-            </Link>
+        {/* Review queue summary (spec §5.6) */}
+        <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid content-between gap-4 rounded-[28px] bg-[var(--night)] p-6 text-white">
+            <p className="text-sm text-[#a1a1a6]">{t.dashboard.pendingReview}</p>
+            <p className="font-heading text-6xl font-extrabold leading-none tracking-tight">
+              <span className={pendingSubmissions ? "text-blend" : "text-[#5f6b88]"}>{pendingSubmissions}</span>
+            </p>
+            {pendingSubmissions > 0 ? (
+              <Link href="/review" className="rounded-full bg-[var(--lime)] px-5 py-3 text-center font-heading font-semibold text-[#06210b] hover:brightness-105">
+                {t.today.reviewCta.replace("{n}", String(pendingSubmissions))} ›
+              </Link>
+            ) : (
+              <p className="text-sm text-[#a1a1a6]">{t.today.reviewNone}</p>
+            )}
           </div>
-        )}
+
+          {/* House strip: this month's status per house */}
+          <div className="ui-card grid content-start gap-4 p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-slate-900">{t.today.houses}</h2>
+              <Link href="/residents?view=map" className="text-xs font-semibold text-[var(--blue)] hover:underline">
+                {t.today.map} ›
+              </Link>
+            </div>
+            <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-10">
+              {strip.map((h) => (
+                <HouseTile key={h.unit} unit={h.unit} state={h.state} label={t.states[h.state]} href={h.id ? `/residents/${h.id}` : undefined} />
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {(["paid", "pending", "partial", "unpaid", "hold"] as const).map((st) => (
+                <StatusPill key={st} state={st} label={`${t.states[st]} · ${strip.filter((h) => h.state === st || (st === "paid" && h.state === "ahead")).length}`} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Stat cards */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -239,85 +265,26 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Pending submissions queue */}
-        <section id="semak" className="ui-card scroll-mt-20 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <div>
-              <h2 className="text-base font-semibold text-slate-900">{t.dashboard.submissionQueue}</h2>
-              <p className="mt-0.5 text-xs text-slate-500">{t.dashboard.submissionQueueSubtitle}</p>
-            </div>
-            {pendingSubmissions > 5 && (
-              <Link className="text-xs font-semibold text-brand-700 hover:underline" href="/payments">
-                View all {pendingSubmissions} →
-              </Link>
-            )}
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-200 border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.resident}</th>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.type}</th>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.coverage}</th>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.amount}</th>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.proof}</th>
-                  <th className="px-5 py-3 font-semibold">{t.dashboard.action}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentSubmissions.length > 0 ? (
-                  recentSubmissions.map((submission) => (
-                    <tr className="transition hover:bg-cyan-50/30" key={submission.id}>
-                      <td className="px-5 py-3">
-                        <p className="font-semibold text-slate-900">{submission.unitNumber}</p>
-                        <p className="text-xs text-slate-500">{submission.residentName}</p>
-                      </td>
-                      <td className="px-5 py-3">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${
-                          submission.paymentType === "MONTHLY_FEE"
-                            ? "bg-cyan-50 text-cyan-700 ring-cyan-100"
-                            : "bg-sky-50 text-sky-700 ring-sky-100"
-                        }`}>
-                          {submission.paymentType === "MONTHLY_FEE" ? t.dashboard.monthlyFee : t.dashboard.specialCollection}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-xs text-slate-600">
-                        {monthLabel(submission.coverageStartYear, submission.coverageStartMonth)}
-                        {" – "}
-                        {monthLabel(submission.coverageEndYear, submission.coverageEndMonth)}
-                      </td>
-                      <td className="px-5 py-3 font-semibold text-slate-900">{formatRM(submission.amountSen)}</td>
-                      <td className="px-5 py-3">
-                        <FileViewer files={submission.uploads} />
-                      </td>
-                      <td className="px-5 py-3">
-                        <div className="flex gap-2">
-                          <ApproveRejectButton
-                            action={approveSubmission.bind(null, submission.id)}
-                            label={<><CheckCircle2 size={13} />{t.common.approve}</>}
-                            className="inline-flex items-center justify-center gap-1 rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
-                          />
-                          <ApproveRejectButton
-                            action={rejectSubmission.bind(null, submission.id)}
-                            label={<><XCircle size={13} />{t.common.reject}</>}
-                            className="inline-flex items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-60"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td className="px-5 py-12 text-center text-slate-500" colSpan={6}>
-                      <CheckCircle2 className="mx-auto mb-2 text-emerald-400" size={28} />
-                      {t.dashboard.noPending}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        {/* Recent activity (AuditLog, last 8) */}
+        <section className="ui-card p-5">
+          <h2 className="text-sm font-semibold text-slate-900">{t.today.activity}</h2>
+          {recentActivity.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-500">{t.today.noActivity}</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-black/5">
+              {recentActivity.map((a) => (
+                <li key={a.id} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <span className="min-w-0 truncate">
+                    <span className="font-semibold">{a.action.replaceAll("_", " ").toLowerCase()}</span>{" "}
+                    <span className="text-slate-500">· {a.entityType}{a.createdBy ? ` · ${actors.get(a.createdBy) ?? "—"}` : ""}</span>
+                  </span>
+                  <time className="shrink-0 text-xs text-slate-500" dateTime={a.createdAt.toISOString()}>
+                    {timeFmt.format(a.createdAt)}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* Bottom row: collection health + quick links */}

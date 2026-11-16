@@ -201,10 +201,14 @@ export async function approveSubmission(submissionId: string) {
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/review");
+  revalidatePath("/status");
 }
 
-export async function rejectSubmission(submissionId: string) {
+export async function rejectSubmission(submissionId: string, formData?: FormData) {
   const reviewer = await assertDashboardUser();
+  // /review sends a required reason; the dashboard quick action doesn't.
+  const reason = formData?.get("reason")?.toString().trim().slice(0, 500) || "Rejected from dashboard review queue.";
 
   await prisma.$transaction(async (tx) => {
     const submission = await tx.publicPaymentSubmission.findUnique({
@@ -219,7 +223,7 @@ export async function rejectSubmission(submissionId: string) {
       where: { id: submission.id },
       data: {
         status: "REJECTED",
-        reviewReason: "Rejected from dashboard review queue.",
+        reviewReason: reason,
         reviewedById: reviewer.id,
         reviewedAt: new Date(),
       },
@@ -231,11 +235,13 @@ export async function rejectSubmission(submissionId: string) {
         entityId: submission.id,
         action: "REJECT",
         beforeJson: JSON.stringify({ status: submission.status }),
-        afterJson: JSON.stringify({ status: "REJECTED" }),
+        afterJson: JSON.stringify({ status: "REJECTED", reason }),
         createdBy: reviewer.id,
       },
     });
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/review");
+  revalidatePath("/status");
 }

@@ -6,6 +6,7 @@ import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { SearchableSelect } from "@/app/components/searchable-select";
 import { TablePagination } from "@/app/components/table-pagination";
+import { HouseMap } from "./house-map";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
 const statuses = ["ACTIVE", "EXEMPT", "FOR_SALE", "MOVED_OUT"] as const;
 
 type ResidentsPageProps = {
-  searchParams: Promise<{ q?: string; status?: string; page?: string; perPage?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; page?: string; perPage?: string; view?: string }>;
 };
 
 const PER_PAGE_OPTIONS = [10, 25, 50, 100];
@@ -40,6 +41,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
   }
 
   const params = await searchParams;
+  const isMap = params.view === "map";
   const query = params.q?.trim() ?? "";
   const selectedStatus = statuses.includes(params.status as (typeof statuses)[number]) ? params.status : "";
   const perPage = PER_PAGE_OPTIONS.includes(parseInt(params.perPage ?? "", 10))
@@ -107,13 +109,25 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
               {inactiveResidents > 0 && <span className="text-slate-400">● {inactiveResidents} inactive</span>}
             </p>
           </div>
-          <Link className="ui-button-primary shrink-0" href="/residents/new">
-            <Plus aria-hidden="true" size={16} />
-            {t.residents.addResident}
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Peta / Senarai toggle (spec §5.8) */}
+            <div className="grid grid-cols-2 rounded-full bg-black/5 p-1 text-sm font-semibold" role="group">
+              <Link href="/residents?view=map" aria-current={isMap ? "page" : undefined} className={`rounded-full px-4 py-1.5 text-center ${isMap ? "bg-white shadow-sm" : "text-slate-500"}`}>
+                {t.today.map}
+              </Link>
+              <Link href="/residents" aria-current={!isMap ? "page" : undefined} className={`rounded-full px-4 py-1.5 text-center ${!isMap ? "bg-white shadow-sm" : "text-slate-500"}`}>
+                {t.today.list}
+              </Link>
+            </div>
+            <Link className="ui-button-primary" href="/residents/new">
+              <Plus aria-hidden="true" size={16} />
+              {t.residents.addResident}
+            </Link>
+          </div>
         </div>
 
-        {/* Table card */}
+        {isMap ? <HouseMap t={t} /> : (
+        /* Table card */
         <section className="ui-card overflow-hidden">
           {/* Filter bar */}
           <form className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center" method="get">
@@ -220,6 +234,7 @@ export default async function ResidentsPage({ searchParams }: ResidentsPageProps
             }}
           />
         </section>
+        )}
       </div>
     </main>
   );

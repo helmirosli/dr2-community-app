@@ -95,7 +95,13 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
   }, [moreOpen]);
 
   const sections: { title: string; items: Item[] }[] = [
-    { title: t.nav.sectionOverview, items: [{ href: "/dashboard", label: t.nav.today, icon: LayoutDashboard, badge: pendingCount }] },
+    {
+      title: t.nav.sectionOverview,
+      items: [
+        { href: "/dashboard", label: t.nav.today, icon: LayoutDashboard },
+        { href: "/review", label: t.nav.review, icon: Inbox, badge: pendingCount },
+      ],
+    },
     { title: t.nav.sectionHouses, items: [{ href: "/residents", label: t.nav.residents, icon: Users }] },
     {
       title: t.nav.sectionMoney,
@@ -114,14 +120,14 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
     { href: "/special-collections/new", label: t.nav.newCollection },
   ];
 
-  // Mobile bottom tabs (spec §5.5). "Semak" points at the dashboard queue until /review exists (phase 4).
+  // Mobile bottom tabs (spec §5.5).
   const tabs: Item[] = [
     { href: "/dashboard", label: t.nav.today, icon: LayoutDashboard },
-    { href: "/dashboard#semak", label: t.nav.review, icon: Inbox, badge: pendingCount },
+    { href: "/review", label: t.nav.review, icon: Inbox, badge: pendingCount },
     { href: "/residents", label: t.nav.houses, icon: Users },
     { href: "/payments/new", label: t.nav.record, icon: Plus },
   ];
-  const tabHrefs = new Set(["/dashboard", "/residents", "/payments/new"]);
+  const tabHrefs = new Set(["/dashboard", "/review", "/residents", "/payments/new"]);
   const moreActive = !moreOpen && sections.flatMap((s) => s.items).some((i) => !tabHrefs.has(i.href) && isActive(pathname, i.href));
 
   return (
@@ -195,7 +201,7 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
       >
         <div className="grid grid-cols-5">
           {tabs.map(({ href, label, icon: Icon, badge }) => {
-            const active = !moreOpen && !href.includes("#") && isActive(pathname, href);
+            const active = !moreOpen && isActive(pathname, href);
             return (
               <Link
                 key={href}
@@ -234,7 +240,7 @@ export function AdminNav({ user, pendingCount }: { user: User; pendingCount: num
             <div className="grid gap-1">
               {sections
                 .flatMap((s) => s.items)
-                .filter((i) => i.href !== "/dashboard")
+                .filter((i) => !tabHrefs.has(i.href))
                 .map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
