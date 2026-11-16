@@ -203,6 +203,7 @@ export async function approveSubmission(submissionId: string) {
 
   revalidatePath("/dashboard");
   revalidatePath("/review");
+  revalidatePath("/", "layout"); // nav badge lives in the admin layout
   revalidatePath("/status");
 }
 
@@ -244,5 +245,6 @@ export async function rejectSubmission(submissionId: string, formData?: FormData
 
   revalidatePath("/dashboard");
   revalidatePath("/review");
+  revalidatePath("/", "layout"); // nav badge lives in the admin layout
   revalidatePath("/status");
 }
