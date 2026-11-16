@@ -72,6 +72,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
       include: {
         resident: { select: { unitNumber: true, name: true } },
         coverages: { orderBy: [{ year: "asc" }, { month: "asc" }] },
+        specialCollection: { select: { id: true, title: true } },
         uploads: { select: { id: true, originalFilename: true, storagePath: true, mimeType: true, url: true } },
       },
     }),
@@ -220,21 +221,38 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                   const last  = payment.coverages[payment.coverages.length - 1];
                   const isMonthly = payment.paymentType === "MONTHLY_FEE";
                   return (
-                    <tr key={payment.id}>
+                    <tr key={payment.id} className={payment.id === params.created ? "[&>td]:bg-[#eef5ff]" : undefined}>
                       <td>
                         <p className="font-semibold text-[var(--ink)]">{payment.resident.unitNumber}</p>
                         <p className="text-xs text-[var(--ink-2)]">{payment.resident.name}</p>
                       </td>
                       <td className="whitespace-nowrap tabular-nums text-[var(--ink-2)]">{payment.paymentDate.toLocaleDateString("en-MY")}</td>
                       <td>
-                        <span className={`ui-chip ${isMonthly ? "bg-[#ddf5fd] text-[#0b6e8e]" : "bg-[#eef0f4] text-[#5d6779]"}`}>
+                        <span className={`ui-chip ${isMonthly ? "bg-[#ddf5fd] text-[#0b6e8e]" : "bg-[#e2f7e1] text-[#1c7a33]"}`}>
                           {isMonthly ? t.payments.monthlyFee : t.payments.specialCollection}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap text-[var(--ink-2)]">
-                        {first && last
-                          ? `${monthLabel(first.year, first.month)} – ${monthLabel(last.year, last.month)}`
-                          : "—"}
+                      <td className="text-[var(--ink-2)]">
+                        {/* What it paid for: the collection (special) or the months (monthly). */}
+                        {!isMonthly ? (
+                          payment.specialCollection ? (
+                            <Link href={`/special-collections/${payment.specialCollection.id}`} className="font-medium text-[var(--ink)] hover:text-[var(--blue)] hover:underline">
+                              {payment.specialCollection.title}
+                            </Link>
+                          ) : (
+                            <span className="ui-chip bg-[#fff4d6] text-[#8a6300]" title="Recorded before payments were linked to collections">
+                              Collection not recorded
+                            </span>
+                          )
+                        ) : first && last ? (
+                          <span className="whitespace-nowrap">
+                            {first.year === last.year && first.month === last.month
+                              ? monthLabel(first.year, first.month)
+                              : `${monthLabel(first.year, first.month)} – ${monthLabel(last.year, last.month)}`}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="whitespace-nowrap text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(payment.amountSen)}</td>
                       <td>

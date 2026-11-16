@@ -196,7 +196,7 @@ const en = {
     recentPayments: "Recent payments",
     date: "Date",
     type: "Type",
-    coverage: "Coverage",
+    coverage: "For",
     amount: "Amount",
     proof: "Proof",
     monthlyFee: "Monthly fee",

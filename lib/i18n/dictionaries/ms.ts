@@ -155,7 +155,7 @@ const ms: Dictionary = {
     recentPayments: "Pembayaran terkini",
     date: "Tarikh",
     type: "Jenis",
-    coverage: "Tempoh",
+    coverage: "Untuk",
     amount: "Jumlah",
     proof: "Bukti",
     monthlyFee: "Yuran bulanan",
