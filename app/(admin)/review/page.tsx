@@ -170,7 +170,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ink-2)]">{r.claim}</h3>
               <p className="font-heading text-4xl font-extrabold tracking-tight tabular-nums">{formatRM(item.amountSen)}</p>
               <dl className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1.5 text-sm">
-                <dt className="text-[var(--ink-2)]">{r.months}</dt>
+                <dt className="text-[var(--ink-2)]">{isMonthly ? r.months : r.collection}</dt>
                 <dd className="font-medium">{monthsLabel}</dd>
                 <dt className="text-[var(--ink-2)]">{r.paidOn}</dt>
                 <dd className="font-medium">{dateFmt.format(item.paymentDate)}</dd>
@@ -198,7 +198,21 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
             <div className="ui-card grid gap-3 p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ink-2)]">{r.expects}</h3>
               <p className="text-sm">
-                {r.expected}: <strong className="tabular-nums">{formatRM(expectedSen)}</strong> · {r.paidUntil}: <strong>{paidUntil}</strong>
+                {isMonthly ? (
+                  <>
+                    {r.expected}: <strong className="tabular-nums">{formatRM(expectedSen)}</strong> · {r.paidUntil}: <strong>{paidUntil}</strong>
+                  </>
+                ) : (
+                  <>
+                    {r.expectedBalance}: <strong className="tabular-nums">{formatRM(expectedSen)}</strong>
+                    {assignment && (
+                      <>
+                        {" · "}
+                        {fill(r.alreadyPaid, { paid: formatRM(assignment.amountPaid), due: formatRM(assignment.amountDue) })}
+                      </>
+                    )}
+                  </>
+                )}
               </p>
               <ul className="grid gap-1.5">
                 {check(diff === 0, diff === 0 ? r.matches : fill(r.differs, { diff: `${diff > 0 ? "+" : "−"}${formatRM(Math.abs(diff))}` }))}
