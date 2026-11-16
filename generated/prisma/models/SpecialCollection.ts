@@ -258,6 +258,7 @@ export type SpecialCollectionWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
   submissions?: Prisma.PublicPaymentSubmissionListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
 }
 
 export type SpecialCollectionOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type SpecialCollectionOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   assignments?: Prisma.SpecialCollectionAssignmentOrderByRelationAggregateInput
   submissions?: Prisma.PublicPaymentSubmissionOrderByRelationAggregateInput
+  payments?: Prisma.PaymentOrderByRelationAggregateInput
 }
 
 export type SpecialCollectionWhereUniqueInput = Prisma.AtLeast<{
@@ -291,6 +293,7 @@ export type SpecialCollectionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"SpecialCollection"> | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentListRelationFilter
   submissions?: Prisma.PublicPaymentSubmissionListRelationFilter
+  payments?: Prisma.PaymentListRelationFilter
 }, "id">
 
 export type SpecialCollectionOrderByWithAggregationInput = {
@@ -340,6 +343,7 @@ export type SpecialCollectionCreateInput = {
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutSpecialCollectionInput
   submissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUncheckedCreateInput = {
@@ -355,6 +359,7 @@ export type SpecialCollectionUncheckedCreateInput = {
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutSpecialCollectionInput
   submissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUpdateInput = {
@@ -370,6 +375,7 @@ export type SpecialCollectionUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutSpecialCollectionNestedInput
   submissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionUncheckedUpdateInput = {
@@ -385,6 +391,7 @@ export type SpecialCollectionUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
   submissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionCreateManyInput = {
@@ -424,6 +431,11 @@ export type SpecialCollectionUncheckedUpdateManyInput = {
   status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SpecialCollectionNullableScalarRelationFilter = {
+  is?: Prisma.SpecialCollectionWhereInput | null
+  isNot?: Prisma.SpecialCollectionWhereInput | null
 }
 
 export type SpecialCollectionCountOrderByAggregateInput = {
@@ -478,9 +490,20 @@ export type SpecialCollectionScalarRelationFilter = {
   isNot?: Prisma.SpecialCollectionWhereInput
 }
 
-export type SpecialCollectionNullableScalarRelationFilter = {
-  is?: Prisma.SpecialCollectionWhereInput | null
-  isNot?: Prisma.SpecialCollectionWhereInput | null
+export type SpecialCollectionCreateNestedOneWithoutPaymentsInput = {
+  create?: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.SpecialCollectionCreateOrConnectWithoutPaymentsInput
+  connect?: Prisma.SpecialCollectionWhereUniqueInput
+}
+
+export type SpecialCollectionUpdateOneWithoutPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.SpecialCollectionCreateOrConnectWithoutPaymentsInput
+  upsert?: Prisma.SpecialCollectionUpsertWithoutPaymentsInput
+  disconnect?: Prisma.SpecialCollectionWhereInput | boolean
+  delete?: Prisma.SpecialCollectionWhereInput | boolean
+  connect?: Prisma.SpecialCollectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SpecialCollectionUpdateToOneWithWhereWithoutPaymentsInput, Prisma.SpecialCollectionUpdateWithoutPaymentsInput>, Prisma.SpecialCollectionUncheckedUpdateWithoutPaymentsInput>
 }
 
 export type EnumSpecialCollectionStatusFieldUpdateOperationsInput = {
@@ -517,6 +540,82 @@ export type SpecialCollectionUpdateOneWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SpecialCollectionUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.SpecialCollectionUpdateWithoutSubmissionsInput>, Prisma.SpecialCollectionUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type SpecialCollectionCreateWithoutPaymentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  amountPerResident: number
+  dueDate?: Date | string | null
+  eventStartDate?: Date | string | null
+  eventEndDate?: Date | string | null
+  status?: $Enums.SpecialCollectionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutSpecialCollectionInput
+  submissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput
+}
+
+export type SpecialCollectionUncheckedCreateWithoutPaymentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  amountPerResident: number
+  dueDate?: Date | string | null
+  eventStartDate?: Date | string | null
+  eventEndDate?: Date | string | null
+  status?: $Enums.SpecialCollectionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutSpecialCollectionInput
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput
+}
+
+export type SpecialCollectionCreateOrConnectWithoutPaymentsInput = {
+  where: Prisma.SpecialCollectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedCreateWithoutPaymentsInput>
+}
+
+export type SpecialCollectionUpsertWithoutPaymentsInput = {
+  update: Prisma.XOR<Prisma.SpecialCollectionUpdateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedUpdateWithoutPaymentsInput>
+  create: Prisma.XOR<Prisma.SpecialCollectionCreateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedCreateWithoutPaymentsInput>
+  where?: Prisma.SpecialCollectionWhereInput
+}
+
+export type SpecialCollectionUpdateToOneWithWhereWithoutPaymentsInput = {
+  where?: Prisma.SpecialCollectionWhereInput
+  data: Prisma.XOR<Prisma.SpecialCollectionUpdateWithoutPaymentsInput, Prisma.SpecialCollectionUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type SpecialCollectionUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amountPerResident?: Prisma.IntFieldUpdateOperationsInput | number
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutSpecialCollectionNestedInput
+  submissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput
+}
+
+export type SpecialCollectionUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amountPerResident?: Prisma.IntFieldUpdateOperationsInput | number
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  eventEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumSpecialCollectionStatusFieldUpdateOperationsInput | $Enums.SpecialCollectionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+  submissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+}
+
 export type SpecialCollectionCreateWithoutAssignmentsInput = {
   id?: string
   title: string
@@ -529,6 +628,7 @@ export type SpecialCollectionCreateWithoutAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUncheckedCreateWithoutAssignmentsInput = {
@@ -543,6 +643,7 @@ export type SpecialCollectionUncheckedCreateWithoutAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionCreateOrConnectWithoutAssignmentsInput = {
@@ -573,6 +674,7 @@ export type SpecialCollectionUpdateWithoutAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionUncheckedUpdateWithoutAssignmentsInput = {
@@ -587,6 +689,7 @@ export type SpecialCollectionUncheckedUpdateWithoutAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionCreateWithoutSubmissionsInput = {
@@ -601,6 +704,7 @@ export type SpecialCollectionCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionUncheckedCreateWithoutSubmissionsInput = {
@@ -615,6 +719,7 @@ export type SpecialCollectionUncheckedCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedCreateNestedManyWithoutSpecialCollectionInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutSpecialCollectionInput
 }
 
 export type SpecialCollectionCreateOrConnectWithoutSubmissionsInput = {
@@ -645,6 +750,7 @@ export type SpecialCollectionUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 export type SpecialCollectionUncheckedUpdateWithoutSubmissionsInput = {
@@ -659,6 +765,7 @@ export type SpecialCollectionUncheckedUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.SpecialCollectionAssignmentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutSpecialCollectionNestedInput
 }
 
 
@@ -669,11 +776,13 @@ export type SpecialCollectionUncheckedUpdateWithoutSubmissionsInput = {
 export type SpecialCollectionCountOutputType = {
   assignments: number
   submissions: number
+  payments: number
 }
 
 export type SpecialCollectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | SpecialCollectionCountOutputTypeCountAssignmentsArgs
   submissions?: boolean | SpecialCollectionCountOutputTypeCountSubmissionsArgs
+  payments?: boolean | SpecialCollectionCountOutputTypeCountPaymentsArgs
 }
 
 /**
@@ -700,6 +809,13 @@ export type SpecialCollectionCountOutputTypeCountSubmissionsArgs<ExtArgs extends
   where?: Prisma.PublicPaymentSubmissionWhereInput
 }
 
+/**
+ * SpecialCollectionCountOutputType without action
+ */
+export type SpecialCollectionCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentWhereInput
+}
+
 
 export type SpecialCollectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -714,6 +830,7 @@ export type SpecialCollectionSelect<ExtArgs extends runtime.Types.Extensions.Int
   updatedAt?: boolean
   assignments?: boolean | Prisma.SpecialCollection$assignmentsArgs<ExtArgs>
   submissions?: boolean | Prisma.SpecialCollection$submissionsArgs<ExtArgs>
+  payments?: boolean | Prisma.SpecialCollection$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SpecialCollectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["specialCollection"]>
 
@@ -760,6 +877,7 @@ export type SpecialCollectionOmit<ExtArgs extends runtime.Types.Extensions.Inter
 export type SpecialCollectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignments?: boolean | Prisma.SpecialCollection$assignmentsArgs<ExtArgs>
   submissions?: boolean | Prisma.SpecialCollection$submissionsArgs<ExtArgs>
+  payments?: boolean | Prisma.SpecialCollection$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.SpecialCollectionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SpecialCollectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -770,6 +888,7 @@ export type $SpecialCollectionPayload<ExtArgs extends runtime.Types.Extensions.I
   objects: {
     assignments: Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>[]
     submissions: Prisma.$PublicPaymentSubmissionPayload<ExtArgs>[]
+    payments: Prisma.$PaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1178,6 +1297,7 @@ export interface Prisma__SpecialCollectionClient<T, Null = never, ExtArgs extend
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assignments<T extends Prisma.SpecialCollection$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpecialCollection$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpecialCollectionAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.SpecialCollection$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpecialCollection$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PublicPaymentSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payments<T extends Prisma.SpecialCollection$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpecialCollection$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1655,6 +1775,30 @@ export type SpecialCollection$submissionsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.PublicPaymentSubmissionScalarFieldEnum | Prisma.PublicPaymentSubmissionScalarFieldEnum[]
+}
+
+/**
+ * SpecialCollection.payments
+ */
+export type SpecialCollection$paymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payment
+   */
+  select?: Prisma.PaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payment
+   */
+  omit?: Prisma.PaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInclude<ExtArgs> | null
+  where?: Prisma.PaymentWhereInput
+  orderBy?: Prisma.PaymentOrderByWithRelationInput | Prisma.PaymentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentScalarFieldEnum | Prisma.PaymentScalarFieldEnum[]
 }
 
 /**

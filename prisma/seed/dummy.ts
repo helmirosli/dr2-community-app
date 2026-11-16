@@ -77,11 +77,35 @@ async function insertSpecialCollectionAssignments(
     amountPaid: number;
     status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "QUARANTINED";
   }>,
+  payment: { createdById: string; paymentDate: Date },
 ) {
   const now = new Date();
   const legacyColumns = await detectLegacyAssignmentRelationColumns();
 
   for (const row of rows) {
+    // Every "paid" amount is backed by a real payment linked to the collection, so the collection
+    // page (which totals linked payments) and the stored amountPaid always agree.
+    if (row.amountPaid > 0) {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."Payment"
+          ("id","residentId","paymentType","amountSen","paymentDate","method","referenceNo","notes","createdById","specialCollectionId","createdAt","updatedAt")
+         values
+          ($1,$2,$3::desarestu_db."PaymentType",$4,$5,$6::desarestu_db."PaymentMethod",$7,$8,$9,$10,$11,$12)`,
+        newId(),
+        row.residentId,
+        "SPECIAL_COLLECTION",
+        row.amountPaid,
+        payment.paymentDate,
+        "BANK_TRANSFER",
+        `DMY-SC-${row.residentId.slice(-6)}`,
+        "Dummy special collection payment",
+        payment.createdById,
+        row.specialCollectionId,
+        now,
+        now,
+      );
+    }
+
     if (legacyColumns) {
       await prisma.$executeRawUnsafe(
         `insert into desarestu_db."SpecialCollectionAssignment"
@@ -581,6 +605,7 @@ async function main() {
       amountPaid: idx % 3 === 0 ? 12000 : idx % 3 === 1 ? 6000 : 0,
       status: idx % 3 === 2 ? "PENDING_REVIEW" : "APPROVED",
     })),
+    { createdById: admin.id, paymentDate: new Date(Date.UTC(currentYear, Math.max(0, currentMonth - 2), 10)) },
   );
 
   await insertSpecialCollectionAssignments(
@@ -591,6 +616,7 @@ async function main() {
       amountPaid: 8000,
       status: "APPROVED",
     })),
+    { createdById: admin.id, paymentDate: new Date(Date.UTC(currentYear - 1, 10, 15)) },
   );
 
   await prisma.publicPaymentSubmission.createMany({

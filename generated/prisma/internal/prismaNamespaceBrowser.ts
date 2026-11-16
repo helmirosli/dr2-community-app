@@ -168,7 +168,8 @@ export const PaymentScalarFieldEnum = {
   notes: 'notes',
   createdById: 'createdById',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  specialCollectionId: 'specialCollectionId'
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]

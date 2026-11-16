@@ -153,6 +153,7 @@ export async function approveSubmission(submissionId: string) {
         referenceNo: submission.referenceNo,
         notes: submission.notes,
         createdById: reviewer.id,
+        specialCollectionId: submission.paymentType === "SPECIAL_COLLECTION" ? submission.specialCollectionId : null,
         coverages: {
           create: buildMonthlyCoverageRows(resident.id, coveredMonths, submission.amountSen, existingCoverageMap),
         },

@@ -167,9 +167,13 @@ model Payment {
   updatedAt   DateTime          @updatedAt
   coverages   PaymentCoverage[]
   uploads     Upload[]
+  /// Which special collection a SPECIAL_COLLECTION payment was for (null for monthly fees).
+  specialCollectionId String?
+  specialCollection   SpecialCollection? @relation(fields: [specialCollectionId], references: [id])
 
   @@index([residentId, paymentDate])
   @@index([paymentType])
+  @@index([specialCollectionId])
   @@schema("desarestu_db")
 }
 
@@ -203,6 +207,7 @@ model SpecialCollection {
   status            SpecialCollectionStatus        @default(DRAFT)
   assignments       SpecialCollectionAssignment[]
   submissions       PublicPaymentSubmission[]
+  payments          Payment[]
   createdAt         DateTime                       @default(now())
   updatedAt         DateTime                       @updatedAt
 

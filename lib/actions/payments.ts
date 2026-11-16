@@ -247,6 +247,9 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
           referenceNo: paymentInput.data.referenceNo || null,
           notes: paymentInput.data.notes || null,
           createdById: user.id,
+          // Link special-collection payments to their collection (the collection page totals these).
+          specialCollectionId:
+            paymentInput.data.paymentType === "SPECIAL_COLLECTION" ? paymentInput.data.specialCollectionId || null : null,
           coverages: {
             // Official payments cover only the selected months; no carry-forward.
             create: buildMonthlyCoverageRows(resident.id, paymentInput.coveredMonths, paymentInput.amountSen).slice(
@@ -282,6 +285,7 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
         afterJson: JSON.stringify({
           residentId: resident.id,
           paymentType: paymentInput.data.paymentType,
+          specialCollectionId: paymentInput.data.specialCollectionId || null,
           amountSen: paymentInput.amountSen,
           coveredMonths: paymentInput.coveredMonths,
           adjusted: paymentInput.data.allowAdjustment === "on",

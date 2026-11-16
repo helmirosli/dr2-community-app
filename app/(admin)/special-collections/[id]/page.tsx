@@ -41,7 +41,7 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
     : DEFAULT_PAGE_SIZE;
   const page = Math.max(1, parseInt(pageParam ?? "1", 10));
 
-  const [collection, allAssignments] = await Promise.all([
+  const [collection, assignmentRows, linkedPayments] = await Promise.all([
     prisma.specialCollection.findUnique({
       where: { id },
       select: {
@@ -66,9 +66,19 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
         status: true,
       },
     }),
+    // Source of truth for "paid": the payments actually linked to this collection, per house.
+    prisma.payment.groupBy({ by: ["residentId"], where: { specialCollectionId: id }, _sum: { amountSen: true } }),
   ]);
 
   if (!collection) notFound();
+
+  const linkedByResident = new Map(linkedPayments.map((p) => [p.residentId, p._sum.amountSen ?? 0]));
+  // `amountPaid` is the stored running total; show the linked payments and flag any disagreement.
+  const allAssignments = assignmentRows.map((a) => ({
+    ...a,
+    recordedPaid: a.amountPaid,
+    amountPaid: linkedByResident.get(a.resident.id) ?? 0,
+  }));
 
   // Numeric sort by unit number
   allAssignments.sort((a, b) => {
@@ -256,7 +266,17 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
                       <td className="font-semibold text-[var(--ink)]">{assignment.resident.unitNumber}</td>
                       <td className="text-[var(--ink)]">{assignment.resident.name}</td>
                       <td className="text-right tabular-nums text-[var(--ink-2)]">{formatRM(assignment.amountDue)}</td>
-                      <td className="text-right font-semibold tabular-nums text-[var(--ink)]">{formatRM(assignment.amountPaid)}</td>
+                      <td className="text-right font-semibold tabular-nums text-[var(--ink)]">
+                        {formatRM(assignment.amountPaid)}
+                        {assignment.recordedPaid !== assignment.amountPaid && (
+                          <span
+                            className="block text-[11px] font-medium text-[#8a6300]"
+                            title="The stored total for this house differs from the payments linked to this collection."
+                          >
+                            record says {formatRM(assignment.recordedPaid)}
+                          </span>
+                        )}
+                      </td>
                       <td>
                         {isPaid ? (
                           <span className="ui-chip bg-[#e2f7e1] text-[#1c7a33]">Paid</span>
