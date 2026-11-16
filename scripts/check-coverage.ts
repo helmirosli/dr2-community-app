@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { DEFAULT_MONTHLY_FEE_SEN as FEE } from "@/lib/money";
 import { buildMonthlyCoverageRows, getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { monthState } from "@/lib/status";
+import { detectFileType } from "@/lib/uploads";
 
 const pick = (rows: ReturnType<typeof buildMonthlyCoverageRows>) =>
   rows.map((r) => `${r.year}-${r.month}:${r.amountApplied}:${r.status}`);
@@ -56,5 +57,13 @@ assert.equal(st(null, { pending: true }), "pending");
 assert.equal(st(null, { residentStatus: "EXEMPT" }), "hold");
 assert.equal(st(5000, { residentStatus: "FOR_SALE" }), "hold");
 assert.equal(st(null, { override: "MOVED_OUT" }), "hold");
+
+// Proof uploads are identified by content, so a misnamed WebP-as-.jpg is still accepted.
+assert.equal(detectFileType(Buffer.from([0xff, 0xd8, 0xff, 0xe0])), "image/jpeg");
+assert.equal(detectFileType(Buffer.from("RIFF\0\0\0\0WEBPVP8 ", "latin1")), "image/webp");
+assert.equal(detectFileType(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0])), "image/png");
+assert.equal(detectFileType(Buffer.from("%PDF-1.7", "latin1")), "application/pdf");
+assert.equal(detectFileType(Buffer.from("\0\0\0\x18ftypheic", "latin1")), null);
+assert.equal(detectFileType(Buffer.from("<html>", "latin1")), null);
 
 console.log("coverage self-check: ok");
