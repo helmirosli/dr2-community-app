@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { CalendarDays, Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -63,7 +63,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     } : {}),
   };
 
-  const [payments, totalCount] = await Promise.all([
+  const [payments, totalCount, typeCounts] = await Promise.all([
     prisma.payment.findMany({
       where: whereClause,
       orderBy: { paymentDate: "desc" },
@@ -76,7 +76,11 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
       },
     }),
     prisma.payment.count({ where: whereClause }),
+    // Per-type counts under the other active filters, for the segmented control.
+    prisma.payment.groupBy({ by: ["paymentType"], where: { ...whereClause, paymentType: undefined }, _count: { _all: true } }),
   ]);
+  const typeCount = (type?: string) =>
+    typeCounts.filter((c) => !type || c.paymentType === type).reduce((sum, c) => sum + c._count._all, 0);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / perPage));
   const currentPage = Math.min(page, totalPages);
@@ -86,6 +90,14 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     const sp = new URLSearchParams({ page: String(p), perPage: String(perPage) });
     if (query)       sp.set("q",    query);
     if (typeFilter)  sp.set("type", typeFilter);
+    if (params.from) sp.set("from", params.from!);
+    if (params.to)   sp.set("to",   params.to!);
+    return `/payments?${sp}`;
+  }
+  function typeLink(type: string) {
+    const sp = new URLSearchParams({ perPage: String(perPage) });
+    if (query)       sp.set("q",    query);
+    if (type)        sp.set("type", type);
     if (params.from) sp.set("from", params.from!);
     if (params.to)   sp.set("to",   params.to!);
     return `/payments?${sp}`;
@@ -107,32 +119,79 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
       {params.created && <div className="ui-alert-success">{t.payments.recordedSuccess}</div>}
 
       <section className="ui-card overflow-hidden">
-        <form className="ui-toolbar" method="get">
-          <label className="ui-search">
-            <Search aria-hidden="true" size={16} className="text-[var(--ink-2)]" />
-            <input defaultValue={query} name="q" placeholder="Search unit, resident, reference..." />
-          </label>
-          <select className="ui-select w-auto!" name="type" defaultValue={typeFilter}>
-            <option value="">All types</option>
-            <option value="MONTHLY_FEE">{t.payments.monthlyFee}</option>
-            <option value="SPECIAL_COLLECTION">{t.payments.specialCollection}</option>
-          </select>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--ink-2)]">
-            <span>Date range:</span>
-            <label className="flex items-center gap-1.5">
-              <span>From</span>
-              <input className="ui-input w-auto!" defaultValue={params.from ?? ""} name="from" type="date" />
-            </label>
-            <label className="flex items-center gap-1.5">
-              <span>To</span>
-              <input className="ui-input w-auto!" defaultValue={params.to ?? ""} name="to" type="date" />
-            </label>
+        <div className="grid gap-3 border-b border-black/5 px-5 py-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            {/* Segmented type filter with counts */}
+            <nav aria-label="Filter by type" className="grid grid-cols-3 rounded-full bg-[var(--paper)] p-1 lg:inline-grid">
+              {([
+                ["", "All"],
+                ["MONTHLY_FEE", t.payments.monthlyFee],
+                ["SPECIAL_COLLECTION", t.payments.specialCollection],
+              ] as const).map(([type, label]) => {
+                const active = (typeFilter ?? "") === type;
+                return (
+                  <Link
+                    key={type || "all"}
+                    href={typeLink(type)}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap transition sm:px-4 ${
+                      active ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    <span className="truncate">{label}</span>
+                    <span className={`rounded-full px-1.5 text-[11px] leading-5 tabular-nums ${active ? "bg-[var(--paper)] text-[var(--ink-2)]" : "text-[#aeaeb2]"}`}>
+                      {typeCount(type || undefined)}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Search + date range: one GET form, type kept from the segmented control */}
+            <form method="get" className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+              {typeFilter && <input type="hidden" name="type" value={typeFilter} />}
+              <input type="hidden" name="perPage" value={perPage} />
+              <label className="flex h-11 items-center gap-2 rounded-full bg-[var(--paper)] px-4 focus-within:outline focus-within:outline-3 focus-within:outline-[rgba(34,199,242,0.35)] sm:w-64">
+                <Search aria-hidden="true" size={16} className="shrink-0 text-[var(--ink-2)]" />
+                <input
+                  defaultValue={query}
+                  name="q"
+                  placeholder="Unit, name or reference"
+                  aria-label="Search unit, resident or reference"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#aeaeb2]"
+                />
+              </label>
+              <div className="flex h-11 items-center gap-1 rounded-full bg-[var(--paper)] pl-4 pr-1 text-sm text-[var(--ink-2)]">
+                <CalendarDays aria-hidden="true" size={16} className="shrink-0" />
+                <input
+                  aria-label="From date"
+                  defaultValue={params.from ?? ""}
+                  name="from"
+                  type="date"
+                  className="min-w-0 flex-1 bg-transparent px-1 text-[var(--ink)] outline-none sm:w-[8.5rem] sm:flex-none"
+                />
+                <span aria-hidden="true">–</span>
+                <input
+                  aria-label="To date"
+                  defaultValue={params.to ?? ""}
+                  name="to"
+                  type="date"
+                  className="min-w-0 flex-1 bg-transparent px-1 text-[var(--ink)] outline-none sm:w-[8.5rem] sm:flex-none"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="h-11 flex-1 rounded-full bg-[var(--ink)] px-5 text-sm font-semibold text-white hover:bg-black sm:flex-none" type="submit">
+                  {t.common.apply}
+                </button>
+                {hasFilters && (
+                  <Link className="grid h-11 place-items-center rounded-full px-3 text-sm font-medium text-[var(--blue)] hover:bg-black/5" href="/payments">
+                    Clear
+                  </Link>
+                )}
+              </div>
+            </form>
           </div>
-          <button className="ui-button-primary" type="submit">{t.common.apply}</button>
-          {hasFilters && (
-            <Link className="text-sm font-medium text-[var(--blue)] hover:underline" href="/payments">Clear</Link>
-          )}
-        </form>
+        </div>
 
         <p className="px-5 py-2 text-xs text-[var(--ink-2)]">
           {totalCount} payment{totalCount !== 1 ? "s" : ""}
