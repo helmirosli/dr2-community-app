@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary } from "@/lib/i18n";
@@ -125,23 +125,24 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           <input type="hidden" name="perPage" value={perPage} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               {/* Segmented type filter with counts */}
-            <nav aria-label="Filter by type" className="flex w-full overflow-x-auto rounded-full bg-[var(--paper)] p-1 sm:w-auto">
+            <nav aria-label="Filter by type" className="grid w-full grid-cols-3 rounded-full bg-[var(--paper)] p-1 sm:flex sm:w-auto">
               {([
-                ["", "All"],
-                ["MONTHLY_FEE", t.payments.monthlyFee],
-                ["SPECIAL_COLLECTION", t.payments.specialCollection],
-              ] as const).map(([type, label]) => {
+                ["", t.payments.filterAll, t.payments.filterAll],
+                ["MONTHLY_FEE", t.payments.monthlyFee, t.payments.monthlyShort],
+                ["SPECIAL_COLLECTION", t.payments.specialCollection, t.payments.specialShort],
+              ] as const).map(([type, label, short]) => {
                 const active = (typeFilter ?? "") === type;
                 return (
                   <Link
                     key={type || "all"}
                     href={typeLink(type)}
                     aria-current={active ? "page" : undefined}
-                    className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-semibold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)] sm:flex-none sm:px-4 ${
+                    className={`flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-semibold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)] sm:flex-none sm:px-4 ${
                       active ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"
                     }`}
                   >
-                    <span>{label}</span>
+                    <span className="sm:hidden">{short}</span>
+                    <span className="hidden sm:inline">{label}</span>
                     <span className={`rounded-full px-1.5 text-[11px] leading-5 tabular-nums ${active ? "bg-[var(--paper)] text-[var(--ink-2)]" : "text-[#aeaeb2]"}`}>
                       {typeCount(type || undefined)}
                     </span>
@@ -149,7 +150,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 );
               })}
             </nav>
-            <label className="flex h-11 items-center gap-2 rounded-full bg-[var(--paper)] px-4 focus-within:outline focus-within:outline-3 focus-within:outline-[rgba(34,199,242,0.35)] sm:w-72">
+            <label className="flex h-11 w-full min-w-0 items-center gap-2 rounded-full bg-[var(--paper)] px-4 focus-within:outline focus-within:outline-3 focus-within:outline-[rgba(34,199,242,0.35)] sm:w-72">
               <Search aria-hidden="true" size={16} className="shrink-0 text-[var(--ink-2)]" />
               <input
                 defaultValue={query}
@@ -160,21 +161,32 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               />
             </label>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex h-11 w-full items-center gap-1 rounded-full bg-[var(--paper)] pl-4 pr-2 text-sm text-[var(--ink-2)] sm:w-auto">
-              <CalendarDays aria-hidden="true" size={16} className="shrink-0" />
-              <input aria-label="From date" defaultValue={params.from ?? ""} name="from" type="date" className="min-w-0 flex-1 bg-transparent px-1 text-[var(--ink)] outline-none sm:w-[8.5rem] sm:flex-none" />
-              <span aria-hidden="true">–</span>
-              <input aria-label="To date" defaultValue={params.to ?? ""} name="to" type="date" className="min-w-0 flex-1 bg-transparent px-1 text-[var(--ink)] outline-none sm:w-[8.5rem] sm:flex-none" />
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+            {/* Dates: two half-width pills on phones, side by side on wider screens */}
+            {([
+              ["from", t.payments.dateFrom, params.from],
+              ["to", t.payments.dateTo, params.to],
+            ] as const).map(([name, label, value]) => (
+              <label key={name} className="flex h-11 min-w-0 items-center gap-2 rounded-full bg-[var(--paper)] pl-4 pr-2 text-sm">
+                <span className="shrink-0 text-xs font-medium text-[var(--ink-2)]">{label}</span>
+                <input
+                  defaultValue={value ?? ""}
+                  name={name}
+                  type="date"
+                  className="w-full min-w-0 bg-transparent text-[var(--ink)] outline-none sm:w-[8.5rem]"
+                />
+              </label>
+            ))}
+            <div className="col-span-2 flex items-center gap-2 sm:col-span-1">
+              <button className="h-11 flex-1 rounded-full bg-[var(--ink)] px-5 text-sm font-semibold text-white hover:bg-black sm:flex-none" type="submit">
+                {t.common.apply}
+              </button>
+              {hasFilters && (
+                <Link className="grid h-11 place-items-center rounded-full px-3 text-sm font-medium text-[var(--blue)] hover:bg-black/5" href="/payments">
+                  Clear
+                </Link>
+              )}
             </div>
-            <button className="h-11 rounded-full bg-[var(--ink)] px-5 text-sm font-semibold text-white hover:bg-black" type="submit">
-              {t.common.apply}
-            </button>
-            {hasFilters && (
-              <Link className="grid h-11 place-items-center rounded-full px-3 text-sm font-medium text-[var(--blue)] hover:bg-black/5" href="/payments">
-                Clear
-              </Link>
-            )}
             <span className="ml-auto hidden text-xs text-[var(--ink-2)] sm:inline">{totalCount} payments</span>
           </div>
         </form>

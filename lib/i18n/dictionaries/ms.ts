@@ -139,6 +139,11 @@ const ms: Dictionary = {
     noMatch: "Tiada rekod penduduk sepadan dengan tapisan ini.",
   },
   payments: {
+    filterAll: "Semua",
+    monthlyShort: "Bulanan",
+    specialShort: "Khas",
+    dateFrom: "Dari",
+    dateTo: "Hingga",
     ledger: "Lejar pembayaran",
     title: "Rekod pembayaran rasmi",
     subtitle: "Semak pembayaran yang direkod oleh admin/AJK atau diluluskan daripada penyerahan awam.",

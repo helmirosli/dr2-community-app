@@ -180,6 +180,11 @@ const en = {
     zipCode: "Zip code",
   },
   payments: {
+    filterAll: "All",
+    monthlyShort: "Monthly",
+    specialShort: "Special",
+    dateFrom: "From",
+    dateTo: "To",
     ledger: "Payment ledger",
     title: "Official payment records",
     subtitle: "Review payments recorded by admin/AJK or approved from public submissions.",
