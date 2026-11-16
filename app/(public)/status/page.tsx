@@ -83,8 +83,8 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
     return unitA - unitB;
   });
 
-  const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
-  const extraCols = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
+  const hasExtra = false; // no generic "Extra" column: collections carried forward are listed by name
+  const extraCols = specialCollections.length;
 
   const report = await getMonthlyReport({ year: currentYear, month: currentMonth, includeInactive: true });
   const paidUntilByUnit = new Map(
@@ -188,6 +188,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                   {specialCollections.map((sc) => (
                     <th className="px-2 py-3 text-center font-semibold text-[#f5b400]" key={sc.id}>
                       {sc.title}
+                      {sc.carriedFrom && <span className="block text-[10px] font-medium opacity-70">from {sc.carriedFrom}</span>}
                     </th>
                   ))}
                   {hasExtra && specialCollections.length === 0 && (

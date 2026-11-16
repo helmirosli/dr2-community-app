@@ -108,8 +108,8 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
-  const hasExtra = filteredRows.some((r) => r.extraDueSen > 0);
-  const extraCols = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
+  const hasExtra = false; // no generic "Extra" column: collections carried forward are listed by name
+  const extraCols = specialCollections.length;
 
   const exportQuery = new URLSearchParams({
     year: String(selectedYear),
@@ -307,6 +307,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 {specialCollections.map((sc) => (
                   <th className="border-b border-black/5 px-2 py-3 text-center font-semibold text-[#8a6300]" key={sc.id}>
                     {sc.title.toUpperCase()}
+                    {sc.carriedFrom && <span className="block text-[10px] font-medium normal-case opacity-70">from {sc.carriedFrom} · still owed</span>}
                   </th>
                 ))}
                 {hasExtra && specialCollections.length === 0 && (

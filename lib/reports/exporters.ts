@@ -223,7 +223,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
   const monthHeaders = MONTH_ABBR.map((m) => ({ header: `${m}-${String(year).slice(2)}`, key: m, width: 10 }));
   const extraHeaders = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ header: sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
+    ? specialCollections.map((sc) => ({ header: sc.carriedFrom ? `${sc.title.toUpperCase()} (from ${sc.carriedFrom})` : sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
     : [];
 
   sheet.columns = [
@@ -231,7 +231,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
     { header: "NO RUMAH", key: "unit", width: 12 },
     { header: "NAMA", key: "name", width: 28 },
     ...monthHeaders,
-    ...(extraHeaders.length > 0 ? extraHeaders : [{ header: "EXTRA", key: "extra", width: 10 }]),
+    ...extraHeaders,
   ];
 
   const headerRow = sheet.getRow(1);
@@ -260,25 +260,17 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
             : "";
     }
 
+    // One column per collection, using that house's assignment for that collection (not its total).
     const extraValues: Record<string, string> = {};
-    if (extraHeaders.length > 0) {
-      for (const sc of specialCollections) {
-        extraValues[`extra_${sc.id}`] = row.isForSale
-          ? statusText
-          : row.extraOutstandingSen > 0
-            ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
-            : row.extraDueSen > 0
-              ? "PAID"
-              : "";
-      }
-    } else {
-      extraValues["extra"] = row.isForSale
+    for (const sc of specialCollections) {
+      const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
+      extraValues[`extra_${sc.id}`] = row.isForSale
         ? statusText
-        : row.extraOutstandingSen > 0
-          ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
-          : row.extraDueSen > 0
-            ? "PAID"
-            : "";
+        : !a
+          ? ""
+          : a.outstanding > 0
+            ? `RM${(a.outstanding / 100).toFixed(2)}`
+            : "PAID";
     }
 
     const dataRow = sheet.addRow({ no: rowIdx + 1, unit: row.unitNumber, name: row.name, ...monthValues, ...extraValues });
@@ -324,8 +316,8 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
     return unitA - unitB;
   });
 
-  const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
-  const extraColCount = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
+  const hasExtra = specialCollections.length > 0; // no generic EXTRA column
+  const extraColCount = specialCollections.length;
 
   const monthHeaderCells = MONTH_ABBR.map((m) => ({
     text: `${m}\n${String(year).slice(2)}`,
@@ -337,7 +329,7 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   }));
 
   const extraHeaderCells = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ text: sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
+    ? specialCollections.map((sc) => ({ text: sc.carriedFrom ? `${sc.title.toUpperCase()}\n(from ${sc.carriedFrom})` : sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
     : hasExtra
       ? [{ text: "EXTRA", bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }]
       : [];
@@ -389,12 +381,16 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
               fontSize: 7,
             }))
           : specialCollections.length > 0
-            ? specialCollections.map(() => ({
-                text: row.extraOutstandingSen > 0 ? compactRM(row.extraOutstandingSen) : row.extraDueSen > 0 ? "PAID" : "",
-                alignment: "center" as const,
-                color: row.extraOutstandingSen > 0 ? "#d97706" : "#16a34a",
-                fontSize: 7,
-              }))
+            ? specialCollections.map((sc) => {
+                // This house's assignment for this collection (not its total across collections).
+                const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
+                return {
+                  text: !a ? "" : a.outstanding > 0 ? compactRM(a.outstanding) : "PAID",
+                  alignment: "center" as const,
+                  color: a && a.outstanding > 0 ? "#d97706" : "#16a34a",
+                  fontSize: 7,
+                };
+              })
             : [{ text: row.extraOutstandingSen > 0 ? compactRM(row.extraOutstandingSen) : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
 
     return [

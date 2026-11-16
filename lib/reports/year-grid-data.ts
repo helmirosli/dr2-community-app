@@ -30,6 +30,8 @@ export type YearGridRow = {
 export type YearGridSpecialCollection = {
   id: string;
   title: string;
+  /** Set when the collection belongs to an earlier year but is carried into this one (still running or owed). */
+  carriedFrom?: number;
 };
 
 export type YearGridData = {
@@ -61,8 +63,6 @@ export async function getYearGridData({
   year: number;
   includeInactive?: boolean;
 }): Promise<YearGridData> {
-  const yearStart = new Date(year, 0, 1);
-  const yearEnd = new Date(year + 1, 0, 1);
 
   const [residents, specialCollections] = await Promise.all([
     prisma.resident.findMany({
@@ -82,24 +82,39 @@ export async function getYearGridData({
       },
     }),
     prisma.specialCollection.findMany({
-      where: {
-        status: { in: ["ACTIVE", "CLOSED"] },
-        // A collection belongs to the year of its due date or event date; one with no dates belongs
-        // to the year it was created. (Previously every ACTIVE collection appeared in every year, e.g.
-        // "Roof Maintenance 2026" showed up on the 2025 grid and exports.)
-        OR: [
-          { dueDate: { gte: yearStart, lt: yearEnd } },
-          { eventStartDate: { gte: yearStart, lt: yearEnd } },
-          { dueDate: null, eventStartDate: null, createdAt: { gte: yearStart, lt: yearEnd } },
-        ],
+      where: { status: { in: ["ACTIVE", "CLOSED"] } }, // year is decided below from the dates
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        dueDate: true,
+        eventStartDate: true,
+        createdAt: true,
+        assignments: { select: { amountDue: true, amountPaid: true } },
       },
-      select: { id: true, title: true },
       orderBy: { createdAt: "asc" },
-      take: 5,
     }),
   ]);
 
   sortByUnit(residents); // numeric house order, so row "no" follows 1, 2, … 10
+  // Which collections appear in this year's grid:
+  // - its own year (due date, else event date, else creation date) always shows there;
+  // - from the current year onward, an earlier collection is carried forward while it is still
+  //   ACTIVE or any house still owes, so the AJK can see who hasn't paid. Past years never carry.
+  const currentYear = new Date().getFullYear();
+  const yearCollections: YearGridSpecialCollection[] = specialCollections
+    .map((c) => {
+      const ownYear = (c.dueDate ?? c.eventStartDate ?? c.createdAt).getFullYear();
+      const unfinished = c.status === "ACTIVE" || c.assignments.some((a) => a.amountPaid < a.amountDue);
+      if (ownYear === year) return { id: c.id, title: c.title, ownYear };
+      if (ownYear < year && year >= currentYear && unfinished) return { id: c.id, title: c.title, ownYear, carriedFrom: ownYear };
+      return null;
+    })
+    .filter((c): c is YearGridSpecialCollection & { ownYear: number } => c !== null)
+    .sort((a, b) => a.ownYear - b.ownYear)
+    .slice(0, 5)
+    .map(({ id, title, carriedFrom }) => ({ id, title, ...(carriedFrom ? { carriedFrom } : {}) }));
+
   const residentIds = residents.map((resident) => resident.id);
   const residentAuditLogs = residentIds.length
     ? await prisma.auditLog.findMany({
@@ -196,7 +211,7 @@ export async function getYearGridData({
 
   return {
     rows,
-    specialCollections: specialCollections.map((c) => ({ id: c.id, title: c.title })),
+    specialCollections: yearCollections,
     year,
   };
 }
