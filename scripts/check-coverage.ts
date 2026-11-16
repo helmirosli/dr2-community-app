@@ -5,6 +5,7 @@ import { DEFAULT_MONTHLY_FEE_SEN as FEE } from "@/lib/money";
 import { buildMonthlyCoverageRows, getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { monthState } from "@/lib/status";
 import { detectFileType } from "@/lib/uploads";
+import { sortByUnit } from "@/lib/units";
 
 const pick = (rows: ReturnType<typeof buildMonthlyCoverageRows>) =>
   rows.map((r) => `${r.year}-${r.month}:${r.amountApplied}:${r.status}`);
@@ -65,5 +66,8 @@ assert.equal(detectFileType(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1
 assert.equal(detectFileType(Buffer.from("%PDF-1.7", "latin1")), "application/pdf");
 assert.equal(detectFileType(Buffer.from("\0\0\0\x18ftypheic", "latin1")), null);
 assert.equal(detectFileType(Buffer.from("<html>", "latin1")), null);
+
+// House numbers sort numerically, not as text.
+assert.deepEqual(sortByUnit(["1", "11", "2", "12A", "12", "3"].map((unitNumber) => ({ unitNumber }))).map((r) => r.unitNumber), ["1", "2", "3", "11", "12", "12A"]);
 
 console.log("coverage self-check: ok");

@@ -1,6 +1,7 @@
 import { monthKey } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { normalizeMonthlyAppliedByMonth } from "@/lib/reports/monthly";
+import { sortByUnit } from "@/lib/units";
 
 export type YearGridAssignment = {
   specialCollectionId: string;
@@ -95,6 +96,7 @@ export async function getYearGridData({
     }),
   ]);
 
+  sortByUnit(residents); // numeric house order, so row "no" follows 1, 2, … 10
   const residentIds = residents.map((resident) => resident.id);
   const residentAuditLogs = residentIds.length
     ? await prisma.auditLog.findMany({

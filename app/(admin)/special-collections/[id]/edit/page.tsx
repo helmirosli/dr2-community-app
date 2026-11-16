@@ -4,6 +4,7 @@ import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { SpecialCollectionForm } from "../../special-collection-form";
+import { sortByUnit } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,6 +35,7 @@ export default async function EditSpecialCollectionPage({ params }: EditPageProp
   }
 
   const assignedIds = assigned.map((a) => a.residentId);
+  sortByUnit(residents);
 
   return (
     <AdminPage width="narrow">

@@ -2,6 +2,7 @@ import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { PaymentForm } from "../payment-form";
+import { sortByUnit } from "@/lib/units";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -35,7 +36,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
         back={{ href: "/payments", label: "Payment records" }}
       />
       {residents.length > 0 ? (
-        <PaymentForm residents={residents} specialCollections={specialCollections} selectedResidentId={params?.residentId} />
+        <PaymentForm residents={sortByUnit(residents)} specialCollections={specialCollections} selectedResidentId={params?.residentId} />
       ) : (
         <div className="ui-card ui-empty">Add at least one active resident before recording payments.</div>
       )}

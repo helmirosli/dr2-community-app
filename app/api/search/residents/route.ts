@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sortByUnit } from "@/lib/units";
 
 export const runtime = "nodejs";
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
   });
 
   return NextResponse.json(
-    residents.map((r) => ({
+    sortByUnit(residents).map((r) => ({
       value: r.id,
       name: r.name,
       unit: r.unitNumber,
