@@ -162,15 +162,39 @@ export default async function DashboardPage() {
         {/* Review queue summary (spec §5.6) */}
         <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <div className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white">
-            {/* Guardhouse art (A2) on the right, fading into the navy */}
-            {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
-            <img
-              src="/art/a2-login.webp"
-              alt=""
-              className={`absolute inset-y-0 right-0 -z-10 h-full w-3/5 object-cover object-[50%_35%] [mask-image:linear-gradient(to_right,transparent,#000_45%)] ${
-                pendingSubmissions ? "opacity-90" : "opacity-40 grayscale"
+            {/* Guardhouse art (A2) on the right, fading into the navy. While payments wait it comes alive:
+                lamp glow pulses, the camera drifts slowly and fireflies rise (all off under reduced motion). */}
+            <div
+              aria-hidden="true"
+              className={`absolute inset-y-0 right-0 -z-10 w-3/5 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_45%)] ${
+                pendingSubmissions ? "" : "opacity-40 grayscale"
               }`}
-            />
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
+              <img
+                src="/art/a2-login.webp"
+                alt=""
+                className={`h-full w-full object-cover object-[50%_35%] ${pendingSubmissions ? "animate-drift" : ""}`}
+              />
+              {pendingSubmissions > 0 && (
+                <>
+                  <span className="animate-glow absolute left-[49%] top-[49%] size-40 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,0.55),rgba(34,199,242,0.12)_45%,transparent_70%)] mix-blend-screen" />
+                  {[
+                    { left: "30%", top: "78%", delay: "0s", color: "bg-[var(--lime)]" },
+                    { left: "62%", top: "70%", delay: "1.4s", color: "bg-[var(--cyan)]" },
+                    { left: "44%", top: "86%", delay: "2.6s", color: "bg-[var(--lime)]" },
+                    { left: "75%", top: "82%", delay: "3.5s", color: "bg-[var(--cyan)]" },
+                    { left: "55%", top: "92%", delay: "4.3s", color: "bg-[var(--lime)]" },
+                  ].map((f) => (
+                    <span
+                      key={f.left}
+                      className={`animate-rise absolute size-1.5 rounded-full opacity-0 shadow-[0_0_8px_2px_currentColor] ${f.color}`}
+                      style={{ left: f.left, top: f.top, animationDelay: f.delay }}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
             <div className="grid min-h-60 content-between gap-6 p-6">
               <p className="flex items-center gap-2 text-sm font-medium text-[#c7cedd]">
                 {pendingSubmissions > 0 && (
