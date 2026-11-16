@@ -1,4 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, normalize, sep } from "node:path";
+
 import { Storage } from "@google-cloud/storage";
 
 const allowedExtensions = new Map([
@@ -26,6 +29,31 @@ export function getUploadLimitBytes() {
   }
 
   return 5 * 1024 * 1024;
+}
+
+// Local development without real Google credentials: keep uploads on disk in ./uploads (gitignored).
+// Production always uses GCS.
+const LOCAL_UPLOAD_ROOT = join(process.cwd(), "uploads");
+
+export function usesLocalUploads() {
+  if (process.env.NODE_ENV === "production") return false;
+  const email = process.env.GCS_CLIENT_EMAIL ?? "";
+  return !email || !process.env.GCS_PRIVATE_KEY || email.startsWith("your-");
+}
+
+function localUploadPath(relativePath: string) {
+  const full = normalize(join(LOCAL_UPLOAD_ROOT, relativePath));
+  if (!full.startsWith(LOCAL_UPLOAD_ROOT + sep)) throw new Error("Invalid upload path.");
+  return full;
+}
+
+/** Reads a locally stored upload (dev only); null if missing. */
+export async function readLocalUpload(relativePath: string) {
+  try {
+    return await readFile(localUploadPath(relativePath));
+  } catch {
+    return null;
+  }
 }
 
 export function getGcsBucket() {
@@ -97,6 +125,10 @@ export function getSingleUploadedFile(formData: FormData, fieldName: string) {
 }
 
 export async function removeStoredUpload(relativePath: string) {
+  if (usesLocalUploads()) {
+    await rm(localUploadPath(relativePath), { force: true });
+    return;
+  }
   const { bucket } = getGcsBucket();
   await bucket.file(relativePath).delete({ ignoreNotFound: true });
 }
@@ -145,17 +177,19 @@ export async function storeProofUpload(
 
   const contentHash = createHash("sha256").update(buffer).digest("hex");
 
-  const { bucket } = getGcsBucket();
+  let url: string;
 
-  const gcsFile = bucket.file(gcsPath);
-
-  await gcsFile.save(buffer, {
-    contentType: mimeType,
-    resumable: false,
-  });
-
-  const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
-  const url = `${baseUrl}/${gcsPath}`;
+  if (usesLocalUploads()) {
+    const target = localUploadPath(gcsPath);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, buffer);
+    url = `/api/uploads/${gcsPath}`;
+  } else {
+    const { bucket } = getGcsBucket();
+    await bucket.file(gcsPath).save(buffer, { contentType: mimeType, resumable: false });
+    const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
+    url = `${baseUrl}/${gcsPath}`;
+  }
 
   return {
     originalFilename,

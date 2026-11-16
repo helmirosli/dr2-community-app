@@ -16,6 +16,16 @@ export type PublicSubmissionState = {
 };
 
 export async function createPublicSubmission(
+  previousState: PublicSubmissionState,
+  formData: FormData,
+): Promise<PublicSubmissionState> {
+  const result = await submit(previousState, formData);
+  // Log why a resident's submission was refused (reason only, no personal data) so the AJK can debug reports.
+  if (!result.ok) console.warn(`[submit] rejected (unit ${formData.get("unitNumber") ?? "?"}): ${result.message}`);
+  return result;
+}
+
+async function submit(
   _previousState: PublicSubmissionState,
   formData: FormData,
 ): Promise<PublicSubmissionState> {

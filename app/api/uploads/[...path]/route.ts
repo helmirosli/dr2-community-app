@@ -1,4 +1,4 @@
-import { getGcsBucket, getPublicFullUrl } from "@/lib/uploads";
+import { detectFileType, getGcsBucket, getPublicFullUrl, readLocalUpload, usesLocalUploads } from "@/lib/uploads";
 
 type RouteParams = {
   params: Promise<{ path: string[] }>;
@@ -13,6 +13,14 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   try {
+    if (usesLocalUploads()) {
+      const data = await readLocalUpload(filePath);
+      if (!data) return new Response("File not found", { status: 404 });
+      return new Response(new Uint8Array(data), {
+        headers: { "Content-Type": detectFileType(data) ?? "application/octet-stream", "Cache-Control": "private, no-store" },
+      });
+    }
+
     const publicFiles = process.env.GCS_PUBLIC_FILES === "true";
 
     if (publicFiles) {
