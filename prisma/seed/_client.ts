@@ -33,6 +33,14 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL or KK_* environment variables must be set.");
 }
 
+// dotenv only fills variables the shell didn't set, so a shell without DATABASE_URL silently gets the
+// .env.example placeholder ("aws-0-[REGION]…") and Prisma fails with a vague "Invalid URL".
+if (databaseUrl.includes("[REGION]") || databaseUrl.includes("[YOUR-PASSWORD]")) {
+  throw new Error(
+    "DATABASE_URL is still the .env.example placeholder. Export the real DATABASE_URL in this shell (e.g. `source ~/.zshrc`) or put it in .env.",
+  );
+}
+
 export const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: databaseUrl }),
 });
