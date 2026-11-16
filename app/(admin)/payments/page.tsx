@@ -167,13 +167,17 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               ["from", t.payments.dateFrom, params.from],
               ["to", t.payments.dateTo, params.to],
             ] as const).map(([name, label, value]) => (
-              <label key={name} className="flex h-11 min-w-0 items-center gap-2 rounded-full bg-[var(--paper)] pl-4 pr-2 text-sm">
-                <span className="shrink-0 text-xs font-medium text-[var(--ink-2)]">{label}</span>
+              <label
+                key={name}
+                className="grid min-w-0 gap-0.5 rounded-2xl bg-[var(--paper)] px-3.5 pb-2 pt-1.5 text-sm focus-within:outline focus-within:outline-3 focus-within:outline-[rgba(34,199,242,0.35)] sm:flex sm:h-11 sm:items-center sm:gap-2 sm:rounded-full sm:py-0 sm:pl-4 sm:pr-2"
+              >
+                {/* Phones: small label above the date so the full dd/mm/yyyy fits; inline on wider screens. */}
+                <span className="text-[11px] font-medium leading-4 text-[var(--ink-2)] sm:shrink-0 sm:text-xs">{label}</span>
                 <input
                   defaultValue={value ?? ""}
                   name={name}
                   type="date"
-                  className="w-full min-w-0 bg-transparent text-[var(--ink)] outline-none sm:w-[8.5rem]"
+                  className="w-full min-w-0 bg-transparent text-[15px] font-medium tabular-nums text-[var(--ink)] outline-none sm:w-[8.5rem] sm:text-sm sm:font-normal"
                 />
               </label>
             ))}
