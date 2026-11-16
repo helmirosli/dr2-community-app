@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit, Search } from "lucide-react";
+import { Edit, Search, X } from "lucide-react";
 import { TablePagination } from "@/app/components/table-pagination";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 
@@ -166,34 +166,72 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
 
       {/* Assignment table */}
       <section className="ui-card overflow-hidden">
-        <div className="ui-toolbar justify-between">
+        <div className="grid gap-4 border-b border-black/5 px-5 pb-4 pt-5">
           <h2 className="ui-section-title">
             Household assignments
             <span className="ml-2 font-sans text-sm font-normal text-[var(--ink-2)]">{allAssignments.length} total</span>
           </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <form method="GET" action={`/special-collections/${id}`} className="ui-search">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Segmented filter with counts */}
+            <nav aria-label="Filter households" className="grid grid-cols-3 rounded-full bg-[var(--paper)] p-1 sm:inline-grid sm:w-auto">
+              {(["all", "paid", "outstanding"] as const).map((f) => {
+                const count = f === "all" ? allAssignments.length : f === "paid" ? paidCount : allAssignments.length - paidCount;
+                const active = filter === f;
+                return (
+                  <Link
+                    key={f}
+                    href={filterLink(f)}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition ${
+                      active ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    {f === "all" ? "All" : f === "paid" ? "Paid" : "Outstanding"}
+                    <span
+                      className={`rounded-full px-1.5 text-[11px] tabular-nums leading-5 ${
+                        active
+                          ? f === "paid"
+                            ? "bg-[#e2f7e1] text-[#1c7a33]"
+                            : f === "outstanding"
+                              ? "bg-[#fff4d6] text-[#8a6300]"
+                              : "bg-[var(--paper)] text-[var(--ink-2)]"
+                          : "text-[#aeaeb2]"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Compact search */}
+            <form
+              method="GET"
+              action={`/special-collections/${id}`}
+              className="flex h-11 items-center gap-2 rounded-full bg-[var(--paper)] pl-4 pr-1.5 focus-within:outline focus-within:outline-3 focus-within:outline-[rgba(34,199,242,0.35)] sm:w-72"
+            >
               <input type="hidden" name="perPage" value={perPage} />
               <input type="hidden" name="filter" value={filter} />
               <input type="hidden" name="page" value="1" />
-              <Search aria-hidden="true" size={16} className="text-[var(--ink-2)]" />
-              <input name="search" defaultValue={search} placeholder="Search unit or name..." aria-label="Search unit or name" />
-            </form>
-            <div className="flex items-center gap-1 rounded-full bg-[var(--paper)] p-1">
-              {(["all", "paid", "outstanding"] as const).map((f) => (
+              <Search aria-hidden="true" size={16} className="shrink-0 text-[var(--ink-2)]" />
+              <input
+                name="search"
+                defaultValue={search}
+                placeholder="Unit or name"
+                aria-label="Search unit or name"
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#aeaeb2]"
+              />
+              {search && (
                 <Link
-                  key={f}
-                  href={filterLink(f)}
-                  className={`inline-flex min-h-10 items-center rounded-full px-3.5 text-xs font-semibold transition ${
-                    filter === f
-                      ? "bg-white text-[var(--ink)] shadow-sm"
-                      : "text-[var(--ink-2)] hover:text-[var(--ink)]"
-                  }`}
+                  href={filterLink(filter).replace(/search=[^&]*/, "search=")}
+                  aria-label="Clear search"
+                  className="grid size-8 shrink-0 place-items-center rounded-full text-[var(--ink-2)] hover:bg-black/5"
                 >
-                  {f === "all" ? "All" : f === "paid" ? "Paid" : "Outstanding"}
+                  <X size={14} aria-hidden="true" />
                 </Link>
-              ))}
-            </div>
+              )}
+            </form>
           </div>
         </div>
 
