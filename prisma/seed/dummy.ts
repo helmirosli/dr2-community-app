@@ -1,9 +1,19 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { hashSync } from "bcryptjs";
 
 import { clearCoreData, prisma } from "./_client";
 
 const DEFAULT_MONTHLY_FEE_SEN = 5000;
+
+// Raw-SQL inserts below bypass Prisma's @default(cuid()), so generate the same cuid-style ids
+// ("c" + time + counter + random, 25 lowercase chars) to keep every table's ids in one format.
+let idCounter = 0;
+function newId() {
+  const time = Date.now().toString(36).padStart(8, "0");
+  const counter = (idCounter++ % 36 ** 4).toString(36).padStart(4, "0");
+  const random = BigInt(`0x${randomBytes(8).toString("hex")}`).toString(36).padStart(12, "0").slice(-12);
+  return `c${time}${counter}${random}`;
+}
 
 type MonthPoint = { year: number; month: number };
 
@@ -76,7 +86,7 @@ async function insertSpecialCollectionAssignments(
           ("id","specialCollectionId","specialCollection","residentId","resident","amountDue","amountPaid","status","createdAt","updatedAt")
          values
           ($1,$2,$3,$4,$5,$6,$7,$8::desarestu_db."SubmissionStatus",$9,$10)`,
-        randomUUID(),
+        newId(),
         row.specialCollectionId,
         row.specialCollectionId,
         row.residentId,
@@ -93,7 +103,7 @@ async function insertSpecialCollectionAssignments(
           ("id","specialCollectionId","residentId","amountDue","amountPaid","status","createdAt","updatedAt")
          values
           ($1,$2,$3,$4,$5,$6::desarestu_db."SubmissionStatus",$7,$8)`,
-        randomUUID(),
+        newId(),
         row.specialCollectionId,
         row.residentId,
         row.amountDue,
@@ -135,7 +145,7 @@ async function createCoveragePayment(input: {
 }) {
   const amountSen = input.coverages.reduce((sum, coverage) => sum + coverage.amountApplied, 0);
   if (amountSen <= 0) return;
-  const paymentId = randomUUID();
+  const paymentId = newId();
   const now = new Date();
 
   await prisma.$executeRawUnsafe(
@@ -160,7 +170,7 @@ async function createCoveragePayment(input: {
 
   for (const coverage of input.coverages) {
     const status = coverage.amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? "PAID" : "PARTIAL";
-    const coverageId = randomUUID();
+    const coverageId = newId();
 
     if (legacyColumns) {
       await prisma.$executeRawUnsafe(
