@@ -33,13 +33,20 @@ function loadResidentsFile() {
 async function main() {
   const residents = loadResidentsFile();
 
+  // The admin login comes from the environment so no password lives in git.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword || adminPassword.length < 10) {
+    throw new Error("Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (10+ characters) before running the official seed.");
+  }
+
   await clearCoreData();
 
   await prisma.user.create({
     data: {
-      name: "Helmi Rosli",
-      email: "helmirosli@gmail.com",
-      passwordHash: hashSync("Admin88!"),
+      name: process.env.SEED_ADMIN_NAME ?? "Admin",
+      email: adminEmail,
+      passwordHash: hashSync(adminPassword),
       role: "ADMIN",
     },
   });
