@@ -405,6 +405,10 @@ const ms: Dictionary = {
     of: "{i} daripada {n}",
   },
   today: {
+    waiting: "{amount} menunggu",
+    oldest: "paling lama {n} hari",
+    oldestToday: "paling lama hari ini",
+    allClear: "Semua selesai",
     title: "Hari ini",
     reviewCta: "Semak {n} bayaran",
     reviewNone: "Tiada bayaran menunggu semakan",

@@ -446,6 +446,10 @@ const en = {
     of: "{i} of {n}",
   },
   today: {
+    waiting: "{amount} waiting",
+    oldest: "oldest {n}d ago",
+    oldestToday: "oldest from today",
+    allClear: "All clear",
     title: "Today",
     reviewCta: "Review {n} payments",
     reviewNone: "No payments waiting for review",

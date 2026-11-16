@@ -38,6 +38,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     prisma.resident.count({ where: { status: "ACTIVE" } }),
     prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } }),
+
     // Monthly fees only — keeps target (residents × RM50) meaningful
     prisma.payment.aggregate({
       _sum: { amountSen: true },
@@ -76,6 +77,14 @@ export default async function DashboardPage() {
       select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
     }),
   ]);
+  const pendingSummary = await prisma.publicPaymentSubmission.aggregate({
+    where: { status: "PENDING_REVIEW" },
+    _sum: { amountSen: true },
+    _min: { createdAt: true },
+  });
+  const oldestDays = pendingSummary._min.createdAt
+    ? Math.floor((now.getTime() - pendingSummary._min.createdAt.getTime()) / 86_400_000)
+    : null;
   const idByUnit = new Map(residentIds.map((r) => [r.unitNumber, r.id]));
   const pendingMap = getPendingSubmissionsMap(pendingThisMonth);
   const monthIndex = now.getMonth();
@@ -128,7 +137,7 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">
-              {monthLabel(now.getFullYear(), now.getMonth() + 1)} {now.getFullYear()}
+              {monthLabel(now.getFullYear(), now.getMonth() + 1)}
             </p>
             <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-slate-900">
               {t.today.title}
@@ -152,18 +161,55 @@ export default async function DashboardPage() {
 
         {/* Review queue summary (spec §5.6) */}
         <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <div className="grid content-between gap-4 rounded-[28px] bg-[var(--night)] p-6 text-white">
-            <p className="text-sm text-[#a1a1a6]">{t.dashboard.pendingReview}</p>
-            <p className="font-heading text-6xl font-extrabold leading-none tracking-tight">
-              <span className={pendingSubmissions ? "text-blend" : "text-[#5f6b88]"}>{pendingSubmissions}</span>
-            </p>
-            {pendingSubmissions > 0 ? (
-              <Link href="/review" className="rounded-full bg-[var(--lime)] px-5 py-3 text-center font-heading font-semibold text-[#06210b] hover:brightness-105">
-                {t.today.reviewCta.replace("{n}", String(pendingSubmissions))} ›
-              </Link>
-            ) : (
-              <p className="text-sm text-[#a1a1a6]">{t.today.reviewNone}</p>
-            )}
+          <div className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white">
+            {/* Guardhouse art (A2) on the right, fading into the navy */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
+            <img
+              src="/art/a2-login.webp"
+              alt=""
+              className={`absolute inset-y-0 right-0 -z-10 h-full w-3/5 object-cover object-[50%_35%] [mask-image:linear-gradient(to_right,transparent,#000_45%)] ${
+                pendingSubmissions ? "opacity-90" : "opacity-40 grayscale"
+              }`}
+            />
+            <div className="grid min-h-60 content-between gap-6 p-6">
+              <p className="flex items-center gap-2 text-sm font-medium text-[#c7cedd]">
+                {pendingSubmissions > 0 && (
+                  <span className="relative flex size-2.5" aria-hidden="true">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-[var(--cyan)] opacity-60 motion-reduce:animate-none" />
+                    <span className="relative inline-flex size-2.5 rounded-full bg-[var(--cyan)]" />
+                  </span>
+                )}
+                {t.dashboard.pendingReview}
+              </p>
+
+              {pendingSubmissions > 0 ? (
+                <div className="grid gap-1">
+                  <p className="font-heading text-7xl font-extrabold leading-none tracking-tight">
+                    <span className="text-blend">{pendingSubmissions}</span>
+                  </p>
+                  <p className="text-sm text-[#a1a1a6]">
+                    {t.today.waiting.replace("{amount}", formatRM(pendingSummary._sum.amountSen ?? 0))}
+                    {oldestDays !== null && (
+                      <> · {oldestDays < 1 ? t.today.oldestToday : t.today.oldest.replace("{n}", String(oldestDays))}</>
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-1">
+                  <p className="font-heading text-3xl font-bold tracking-tight">{t.today.allClear}</p>
+                  <p className="text-sm text-[#a1a1a6]">{t.today.reviewNone}</p>
+                </div>
+              )}
+
+              {pendingSubmissions > 0 && (
+                <Link
+                  href="/review"
+                  className="w-fit rounded-full bg-[var(--lime)] px-5 py-2.5 font-heading text-sm font-semibold text-[#06210b] shadow-[0_8px_24px_rgba(142,229,63,0.25)] hover:brightness-105"
+                >
+                  {t.today.reviewCta.replace("{n}", String(pendingSubmissions))} ›
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* House strip: this month's status per house */}
