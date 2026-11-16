@@ -182,7 +182,7 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
                     key={f}
                     href={filterLink(f)}
                     aria-current={active ? "page" : undefined}
-                    className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition ${
+                    className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-4 text-[13px] font-semibold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)] ${
                       active ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"
                     }`}
                   >
