@@ -9,7 +9,7 @@ export default async function NewResidentPage() {
   await requireDashboardUser();
 
   return (
-    <AdminPage width="narrow">
+    <AdminPage>
       <PageHeader
         title="Add resident"
         subtitle="Create a household record before recording official payments."

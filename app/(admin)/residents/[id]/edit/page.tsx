@@ -25,7 +25,7 @@ export default async function EditResidentPage({ params }: EditResidentPageProps
   }
 
   return (
-    <AdminPage width="narrow">
+    <AdminPage>
       <PageHeader
         title={`Edit ${resident.unitNumber}`}
         subtitle="Update household contact details, block, status, and notes."
