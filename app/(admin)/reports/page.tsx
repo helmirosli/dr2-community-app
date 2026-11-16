@@ -1,4 +1,5 @@
-import { FileSpreadsheet, FileText, Search } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, FileSpreadsheet, FileText, Search, X } from "lucide-react";
 
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { StatusPill, stateStyles } from "@/app/components/status";
@@ -21,6 +22,7 @@ type ReportsPageProps = {
     year?: string;
     includeInactive?: string;
     q?: string;
+    show?: string;
   }>;
 };
 
@@ -130,6 +132,33 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   ).length;
   const forSaleCount = filteredRows.filter((r) => r.isForSale).length;
 
+  // Status filter (the stat tiles are the buttons). Same definitions as the counts above.
+  const monthsSoFar = (r: (typeof filteredRows)[number]) => r.months.slice(0, currentYear === selectedYear ? currentMonth : 12);
+  const isPaidAll = (r: (typeof filteredRows)[number]) => r.status === "ACTIVE" && monthsSoFar(r).every((m) => (m ?? 0) >= DEFAULT_MONTHLY_FEE_SEN);
+  const isArrears = (r: (typeof filteredRows)[number]) => r.status === "ACTIVE" && monthsSoFar(r).some((m) => (m ?? 0) < DEFAULT_MONTHLY_FEE_SEN);
+  const isPending = (r: (typeof filteredRows)[number]) => r.months.some((_, i) => pendingMap.has(`${r.unitNumber}:${selectedYear}:${i + 1}`));
+  const pendingCount = filteredRows.filter(isPending).length;
+  const SHOWS = ["all", "paid", "arrears", "pending", "hold"] as const;
+  const show = (SHOWS as readonly string[]).includes(params.show ?? "") ? (params.show as (typeof SHOWS)[number]) : "all";
+  const visibleRows = filteredRows.filter((r) =>
+    show === "paid" ? isPaidAll(r) : show === "arrears" ? isArrears(r) : show === "pending" ? isPending(r) : show === "hold" ? r.isForSale : true,
+  );
+
+  // Links keep every other filter.
+  const link = (patch: Record<string, string | null>) => {
+    const sp = new URLSearchParams();
+    const merged: Record<string, string | null> = {
+      year: String(selectedYear),
+      includeInactive: includeInactive ? null : "off",
+      q: query || null,
+      show: show === "all" ? null : show,
+      ...patch,
+    };
+    for (const [k, v] of Object.entries(merged)) if (v) sp.set(k, v);
+    const qs = sp.toString();
+    return `/reports${qs ? `?${qs}` : ""}`;
+  };
+
   const holdLabel = (status: string, override: string | null | undefined) => {
     const s = override === "FOR_SALE" || override === "MOVED_OUT" ? override : status;
     return s === "FOR_SALE" ? "FOR SALE" : s === "MOVED_OUT" ? "MOVED OUT" : s === "EXEMPT" ? "EXEMPT" : "";
@@ -144,11 +173,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   ];
 
   const stats = [
-    { label: t.reports.totalUnits, value: filteredRows.length, tone: "text-[var(--ink)]" },
-    { label: t.reports.fullyPaid, value: paidAll, tone: "text-[#1c7a33]" },
-    { label: t.reports.haveArrears, value: hasArrears, tone: "text-[#c2341a]" },
-    { label: t.reports.forSale, value: forSaleCount, tone: "text-[#5d6779]" },
-  ];
+    { key: "all", label: t.reports.totalUnits, value: filteredRows.length, tone: "text-[var(--ink)]", dot: "bg-[var(--ink)]" },
+    { key: "paid", label: t.reports.fullyPaid, value: paidAll, tone: "text-[#1c7a33]", dot: "bg-[var(--leaf)]" },
+    { key: "arrears", label: t.reports.haveArrears, value: hasArrears, tone: "text-[#c2341a]", dot: "bg-[var(--due)]" },
+    { key: "pending", label: "Pending review", value: pendingCount, tone: "text-[#0b6e8e]", dot: "bg-[var(--cyan)]" },
+    { key: "hold", label: t.reports.forSale, value: forSaleCount, tone: "text-[#5d6779]", dot: "bg-[var(--hold)]" },
+  ] as const;
 
   return (
     <AdminPage>
@@ -170,35 +200,81 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         }
       />
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        {stats.map((s) => (
-          <div className="ui-card p-4" key={s.label}>
-            <p className="text-sm text-[var(--ink-2)]">{s.label}</p>
-            <p className={`mt-1 font-heading text-3xl font-bold tracking-tight tabular-nums ${s.tone}`}>{s.value}</p>
-          </div>
-        ))}
-      </div>
+      {/* Stat tiles double as the status filter */}
+      <nav aria-label="Filter houses by status" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        {stats.map((st) => {
+          const active = show === st.key;
+          return (
+            <Link
+              key={st.key}
+              href={link({ show: active || st.key === "all" ? null : st.key })}
+              aria-current={active ? "page" : undefined}
+              className={`ui-card grid gap-1 p-4 transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)] ${
+                active ? "ring-2 ring-[var(--blue)] shadow-[0_8px_24px_-12px_rgba(36,99,232,0.5)]" : ""
+              }`}
+            >
+              <span className="flex items-center gap-2 text-sm text-[var(--ink-2)]">
+                <span className={`size-2 rounded-full ${st.dot}`} aria-hidden="true" />
+                {st.label}
+              </span>
+              <span className={`font-heading text-3xl font-bold tracking-tight tabular-nums ${st.tone}`}>{st.value}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
       <section className="ui-card overflow-hidden">
-        {/* Filter bar */}
-        <form className="ui-toolbar" method="get">
-          <label className="ui-search">
-            <Search size={16} className="text-[var(--ink-2)]" />
-            <input aria-label="Search" defaultValue={query} name="q" placeholder="Search unit or name" type="search" />
-          </label>
-          <label className="flex items-center gap-2 text-sm font-medium text-[var(--ink-2)]">
-            {t.common.year}
-            <input className="ui-input w-24" defaultValue={selectedYear} max={2100} min={2020} name="year" type="number" />
-          </label>
-          <label className="flex min-h-10 items-center gap-2 text-sm font-medium text-[var(--ink)]">
-            <input defaultChecked={includeInactive} name="includeInactive" type="checkbox" />
-            {t.reports.includeInactive}
-          </label>
-          <button className="ui-button-primary" type="submit">
-            {t.common.apply}
-          </button>
-        </form>
+        {/* Filter row: year switcher, house scope, search */}
+        <div className="flex flex-col gap-3 border-b border-black/5 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex h-10 items-center rounded-full bg-[var(--paper)] p-1">
+              <Link aria-label="Previous year" href={link({ year: String(selectedYear - 1) })} className="grid size-8 place-items-center rounded-full text-[var(--ink-2)] hover:bg-white hover:text-[var(--ink)]">
+                <ChevronLeft size={16} />
+              </Link>
+              <span className="px-3 font-heading text-base font-bold tabular-nums text-[var(--ink)]">{selectedYear}</span>
+              <Link aria-label="Next year" href={link({ year: String(selectedYear + 1) })} className="grid size-8 place-items-center rounded-full text-[var(--ink-2)] hover:bg-white hover:text-[var(--ink)]">
+                <ChevronRight size={16} />
+              </Link>
+            </div>
+            <div className="grid h-10 grid-cols-2 rounded-full bg-[var(--paper)] p-1 text-[13px] font-semibold" role="group" aria-label="Houses">
+              <Link
+                href={link({ includeInactive: "off" })}
+                aria-current={!includeInactive ? "page" : undefined}
+                className={`flex items-center justify-center rounded-full px-3.5 ${!includeInactive ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"}`}
+              >
+                Active only
+              </Link>
+              <Link
+                href={link({ includeInactive: null })}
+                aria-current={includeInactive ? "page" : undefined}
+                className={`flex items-center justify-center rounded-full px-3.5 ${includeInactive ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink-2)] hover:text-[var(--ink)]"}`}
+              >
+                {t.reports.includeInactive}
+              </Link>
+            </div>
+          </div>
+          <form method="get" className="flex h-10 items-center gap-2 rounded-full bg-[var(--paper)] pl-4 pr-1 focus-within:bg-white focus-within:ring-2 focus-within:ring-[var(--cyan)] lg:w-72">
+            <input type="hidden" name="year" value={selectedYear} />
+            {!includeInactive && <input type="hidden" name="includeInactive" value="off" />}
+            {show !== "all" && <input type="hidden" name="show" value={show} />}
+            <Search size={16} className="shrink-0 text-[var(--ink-2)]" aria-hidden="true" />
+            <input aria-label="Search unit or name" defaultValue={query} name="q" placeholder="House no. or name" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+            {query && (
+              <Link href={link({ q: null })} aria-label="Clear search" className="grid size-8 shrink-0 place-items-center rounded-full text-[var(--ink-2)] hover:bg-black/5">
+                <X size={14} />
+              </Link>
+            )}
+          </form>
+        </div>
+
+        {(show !== "all" || query) && (
+          <p className="flex flex-wrap items-center gap-2 border-b border-black/5 bg-[#fafafc] px-5 py-2 text-xs text-[var(--ink-2)]">
+            Showing {visibleRows.length} of {filteredRows.length} houses
+            <Link href={link({ show: null, q: null })} className="font-semibold text-[var(--blue)] hover:underline">
+              Clear filters
+            </Link>
+          </p>
+        )}
 
         {/* Legend — above table */}
         <div className="flex flex-wrap items-center gap-2 border-b border-black/5 px-5 py-3">
@@ -239,7 +315,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => (
+              {visibleRows.map((row) => (
                 <tr className="group" key={row.unitNumber}>
                   <td className={`${CELL} px-3 text-[var(--ink-2)]`}>{row.no}</td>
                   <td className={`${STICKY_CELL} px-3 py-2 font-heading font-bold text-[var(--ink)]`}>{row.unitNumber}</td>
@@ -336,7 +412,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   )}
                 </tr>
               ))}
-              {filteredRows.length === 0 && (
+              {visibleRows.length === 0 && (
                 <tr>
                   <td colSpan={15 + extraCols}>
                     <div className="ui-empty">{t.reports.noResidents}</div>
