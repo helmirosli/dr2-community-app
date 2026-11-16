@@ -1,26 +1,55 @@
 "use client";
 
+import { useState, useTransition } from "react";
+
 import { updateUserRole } from "@/lib/actions/user-management";
-import { SearchableDropdown } from "@/app/components/searchable-dropdown";
+import { ROLES } from "./roles";
 
 type UserRoleSelectProps = {
   userId: string;
   currentRole: string;
 };
 
-const ROLE_OPTIONS = [
-  { value: "ADMIN", label: "Admin" },
-  { value: "AJK", label: "AJK" },
-  { value: "VIEWER", label: "Viewer" },
-];
-
+/** Segmented role picker: tapping a role saves it straight away. */
 export function UserRoleSelect({ userId, currentRole }: UserRoleSelectProps) {
+  const [role, setRole] = useState(currentRole);
+  const [pending, startTransition] = useTransition();
+
+  const choose = (value: string) => {
+    if (value === role) return;
+    const previous = role;
+    setRole(value);
+    startTransition(async () => {
+      const result = await updateUserRole(userId, value);
+      if (!result.ok) setRole(previous);
+    });
+  };
+
   return (
-    <SearchableDropdown
-      name={`role-${userId}`}
-      options={ROLE_OPTIONS}
-      value={currentRole}
-      onChange={(value) => updateUserRole(userId, value)}
-    />
+    <div
+      role="radiogroup"
+      aria-label="Role"
+      className={`inline-flex rounded-full bg-[#eef0f4] p-1 transition ${pending ? "opacity-60" : ""}`}
+    >
+      {ROLES.map((r) => {
+        const selected = role === r.value;
+        return (
+          <button
+            key={r.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            title={r.hint}
+            disabled={pending}
+            onClick={() => choose(r.value)}
+            className={`min-h-10 rounded-full px-3.5 text-xs font-semibold transition ${
+              selected ? `${r.tone} shadow-sm ring-1 ring-black/5` : "text-[var(--ink-2)] hover:text-[var(--ink)]"
+            }`}
+          >
+            {r.title}
+          </button>
+        );
+      })}
+    </div>
   );
 }

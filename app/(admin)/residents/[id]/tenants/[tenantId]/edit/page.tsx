@@ -1,6 +1,7 @@
-import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
+import { HouseHeader } from "@/app/(admin)/residents/[id]/vehicles/vehicle-list-view";
+import { AdminPage } from "@/app/components/page-header";
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TenantForm } from "../../tenant-form";
@@ -24,6 +25,7 @@ export default async function EditTenantPage({ params }: EditTenantPageProps) {
           plateNumber: true,
         },
       },
+      resident: { select: { name: true, unitNumber: true } },
     },
   });
 
@@ -33,7 +35,12 @@ export default async function EditTenantPage({ params }: EditTenantPageProps) {
 
   return (
     <AdminPage width="narrow">
-      <PageHeader title="Edit tenant" back={{ href: `/residents/${residentId}/tenants`, label: "Back to tenants" }} />
+      <HouseHeader
+        unitNumber={tenant.resident.unitNumber}
+        title="Edit tenant"
+        subtitle={`${tenant.name} · ${tenant.resident.name}`}
+        back={{ href: `/residents/${residentId}/tenants`, label: "Back to tenants" }}
+      />
       <TenantForm residentId={residentId} tenant={tenant} />
     </AdminPage>
   );

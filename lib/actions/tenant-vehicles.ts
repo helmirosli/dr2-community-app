@@ -55,6 +55,8 @@ export async function createTenantVehicle(
     return normalized;
   }
 
+  let residentId: string | undefined;
+
   try {
     const vehicle = await prisma.tenantVehicle.create({
       data: {
@@ -77,18 +79,19 @@ export async function createTenantVehicle(
       where: { id: tenantId },
     });
 
-    if (tenant) {
-      revalidatePath(`/residents/${tenant.residentId}/tenants`);
-      redirect(`/residents/${tenant.residentId}/tenants`);
-    }
-
-    return { ok: false, message: "Unable to redirect." };
+    residentId = tenant?.residentId;
   } catch {
     return {
       ok: false,
       message: "Unable to create vehicle.",
     };
   }
+
+  // redirect() throws to navigate, so it must run outside the try/catch above (which used to
+  // swallow it and report "Unable to create vehicle." even though the vehicle was saved).
+  if (!residentId) return { ok: false, message: "Vehicle saved, but its tenant could not be found." };
+  revalidatePath(`/residents/${residentId}/tenants`);
+  redirect(`/residents/${residentId}/tenants`);
 }
 
 export async function updateTenantVehicle(

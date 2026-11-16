@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { VehicleFormBody } from "@/app/(admin)/residents/[id]/vehicles/vehicle-form";
 import {
   createTenantVehicle,
   updateTenantVehicle,
@@ -21,42 +22,24 @@ type VehicleFormValues = {
 };
 
 type VehicleFormProps = {
+  residentId: string;
   tenantId: string;
   vehicle?: VehicleFormValues;
+  owner?: string;
 };
 
-export function VehicleForm({ tenantId, vehicle }: VehicleFormProps) {
+export function VehicleForm({ residentId, tenantId, vehicle, owner }: VehicleFormProps) {
   const action = vehicle?.id ? updateTenantVehicle.bind(null, vehicle.id) : createTenantVehicle.bind(null, tenantId);
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="ui-card overflow-hidden">
-      <section className="ui-form-section">
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="ui-label">
-            Make
-            <input className="ui-input" defaultValue={vehicle?.make ?? ""} name="make" required />
-          </label>
-
-          <label className="ui-label">
-            Plate number
-            <input className="ui-input uppercase" defaultValue={vehicle?.plateNumber ?? ""} name="plateNumber" required />
-          </label>
-        </div>
-
-        <label className="ui-label">
-          Model
-          <input className="ui-input" defaultValue={vehicle?.model ?? ""} name="model" />
-        </label>
-      </section>
-
-      <section className="ui-form-section">
-        {state.message ? <p className="ui-alert-error">{state.message}</p> : null}
-
-        <button className="ui-button-primary w-full sm:w-fit sm:justify-self-end" disabled={pending} type="submit">
-          {pending ? "Saving..." : vehicle?.id ? "Save vehicle" : "Create vehicle"}
-        </button>
-      </section>
-    </form>
+    <VehicleFormBody
+      formAction={formAction}
+      pending={pending}
+      message={state.message}
+      vehicle={vehicle}
+      owner={owner}
+      cancelHref={`/residents/${residentId}/tenant/${tenantId}/vehicles`}
+    />
   );
 }

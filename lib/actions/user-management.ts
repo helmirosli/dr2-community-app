@@ -22,6 +22,11 @@ export async function createUser(
       return { ok: false, message: "Name, email, and password are required" };
     }
 
+    // Same minimum as setup and change-password.
+    if (password.length < 8) {
+      return { ok: false, message: "Password must be at least 8 characters." };
+    }
+
     const existing = await prisma.user.findUnique({
       where: { email },
     });

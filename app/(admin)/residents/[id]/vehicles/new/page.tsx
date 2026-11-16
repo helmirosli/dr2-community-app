@@ -1,9 +1,10 @@
-import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
+import { AdminPage } from "@/app/components/page-header";
 import { requireDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VehicleForm } from "../vehicle-form";
+import { HouseHeader } from "../vehicle-list-view";
 
 type NewVehiclePageProps = {
   params: Promise<{ id: string }>;
@@ -24,12 +25,13 @@ export default async function NewVehiclePage({ params }: NewVehiclePageProps) {
 
   return (
     <AdminPage width="narrow">
-      <PageHeader
+      <HouseHeader
+        unitNumber={resident.unitNumber}
         title="Add vehicle"
-        subtitle={`Unit ${resident.unitNumber} — ${resident.name}`}
+        subtitle={resident.name}
         back={{ href: `/residents/${residentId}/vehicles`, label: "Back to vehicles" }}
       />
-      <VehicleForm residentId={residentId} />
+      <VehicleForm residentId={residentId} owner={`${resident.name} · Resident`} />
     </AdminPage>
   );
 }
