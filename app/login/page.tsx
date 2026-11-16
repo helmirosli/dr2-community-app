@@ -22,38 +22,24 @@ export default async function LoginPage() {
   const t = await getDictionary();
 
   return (
-    <main className="flex min-h-screen flex-col md:flex-row">
-      {/* Left — branding + live stats */}
-      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-brand-gradient px-10 py-16 text-white md:w-1/2">
-        <div className="flex flex-col items-center text-center">
-          <Image
-            src="/jr2-logo.jpeg"
-            alt="Desa Restu 2 @ Sepang"
-            width={110}
-            height={110}
-            className="rounded-full ring-4 ring-white/30 drop-shadow-xl"
-            priority
-          />
-          <p className="mt-5 text-base font-light tracking-wide text-white/80">{t.login.welcomeTo}</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">{t.login.communityName}</h1>
-          <p className="mt-2 max-w-xs text-sm leading-6 text-white/70">{t.login.tagline}</p>
-        </div>
-
-
-        {/* Wave separator */}
-        <div className="absolute right-0 top-0 hidden h-full md:block" style={{ width: 72 }}>
-          <svg className="h-full w-full" viewBox="0 0 72 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill="rgba(255,255,255,0.12)" d="M72,0 C12,100 12,200 72,300 C12,400 12,500 72,600 C12,700 12,750 72,800 L72,0Z" />
-            <path fill="rgba(255,255,255,0.18)" d="M72,0 C20,110 20,220 72,330 C20,440 20,550 72,660 C20,730 20,780 72,800 L72,0Z" />
-            <path fill="white" d="M72,0 C28,120 28,240 72,360 C28,480 28,600 72,720 C28,760 28,800 72,800 L72,0Z" />
-          </svg>
+    <main className="flex min-h-screen flex-col bg-white md:flex-row">
+      {/* Left: night panel with the guardhouse art (A2) */}
+      <div className="relative flex min-h-64 flex-col items-center justify-end overflow-hidden bg-[var(--night)] px-10 pb-10 pt-16 text-white md:min-h-screen md:w-1/2 md:justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element -- decorative art, fills the panel */}
+        <img src="/art/a2-login.webp" alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[var(--night)] via-[var(--night)]/40 to-transparent" />
+        <div className="relative flex flex-col items-center text-center md:mt-auto md:pb-6">
+          <Image src="/jr2-logo.jpeg" alt="Desa Restu 2 @ Sepang" width={84} height={84} className="rounded-full ring-2 ring-white/20" priority />
+          <p className="mt-4 text-sm text-white/70">{t.login.welcomeTo}</p>
+          <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight">{t.login.communityName}</h1>
+          <p className="text-blend mt-2 max-w-xs font-heading text-sm font-semibold">{t.login.tagline}</p>
         </div>
       </div>
 
       {/* Right — sign in form */}
       <div className="flex flex-col items-center justify-center bg-white px-8 py-16 md:w-1/2">
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-slate-900">{t.login.title}</h2>
+          <h2 className="font-heading text-3xl font-bold tracking-tight text-slate-900">{t.login.title}</h2>
           <p className="mt-1 text-sm text-slate-500">{t.login.subtitle}</p>
 
           <div className="mt-8">
@@ -61,11 +47,11 @@ export default async function LoginPage() {
           </div>
 
           <div className="mt-6 flex justify-center gap-4 text-sm">
-            <Link className="font-medium text-brand-700 hover:opacity-80" href="/status">
-              Payment Status →
+            <Link className="font-medium text-[var(--blue)] hover:underline" href="/status">
+              {t.publicLayout.status} ›
             </Link>
-            <Link className="font-medium text-brand-700 hover:opacity-80" href="/submit">
-              Submit Payment →
+            <Link className="font-medium text-[var(--blue)] hover:underline" href="/submit">
+              {t.home.submitTitle} ›
             </Link>
           </div>
         </div>

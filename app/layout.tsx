@@ -16,8 +16,16 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DR2 Community Fee System",
-  description: "Resident fee dashboard and public payment submission form.",
+  // Absolute base for the OG image URL in link previews. Set NEXT_PUBLIC_SITE_URL in production.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: { default: "JR2 Desa Restu", template: "%s · JR2 Desa Restu" },
+  description: "Yuran pondok pengawal Jalan Restu 2: semak status rumah anda dan hantar bukti bayaran.",
+  openGraph: {
+    title: "JR2 Desa Restu",
+    description: "Semak status rumah anda dan hantar bukti bayaran yuran pondok pengawal.",
+    locale: "ms_MY",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
