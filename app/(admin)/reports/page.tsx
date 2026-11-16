@@ -323,13 +323,8 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   <td className="min-w-36 border-b border-black/5 px-3 py-2 font-medium text-[var(--ink)] group-hover:bg-[#fafafc]">
                     {row.name}
                   </td>
-                  {row.isForSale ? (
-                    Array.from({ length: 12 + extraCols }).map((_, i) => (
-                      <td className={CELL} key={i}>
-                        <span className={`${TILE} ${stateStyles.hold.tile}`}>{holdLabel(row.status, null)}</span>
-                      </td>
-                    ))
-                  ) : (
+                  {/* Every cell shows what was paid; the house's status only labels unpaid months. */}
+                  {(
                     <>
                       {row.months.map((amountSen, i) => {
                         const pending = pendingMap.get(`${row.unitNumber}:${selectedYear}:${i + 1}`);
@@ -337,7 +332,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                         const state = monthState({
                           amountSen,
                           override: row.monthStatusOverrides[i],
-                          residentStatus: row.status,
+                          residentStatus: row.monthStatus[i],
                           isFuture,
                           pending: Boolean(pending),
                         });
@@ -354,7 +349,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                                   <span className="text-[10px]">{pending.isCarryForward ? "CARRY" : "PENDING"}</span>
                                 </span>
                               ) : state === "hold" ? (
-                                holdLabel(row.status, row.monthStatusOverrides[i])
+                                holdLabel(row.monthStatus[i], row.monthStatusOverrides[i])
                               ) : state === "paid" || state === "ahead" ? (
                                 "✓"
                               ) : amountSen ? (

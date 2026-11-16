@@ -18,6 +18,9 @@ export type YearGridRow = {
   isForSale: boolean;
   months: (number | null)[];
   monthStatusOverrides: (("FOR_SALE" | "MOVED_OUT" | "EXEMPT") | null)[];
+  /** The house's status at the end of each month (from status-change history), so a house that became
+   *  "For sale" in November still shows its earlier months as normal (paid / unpaid). */
+  monthStatus: ("ACTIVE" | "EXEMPT" | "FOR_SALE" | "MOVED_OUT")[];
   assignments: YearGridAssignment[];
   /** @deprecated use assignments map instead */
   extraOutstandingSen: number;
@@ -157,29 +160,24 @@ export async function getYearGridData({
       })),
     );
 
-    const residentLogs = logsByResidentId.get(resident.id) ?? [];
-    const latestMoveIn = [...residentLogs]
-      .reverse()
-      .find(
-        (log) =>
-          log.createdAt.getFullYear() === year &&
-          log.beforeStatus === "FOR_SALE" &&
-          log.afterStatus === "ACTIVE",
-      );
-
-    if (latestMoveIn) {
-      const moveInMonth = latestMoveIn.createdAt.getMonth() + 1;
-      for (let i = 1; i < moveInMonth && i <= YEAR_END_MONTH; i++) {
-        monthStatusOverrides[i - 1] = "FOR_SALE";
-      }
-    }
+    // Status at the end of each month: the last status change before that month ended; before the
+    // first recorded change, the status it changed from; with no history, today's status.
+    const residentLogs = (logsByResidentId.get(resident.id) ?? []).filter((log) => log.afterStatus);
+    const monthStatus = Array.from({ length: YEAR_END_MONTH }, (_, i) => {
+      const monthEnd = new Date(year, i + 1, 1);
+      const last = [...residentLogs].reverse().find((log) => log.createdAt < monthEnd);
+      if (last?.afterStatus) return last.afterStatus;
+      return residentLogs[0]?.beforeStatus ?? resident.status;
+    });
 
     for (let i = 1; i <= 12; i++) {
       const key = monthKey(year, i);
       const amount = normalizedByMonth.get(key) ?? 0;
       if (amount > 0) {
+        // Payments always show, whatever the house's status was.
         months[i - 1] = amount;
-        monthStatusOverrides[i - 1] = null;
+      } else if (monthStatus[i - 1] !== "ACTIVE") {
+        monthStatusOverrides[i - 1] = monthStatus[i - 1] as "FOR_SALE" | "MOVED_OUT" | "EXEMPT";
       }
     }
 
@@ -202,6 +200,7 @@ export async function getYearGridData({
       isForSale: resident.status === "FOR_SALE" || resident.status === "MOVED_OUT",
       months,
       monthStatusOverrides,
+      monthStatus,
       assignments,
       extraDueSen,
       extraPaidSen,

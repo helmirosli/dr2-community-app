@@ -28,7 +28,7 @@ export async function HouseMap({ t }: { t: Dictionary }) {
       state: monthState({
         amountSen: row.months[m],
         override: row.monthStatusOverrides[m],
-        residentStatus: row.status,
+        residentStatus: row.monthStatus[m],
         isFuture: false,
         pending: pendingMap.has(`${row.unitNumber}:${now.getFullYear()}:${m + 1}`),
       }),

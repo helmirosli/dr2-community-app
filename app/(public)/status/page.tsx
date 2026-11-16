@@ -104,7 +104,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
         state: monthState({
           amountSen,
           override: row.monthStatusOverrides[i],
-          residentStatus: row.status,
+          residentStatus: row.monthStatus[i],
           isFuture: isFutureMonth(selectedYear, i + 1, now),
           pending: Boolean(pending),
         }),
@@ -214,7 +214,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
                           {pending
                             ? fmtCell(pending.appliedSen)
                             : state === "hold"
-                              ? holdLabel(row.status, row.monthStatusOverrides[i])
+                              ? holdLabel(row.monthStatus[i], row.monthStatusOverrides[i])
                               : state === "paid" || state === "ahead"
                                 ? "✓"
                                 : amountSen

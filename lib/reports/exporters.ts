@@ -241,32 +241,19 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
   for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
     const row = rows[rowIdx];
-    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
     const monthValues: Record<string, string | number> = {};
     for (let i = 0; i < 12; i++) {
       const key = MONTH_ABBR[i];
       const amountSen = row.months[i];
       const monthOverride = row.monthStatusOverrides[i];
-      monthValues[key] = row.isForSale
-        ? statusText
-        : amountSen !== null
-          ? amountSen / 100
-          : monthOverride === "FOR_SALE"
-            ? "FOR SALE"
-            : monthOverride === "MOVED_OUT"
-              ? "MOVED OUT"
-          : row.status === "EXEMPT"
-            ? "EXEMPT"
-            : "";
+      monthValues[key] = amountSen !== null ? amountSen / 100 : statusLabelFor(monthOverride ?? (row.monthStatus[i] !== "ACTIVE" ? row.monthStatus[i] : null));
     }
 
     // One column per collection, using that house's assignment for that collection (not its total).
     const extraValues: Record<string, string> = {};
     for (const sc of specialCollections) {
       const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
-      extraValues[`extra_${sc.id}`] = row.isForSale
-        ? statusText
-        : !a
+      extraValues[`extra_${sc.id}`] = !a
           ? ""
           : a.outstanding > 0
             ? `RM${(a.outstanding / 100).toFixed(2)}`
@@ -275,10 +262,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
     const dataRow = sheet.addRow({ no: rowIdx + 1, unit: row.unitNumber, name: row.name, ...monthValues, ...extraValues });
 
-    if (row.isForSale) {
-      dataRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
-      dataRow.font = { italic: true, color: { argb: "FF94A3B8" } };
-    } else {
+    {
       for (let i = 0; i < 12; i++) {
         const amountSen = row.months[i];
         const cell = dataRow.getCell(4 + i);
@@ -299,6 +283,11 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
   const arrayBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(arrayBuffer);
+}
+
+/** Label for an unpaid month from the house's status that month ("" when it was active). */
+function statusLabelFor(status: string | null | undefined) {
+  return status === "FOR_SALE" ? "FOR SALE" : status === "MOVED_OUT" ? "MOVED OUT" : status === "EXEMPT" ? "EXEMPT" : "";
 }
 
 /** "50" for RM50.00, "12.50" for RM12.50: narrow portrait columns state "Amounts in RM" once in the header. */
@@ -343,55 +332,30 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   ];
 
   const bodyRows = rows.map((row, idx) => {
-    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
-    const monthCells = row.isForSale
-      ? Array.from({ length: 12 }, () => ({
-          text: statusText,
-          italics: true,
-          color: "#94a3b8",
-          alignment: "center" as const,
-          fontSize: 7,
-        }))
-      : row.months.map((amountSen, i) => ({
-          // Portrait page: amounts in RM without decimals ("50"), unit stated once in the header.
-          text:
-            amountSen !== null
-              ? compactRM(amountSen)
-              : row.monthStatusOverrides[i] === "FOR_SALE"
-                ? "FOR SALE"
-                : row.monthStatusOverrides[i] === "MOVED_OUT"
-                  ? "MOVED OUT"
-                  : row.status === "EXEMPT"
-                    ? "EXEMPT"
-                    : "",
-          alignment: "center" as const,
-          fontSize: 7,
-          fillColor: amountSen !== null && amountSen < DEFAULT_MONTHLY_FEE_SEN && amountSen > 0 ? "#fef3c7" : undefined,
-        }));
+    // Payments always show; the house's status that month only labels unpaid months.
+    const monthCells = row.months.map((amountSen, i) => {
+      const label = amountSen === null ? statusLabelFor(row.monthStatusOverrides[i] ?? (row.monthStatus[i] !== "ACTIVE" ? row.monthStatus[i] : null)) : "";
+      return {
+        // Portrait page: amounts in RM without decimals ("50"), unit stated once in the header.
+        text: amountSen !== null ? compactRM(amountSen) : label,
+        alignment: "center" as const,
+        fontSize: 7,
+        italics: Boolean(label),
+        color: label ? "#94a3b8" : undefined,
+        fillColor: amountSen !== null && amountSen < DEFAULT_MONTHLY_FEE_SEN && amountSen > 0 ? "#fef3c7" : label ? "#f1f5f9" : undefined,
+      };
+    });
 
-    const extraCells =
-      extraColCount === 0
-        ? []
-        : row.isForSale
-          ? Array.from({ length: extraColCount }, () => ({
-              text: statusText,
-              italics: true,
-              color: "#94a3b8",
-              alignment: "center" as const,
-              fontSize: 7,
-            }))
-          : specialCollections.length > 0
-            ? specialCollections.map((sc) => {
-                // This house's assignment for this collection (not its total across collections).
-                const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
-                return {
-                  text: !a ? "" : a.outstanding > 0 ? compactRM(a.outstanding) : "PAID",
-                  alignment: "center" as const,
-                  color: a && a.outstanding > 0 ? "#d97706" : "#16a34a",
-                  fontSize: 7,
-                };
-              })
-            : [{ text: row.extraOutstandingSen > 0 ? compactRM(row.extraOutstandingSen) : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
+    // Collections show the house's real balance even if it is now for sale / moved out.
+    const extraCells = specialCollections.map((sc) => {
+      const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
+      return {
+        text: !a ? "" : a.outstanding > 0 ? compactRM(a.outstanding) : "PAID",
+        alignment: "center" as const,
+        color: a && a.outstanding > 0 ? "#d97706" : "#16a34a",
+        fontSize: 7,
+      };
+    });
 
     return [
       { text: idx + 1, alignment: "center", fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },

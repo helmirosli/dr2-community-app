@@ -18,12 +18,13 @@ export function monthState({
   isFuture: boolean;
   pending?: boolean;
 }): MonthState {
-  if (residentStatus === "FOR_SALE" || residentStatus === "MOVED_OUT") return "hold";
+  // What was actually paid (or is waiting for review) always shows; the house's status only labels
+  // months with no payment. Pass the month's own status (YearGridRow.monthStatus) where known.
   if (pending) return "pending";
   const amount = amountSen ?? 0;
   if (amount >= DEFAULT_MONTHLY_FEE_SEN) return isFuture ? "ahead" : "paid";
   if (amount > 0) return "partial";
-  if (override || residentStatus === "EXEMPT") return "hold";
+  if (override || residentStatus !== "ACTIVE") return "hold";
   return isFuture ? "upcoming" : "unpaid";
 }
 

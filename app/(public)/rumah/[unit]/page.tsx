@@ -67,7 +67,7 @@ export default async function HousePage({
     const state = monthState({
       amountSen,
       override: row.monthStatusOverrides[i],
-      residentStatus: row.status,
+      residentStatus: row.monthStatus[i],
       isFuture: isFutureMonth(year, month, now),
       pending: !amountSen && pendingMap.has(`${unit}:${year}:${month}`),
     });

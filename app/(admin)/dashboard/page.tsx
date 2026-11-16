@@ -96,7 +96,7 @@ export default async function DashboardPage() {
       state: monthState({
         amountSen: row.months[monthIndex],
         override: row.monthStatusOverrides[monthIndex],
-        residentStatus: row.status,
+        residentStatus: row.monthStatus[monthIndex],
         isFuture: false,
         pending: pendingMap.has(`${row.unitNumber}:${now.getFullYear()}:${monthIndex + 1}`),
       }),

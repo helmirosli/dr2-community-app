@@ -56,7 +56,8 @@ assert.equal(st(null), "unpaid");
 assert.equal(st(null, { isFuture: true }), "upcoming");
 assert.equal(st(null, { pending: true }), "pending");
 assert.equal(st(null, { residentStatus: "EXEMPT" }), "hold");
-assert.equal(st(5000, { residentStatus: "FOR_SALE" }), "hold");
+assert.equal(st(5000, { residentStatus: "FOR_SALE" }), "paid"); // payments still show after a house goes up for sale
+assert.equal(st(null, { residentStatus: "FOR_SALE" }), "hold");
 assert.equal(st(null, { override: "MOVED_OUT" }), "hold");
 
 // Proof uploads are identified by content, so a misnamed WebP-as-.jpg is still accepted.
