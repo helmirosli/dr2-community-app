@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Check, X } from "lucide-react";
 
@@ -13,7 +13,14 @@ function Submit({ className, children }: { className: string; children: React.Re
   );
 }
 
-/** Approve / reject bar with A and R keyboard shortcuts (spec §5.7). */
+const Key = ({ k }: { k: string }) => (
+  <kbd className="ml-1 hidden rounded border border-current px-1 text-[10px] leading-4 opacity-60 lg:inline">{k}</kbd>
+);
+
+/**
+ * Slim approve / reject bar (spec §5.7). Approve is the main action; Reject first asks for a reason
+ * in place, so the bar stays small and never covers the claim. Keys: A approve, R reject, Esc cancel.
+ */
 export function ReviewActions({
   approve,
   reject,
@@ -21,13 +28,19 @@ export function ReviewActions({
 }: {
   approve: (formData: FormData) => Promise<void>;
   reject: (formData: FormData) => Promise<void>;
-  labels: { approve: string; reject: string; reason: string; shortcuts: string };
+  labels: { approve: string; reject: string; reason: string; confirmReject: string; cancel: string };
 }) {
   const approveRef = useRef<HTMLFormElement>(null);
   const reasonRef = useRef<HTMLTextAreaElement>(null);
+  const [rejecting, setRejecting] = useState(false);
+
+  useEffect(() => {
+    if (rejecting) reasonRef.current?.focus();
+  }, [rejecting]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setRejecting(false);
       const target = e.target as HTMLElement;
       if (e.metaKey || e.ctrlKey || e.altKey || target.closest("input, textarea, select, [contenteditable]")) return;
       if (e.key === "a" || e.key === "A") {
@@ -35,30 +48,50 @@ export function ReviewActions({
         approveRef.current?.requestSubmit();
       } else if (e.key === "r" || e.key === "R") {
         e.preventDefault();
-        reasonRef.current?.focus();
+        setRejecting(true);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  return (
-    <div className="sticky bottom-[72px] z-10 grid gap-3 rounded-3xl bg-white/95 p-4 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] ring-1 ring-black/5 backdrop-blur lg:bottom-4">
-      <form action={reject} className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+  const bar = "sticky bottom-[76px] z-10 rounded-[22px] bg-white/90 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5 backdrop-blur-xl lg:bottom-4";
+
+  if (rejecting) {
+    return (
+      <form action={reject} className={`${bar} grid gap-2 p-3`}>
         <label className="grid gap-1 text-xs font-semibold text-[var(--ink-2)]">
           {labels.reason}
-          <textarea ref={reasonRef} name="reason" required rows={1} className="ui-textarea !min-h-0 text-sm" />
+          <textarea ref={reasonRef} name="reason" required rows={2} className="ui-textarea !min-h-0 text-sm" />
         </label>
-        <Submit className="ui-button-danger">
-          <X size={16} aria-hidden="true" /> {labels.reject} <kbd className="ml-1 rounded border border-current px-1 text-[10px] opacity-60">R</kbd>
-        </Submit>
+        <div className="grid grid-cols-[1fr_2fr] gap-2">
+          <button type="button" onClick={() => setRejecting(false)} className="rounded-full py-2.5 text-sm font-semibold text-[var(--ink-2)] hover:bg-black/5">
+            {labels.cancel}
+          </button>
+          <Submit className="flex items-center justify-center gap-1.5 rounded-full bg-[var(--due)] py-2.5 text-sm font-semibold text-white hover:brightness-95">
+            <X size={16} aria-hidden="true" /> {labels.confirmReject}
+          </Submit>
+        </div>
       </form>
+    );
+  }
+
+  return (
+    <div className={`${bar} grid grid-cols-[1fr_2fr] gap-2`}>
+      <button
+        type="button"
+        onClick={() => setRejecting(true)}
+        className="flex items-center justify-center gap-1.5 rounded-full py-3 text-sm font-semibold text-[#c2341a] ring-1 ring-inset ring-[#ffc9bc] hover:bg-[#fff4f1]"
+      >
+        <X size={16} aria-hidden="true" /> {labels.reject}
+        <Key k="R" />
+      </button>
       <form ref={approveRef} action={approve}>
-        <Submit className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--leaf)] px-5 py-3 font-heading font-semibold text-white hover:brightness-105">
-          <Check size={18} aria-hidden="true" /> {labels.approve} <kbd className="ml-1 rounded border border-current px-1 text-[10px] opacity-70">A</kbd>
+        <Submit className="flex w-full items-center justify-center gap-1.5 rounded-full bg-[var(--leaf)] py-3 font-heading text-[15px] font-semibold text-white hover:brightness-105">
+          <Check size={18} aria-hidden="true" /> {labels.approve}
+          <Key k="A" />
         </Submit>
       </form>
-      <p className="hidden text-center text-[11px] text-[var(--ink-2)] lg:block">{labels.shortcuts}</p>
     </div>
   );
 }

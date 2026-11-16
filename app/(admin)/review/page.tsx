@@ -224,9 +224,10 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
         </div>
 
         <ReviewActions
+          key={item.id}
           approve={approveSubmission.bind(null, item.id)}
           reject={rejectSubmission.bind(null, item.id)}
-          labels={{ approve: r.approveNext, reject: r.rejectNext, reason: r.reason, shortcuts: r.shortcuts }}
+          labels={{ approve: r.approveNext, reject: r.rejectNext, reason: r.reason, confirmReject: r.confirmReject, cancel: r.cancel }}
         />
       </section>
     </main>

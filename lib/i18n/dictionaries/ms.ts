@@ -392,6 +392,8 @@ const ms: Dictionary = {
     noProof: "Tiada fail bukti",
     openFile: "Buka fail",
     reason: "Sebab ditolak (disimpan dalam rekod)",
+    confirmReject: "Sahkan tolak",
+    cancel: "Batal",
     approveNext: "Lulus & seterusnya",
     rejectNext: "Tolak",
     shortcuts: "Kekunci: A lulus · R tolak",
