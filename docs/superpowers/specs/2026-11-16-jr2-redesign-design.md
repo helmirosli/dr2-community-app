@@ -97,7 +97,7 @@ Route groups: `app/(public)` gets its own layout (night side). A new `app/(admin
 
 ### 5.1 Home `/` (public)
 - Hero: generated night illustration of the guardhouse and boom gate (OpenArt asset A1), the logo, and the line *"Selamat datang ke Desa Restu 2"*.
-- **Main action:** a large field *"No. rumah anda"* plus a button **Semak** that goes to `/rumah/[unit]`. The last unit used is remembered in `localStorage`.
+- **Main action:** a large field *"No. rumah anda"* plus a button **Semak** that goes to `/rumah/[unit]`. The field starts empty on every visit (decided 2026-11-16: no remembered unit).
 - Two secondary cards: **Hantar bukti bayaran** → `/submit` and **Papan status** → `/status`.
 - **Kutipan khas** strip: any ACTIVE special collection (e.g. "Kawalan 24 jam Raya") shows the title, the amount per house and a community progress bar (houses paid / assigned). No names.
 - **Collection this month**, community-wide: "21 / 27 rumah sudah bayar", shown as a bar. This is the transparency the WhatsApp sheet gave people, without a giant table.

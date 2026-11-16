@@ -1,21 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-const LAST_UNIT_KEY = "jr2:lastUnit";
+import { useState } from "react";
 
 export function UnitLookup({ label, placeholder, button }: { label: string; placeholder: string; button: string }) {
   const router = useRouter();
   const [unit, setUnit] = useState("");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LAST_UNIT_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore from storage after hydration
-      if (saved) setUnit(saved);
-    } catch {}
-  }, []);
 
   return (
     <form
@@ -24,9 +14,6 @@ export function UnitLookup({ label, placeholder, button }: { label: string; plac
         e.preventDefault();
         const value = unit.trim();
         if (!value) return;
-        try {
-          localStorage.setItem(LAST_UNIT_KEY, value);
-        } catch {}
         router.push(`/rumah/${encodeURIComponent(value)}`);
       }}
     >
