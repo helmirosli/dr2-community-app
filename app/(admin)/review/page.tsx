@@ -146,23 +146,34 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
 
         <div className="grid gap-4 xl:grid-cols-2">
           {/* Receipt */}
-          <div className="ui-card grid min-h-80 place-items-center overflow-hidden p-2">
-            {proof && proofSrc ? (
-              proof.mimeType === "application/pdf" ? (
+          {proof && proofSrc ? (
+            <div className="ui-card grid min-h-80 place-items-center overflow-hidden p-2">
+              {proof.mimeType === "application/pdf" ? (
                 <iframe src={proofSrc} title={proof.originalFilename} className="h-[480px] w-full rounded-xl" />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element -- private upload served by /api/uploads
                 <img src={proofSrc} alt={proof.originalFilename} className="max-h-[480px] w-auto rounded-xl" />
-              )
-            ) : (
-              <p className="text-[var(--ink-2)]">{r.noProof}</p>
-            )}
-            {item.uploads.length > 0 && (
+              )}
               <div className="pb-2">
                 <FileViewer files={item.uploads} triggerLabel={r.openFile} />
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="grid content-center justify-items-center gap-3 rounded-[18px] border border-dashed border-[#f0d58a] bg-[#fffbf0] px-6 py-10 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
+              <img
+                src="/art/no-receipt.webp"
+                alt=""
+                width={160}
+                height={160}
+                className="animate-float size-36 rounded-[28px] shadow-[0_18px_40px_-18px_rgba(138,99,0,0.45)]"
+              />
+              <div className="grid gap-1">
+                <p className="font-heading text-lg font-bold text-[var(--ink)]">{r.noProof}</p>
+                <p className="mx-auto max-w-xs text-sm text-[var(--ink-2)]">{r.noProofHint}</p>
+              </div>
+            </div>
+          )}
 
           {/* Claim vs expectation */}
           <div className="grid content-start gap-4">
@@ -217,7 +228,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
               <ul className="grid gap-1.5">
                 {check(diff === 0, diff === 0 ? r.matches : fill(r.differs, { diff: `${diff > 0 ? "+" : "−"}${formatRM(Math.abs(diff))}` }))}
                 {isMonthly && check(!overlap, overlap ? fill(r.overlap, { month: `${monthName(locale, overlap.year, overlap.month)} ${overlap.year}` }) : r.noOverlap)}
-                {hashes.length > 0 && check(dupCount === 0, dupCount ? r.dupFile : r.noDupFile)}
+                {proof ? hashes.length > 0 && check(dupCount === 0, dupCount ? r.dupFile : r.noDupFile) : check(false, r.noProof)}
               </ul>
             </div>
           </div>
