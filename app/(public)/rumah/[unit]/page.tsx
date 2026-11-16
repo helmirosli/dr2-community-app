@@ -52,7 +52,7 @@ export default async function HousePage({
 
   if (!row || !summary) {
     return (
-      <section className="mx-auto grid max-w-md justify-items-center gap-5 px-4 py-24 text-center">
+      <section className="mx-auto grid max-w-md content-center justify-items-center gap-5 px-4 py-24 text-center">
         <h1 className="font-heading text-3xl font-bold">{fill(t.house.notFound, { unit })}</h1>
         <Link href="/" className="rounded-full bg-[var(--lime)] px-5 py-2.5 font-semibold text-[#06210b]">
           {t.house.tryAgain}

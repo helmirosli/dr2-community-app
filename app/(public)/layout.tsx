@@ -8,7 +8,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const t = await getDictionary();
 
   return (
-    <div className="min-h-screen bg-[var(--night)] text-[#f5f5f7]">
+    <div className="flex min-h-screen flex-col bg-[var(--night)] text-[#f5f5f7]">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--night)]/75 backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex h-12 max-w-6xl items-center gap-5 px-4 text-[13px] text-[#d2d2d7] sm:px-6">
           <Link href="/" className="mr-auto flex items-center gap-2.5 hover:opacity-85">
@@ -26,7 +26,8 @@ export default async function PublicLayout({ children }: { children: React.React
         </div>
       </header>
 
-      <main>{children}</main>
+      {/* Last band stretches so the footer always sits at the bottom on short pages. */}
+      <main className="flex flex-1 flex-col [&>section:last-child]:flex-1">{children}</main>
 
       <footer className="border-t border-black/5 bg-[var(--paper)] text-xs text-[var(--ink-2)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
