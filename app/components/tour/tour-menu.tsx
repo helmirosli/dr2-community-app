@@ -107,8 +107,8 @@ export function TourReset({ tone = "light" }: { tone?: "light" | "dark" }) {
   );
 }
 
-/** The ? button in the staff header: a small panel with the tour for this page and every other one. */
-export function TourHelpButton() {
+/** The ? button in the staff header (dark on the phone top bar): a panel with the tour for this page and every other one. */
+export function TourHelpButton({ tone = "light" }: { tone?: "light" | "dark" }) {
   const { t } = useDictionary();
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -128,7 +128,7 @@ export function TourHelpButton() {
   }, [open]);
 
   return (
-    <div ref={box} className="relative">
+    <div ref={box} className="lg:relative">
       <button
         type="button"
         data-tour="help-entry"
@@ -137,7 +137,9 @@ export function TourHelpButton() {
         aria-label={t.tour.ui.help}
         title={t.tour.ui.help}
         onClick={() => setOpen((v) => !v)}
-        className="grid size-10 place-items-center rounded-full text-[var(--ink-2)] transition hover:bg-black/5 hover:text-[var(--ink)]"
+        className={`grid size-10 place-items-center rounded-full transition ${
+          tone === "dark" ? "text-[#c7cedd] hover:bg-white/10 hover:text-white" : "text-[var(--ink-2)] hover:bg-black/5 hover:text-[var(--ink)]"
+        }`}
       >
         <HelpCircle size={19} aria-hidden="true" />
       </button>
@@ -145,7 +147,7 @@ export function TourHelpButton() {
         <div
           role="dialog"
           aria-label={t.tour.ui.helpTitle}
-          className="absolute right-0 top-12 z-30 flex max-h-[min(34rem,calc(100vh-6rem))] w-[22rem] flex-col rounded-3xl bg-white p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,.35)] ring-1 ring-black/5"
+          className="absolute inset-x-4 top-full z-30 mt-1 flex max-h-[calc(100dvh-8.5rem)] flex-col rounded-3xl lg:inset-x-auto lg:right-0 lg:top-12 lg:mt-0 lg:max-h-[min(34rem,calc(100vh-6rem))] lg:w-[22rem] bg-white p-3 shadow-[0_24px_60px_-20px_rgba(0,0,0,.35)] ring-1 ring-black/5"
         >
           <p className="px-2 pb-2 pt-1 font-heading text-base font-bold text-[var(--ink)]">{t.tour.ui.helpTitle}</p>
           <div className="min-h-0 flex-1 overflow-y-auto">

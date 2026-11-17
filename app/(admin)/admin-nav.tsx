@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import {
   FileSpreadsheet,
   Gift,
-  HelpCircle,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -24,7 +23,7 @@ import {
 import { logout } from "@/lib/actions/auth";
 import { useDictionary } from "@/lib/i18n/context";
 import { LocaleToggle } from "@/app/components/locale-toggle";
-import { TourList, TourReset } from "@/app/components/tour/tour-menu";
+import { TourHelpButton } from "@/app/components/tour/tour-menu";
 import { useLivePendingCount } from "./use-pending-count";
 
 type User = { name: string; role: string };
@@ -196,7 +195,10 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
       {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between bg-[var(--night)]/90 px-4 py-2.5 backdrop-blur-xl lg:hidden">
         <Brand size={30} />
-        <LocaleToggle dark />
+        <div className="flex items-center gap-1">
+          <TourHelpButton tone="dark" />
+          <LocaleToggle dark />
+        </div>
       </header>
 
       {/* Mobile bottom tab bar */}
@@ -228,7 +230,6 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
           })}
           <button
             type="button"
-            data-tour="help-entry"
             onClick={() => setMoreOpen((v) => !v)}
             aria-expanded={moreOpen}
             aria-controls="admin-more-sheet"
@@ -262,18 +263,6 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
                   </Link>
                 ))}
             </div>
-            <details className="group rounded-2xl bg-[var(--night-3)]">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 px-4 text-[15px] font-medium text-white [&::-webkit-details-marker]:hidden">
-                <HelpCircle size={20} aria-hidden="true" />
-                {t.tour.ui.help}
-              </summary>
-              <div className="max-h-[34vh] overflow-y-auto px-2">
-                <TourList tone="dark" onPlay={() => setMoreOpen(false)} />
-              </div>
-              <div className="border-t border-white/10 px-2 pb-2 pt-1">
-                <TourReset tone="dark" />
-              </div>
-            </details>
             <UserCard user={user} />
             <form action={logout}>
               <LogoutButton />
