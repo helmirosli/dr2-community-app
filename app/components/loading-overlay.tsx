@@ -1,7 +1,10 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
+
+import { useDictionary } from "@/lib/i18n/context";
 
 type Phase = "idle" | "run" | "finish";
 
@@ -15,7 +18,9 @@ function Bar() {
   const search = useSearchParams().toString();
   const here = useRef("");
   const [phase, setPhase] = useState<Phase>("idle");
+  const { t } = useDictionary();
   const [grow, setGrow] = useState(false);
+  const [pill, setPill] = useState(false);
   const phaseRef = useRef<Phase>("idle");
   const timers = useRef<number[]>([]);
 
@@ -29,6 +34,7 @@ function Bar() {
     timers.current.forEach(clearTimeout);
     timers.current = [];
     to("finish");
+    setPill(false);
     later(() => to("idle"), 450);
   };
 
@@ -39,7 +45,9 @@ function Bar() {
       timers.current.forEach(clearTimeout);
       timers.current = [];
       setGrow(false);
+      setPill(false);
       to("run");
+      later(() => setPill(true), 150); // only for loads that take a moment
       requestAnimationFrame(() => requestAnimationFrame(() => setGrow(true)));
       later(finish, 20000); // never leave it hanging if nothing navigates
     };
@@ -76,7 +84,7 @@ function Bar() {
   if (phase === "idle") return null;
   const done = phase === "finish";
   return (
-    <div role="progressbar" aria-label="Loading" aria-busy={!done} className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[3px]">
+    <div role="progressbar" aria-label="Loading" aria-busy={!done} className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-1">
       <div
         className="h-full bg-[image:var(--blend)] shadow-[0_0_10px_rgba(34,199,242,.7)]"
         style={{
@@ -85,6 +93,14 @@ function Bar() {
           transition: done ? "width .2s ease-out, opacity .25s ease-out .15s" : grow ? "width 12s cubic-bezier(.1,.6,.2,1)" : "none",
         }}
       />
+      {pill && !done && (
+        <div className="absolute inset-x-0 top-3 flex justify-center px-4">
+          <div className="flex items-center gap-2 rounded-full bg-[var(--night)]/95 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,.5)] ring-1 ring-white/15">
+            <Loader2 size={16} className="animate-spin text-[var(--lime)] motion-reduce:animate-none" aria-hidden="true" />
+            {t.common.loading}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

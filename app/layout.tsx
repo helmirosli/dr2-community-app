@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
+import { LoadingOverlay } from "@/app/components/loading-overlay";
 import { I18nProvider } from "@/lib/i18n/context";
 import { getDictionary, getLocale } from "@/lib/i18n";
 
@@ -49,6 +50,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full">
         <I18nProvider locale={locale} dictionary={dictionary}>
+          <LoadingOverlay />
           {children}
         </I18nProvider>
       </body>
