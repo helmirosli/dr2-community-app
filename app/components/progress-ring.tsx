@@ -9,6 +9,7 @@ export function ProgressRing({
   max,
   size = 56,
   stroke = 7,
+  track = "#e3e3e8",
   className = "",
   children,
 }: {
@@ -16,6 +17,8 @@ export function ProgressRing({
   max: number;
   size?: number;
   stroke?: number;
+  /** Colour of the unfilled part; use a translucent white on dark cards. */
+  track?: string;
   className?: string;
   children?: ReactNode;
 }) {
@@ -34,7 +37,7 @@ export function ProgressRing({
             <stop offset="1" stopColor="#22c7f2" />
           </linearGradient>
         </defs>
-        <circle cx="30" cy="30" r={r} fill="none" stroke="#e3e3e8" strokeWidth={stroke} />
+        <circle cx="30" cy="30" r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle
           cx="30"
           cy="30"

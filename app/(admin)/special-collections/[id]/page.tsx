@@ -90,7 +90,8 @@ export default async function SpecialCollectionDetailPage({ params, searchParams
 
   const totalDue  = allAssignments.reduce((sum, a) => sum + a.amountDue,  0);
   const totalPaid = allAssignments.reduce((sum, a) => sum + a.amountPaid, 0);
-  const outstanding = totalDue - totalPaid;
+  // Each house's shortfall, so one house overpaying never hides another's debt (same rule as the list page).
+  const outstanding = allAssignments.reduce((sum, a) => sum + Math.max(0, a.amountDue - a.amountPaid), 0);
   const paidCount = allAssignments.filter((a) => a.amountPaid >= a.amountDue).length;
   const progressPct = totalDue > 0 ? Math.min(100, Math.round((totalPaid / totalDue) * 100)) : 0;
 
