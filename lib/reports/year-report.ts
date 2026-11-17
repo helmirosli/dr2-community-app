@@ -52,12 +52,14 @@ export type YearReport = {
   highlightMonth: number | null;
 };
 
-export function parseReportParams(params: { year?: string; includeInactive?: string; q?: string; show?: string }) {
+export function parseReportParams(params: { year?: string; includeInactive?: string; q?: string; show?: string; totals?: string }) {
   const today = malaysiaToday();
   return {
     year: clampReportYear(params.year, today.year),
     includeInactive: params.includeInactive !== "off",
     q: params.q?.trim() ?? "",
+    /** Paid / Owes columns and the Total row are hidden unless asked for. */
+    totals: params.totals === "1",
     show: ((SHOWS as readonly string[]).includes(params.show ?? "") ? params.show : "all") as Show,
   };
 }

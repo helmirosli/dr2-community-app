@@ -465,6 +465,8 @@ const en = {
   },
   reports: {
     title: "Resident fee report",
+    showTotals: "Show totals",
+    hideTotals: "Hide totals",
     heading: "Payment status",
     subtitle: "Year-by-month grid for all households. Each cell shows the amount paid for that month.",
     excel: "Excel",

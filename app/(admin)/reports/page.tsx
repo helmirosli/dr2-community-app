@@ -15,6 +15,7 @@ type ReportsPageProps = {
     includeInactive?: string;
     q?: string;
     show?: string;
+    totals?: string;
   }>;
 };
 

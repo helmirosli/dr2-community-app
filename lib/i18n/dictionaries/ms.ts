@@ -424,6 +424,8 @@ const ms: Dictionary = {
   },
   reports: {
     title: "Laporan yuran penduduk",
+    showTotals: "Tunjuk jumlah",
+    hideTotals: "Sembunyi jumlah",
     heading: "Status pembayaran",
     subtitle: "Grid tahun-ikut-bulan untuk semua isi rumah. Setiap sel menunjukkan jumlah dibayar untuk bulan itu.",
     excel: "Excel",

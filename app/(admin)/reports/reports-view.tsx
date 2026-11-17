@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Search, Sigma, X } from "lucide-react";
 
 import { StatusPill, stateStyles, TILE_RAISED } from "@/app/components/status";
 import type { Dictionary } from "@/lib/i18n";
@@ -9,7 +9,7 @@ import type { HoldKind, ReportCell, ReportRow, Show, YearReport } from "@/lib/re
 import { monthName, type MonthState } from "@/lib/status";
 import { fill } from "@/lib/text";
 
-export type ReportQuery = { year: number; includeInactive: boolean; q: string; show: Show };
+export type ReportQuery = { year: number; includeInactive: boolean; q: string; show: Show; totals: boolean };
 
 const CELL = "border-b border-black/5 p-1 text-center group-hover:bg-[#fafafc]";
 
@@ -19,12 +19,13 @@ const isDue = (s: MonthState) => isPaid(s) || s === "pending" || s === "partial"
 
 /** Builds /reports URLs from the current filters, with some overridden. null removes that filter. */
 function makeHref(query: ReportQuery) {
-  return (patch: Partial<Record<"year" | "includeInactive" | "q" | "show", string | null>> = {}) => {
+  return (patch: Partial<Record<"year" | "includeInactive" | "q" | "show" | "totals", string | null>> = {}) => {
     const merged: Record<string, string | null | undefined> = {
       year: String(query.year),
       includeInactive: query.includeInactive ? null : "off",
       q: query.q || null,
       show: query.show === "all" ? null : query.show,
+      totals: query.totals ? "1" : null,
       ...patch,
     };
     const sp = new URLSearchParams();
@@ -246,11 +247,20 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                 {c.includeInactive}
               </Link>
             </div>
+            <Link
+              href={href({ totals: query.totals ? null : "1" })}
+              aria-pressed={query.totals}
+              className={`inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition ${query.totals ? "bg-[var(--ink)] text-white shadow-[0_3px_0_rgba(0,0,0,.25)]" : "bg-[var(--paper)] text-[var(--ink-2)] hover:text-[var(--ink)]"}`}
+            >
+              <Sigma size={15} aria-hidden="true" />
+              {query.totals ? c.hideTotals : c.showTotals}
+            </Link>
           </div>
           <form method="get" action="/reports" className="flex h-10 items-center gap-2 rounded-full bg-[var(--paper)] pl-4 pr-1 focus-within:bg-white focus-within:ring-2 focus-within:ring-[var(--cyan)] lg:w-72">
             <input type="hidden" name="year" value={query.year} />
             {!query.includeInactive && <input type="hidden" name="includeInactive" value="off" />}
             {query.show !== "all" && <input type="hidden" name="show" value={query.show} />}
+            {query.totals && <input type="hidden" name="totals" value="1" />}
             <Search size={16} className="shrink-0 text-[var(--ink-2)]" aria-hidden="true" />
             <input aria-label={c.searchPlaceholder} defaultValue={query.q} name="q" placeholder={c.searchPlaceholder} className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
             {query.q && (
@@ -311,7 +321,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
         </ul>
 
         {/* Tablet and up: the year grid */}
-        <div className="hidden max-h-[75vh] overflow-auto md:block">
+        <div className="scroll-gutter hidden max-h-[75vh] overflow-auto md:block">
           <table className="w-full border-separate border-spacing-0 text-left text-xs">
             <thead className="sticky top-0 z-20">
               <tr className="bg-[#fafafc] text-[var(--ink-2)]">
@@ -336,8 +346,8 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                     {sc.carriedFrom && <span className="block text-[10px] font-medium normal-case opacity-70">{fill(c.stillOwedFrom, { year: sc.carriedFrom })}</span>}
                   </th>
                 ))}
-                <th className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-b border-black/5 bg-[#fafafc] px-3 py-3 text-right font-semibold uppercase">{c.paidCol}</th>
-                <th className="sticky right-0 z-10 w-24 min-w-24 border-b border-black/5 bg-[#fafafc] px-3 py-3 text-right font-semibold uppercase">{c.owesCol}</th>
+                {query.totals && <th className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-b border-black/5 bg-[#fafafc] px-3 py-3 text-right font-semibold uppercase">{c.paidCol}</th>}
+                {query.totals && <th className="sticky right-0 z-10 w-24 min-w-24 border-b border-black/5 bg-[#fafafc] px-3 py-3 text-right font-semibold uppercase">{c.owesCol}</th>}
               </tr>
             </thead>
             <tbody>
@@ -377,10 +387,10 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                       )}
                     </td>
                   ))}
-                  <td className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-b border-black/5 bg-white px-3 py-2 text-right font-semibold tabular-nums text-[var(--ink)] group-hover:bg-[#fafafc]">{formatRMShort(r.paidSen)}</td>
-                  <td className={`sticky right-0 z-10 w-24 min-w-24 border-b border-black/5 bg-white px-3 py-2 text-right font-semibold tabular-nums group-hover:bg-[#fafafc] ${r.arrearsSen > 0 ? "text-[#c2341a]" : "text-[#c7c7cc]"}`}>
+                  {query.totals && <td className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-b border-black/5 bg-white px-3 py-2 text-right font-semibold tabular-nums text-[var(--ink)] group-hover:bg-[#fafafc]">{formatRMShort(r.paidSen)}</td>}
+                  {query.totals && <td className={`sticky right-0 z-10 w-24 min-w-24 border-b border-black/5 bg-white px-3 py-2 text-right font-semibold tabular-nums group-hover:bg-[#fafafc] ${r.arrearsSen > 0 ? "text-[#c2341a]" : "text-[#c7c7cc]"}`}>
                     {r.arrearsSen > 0 ? formatRMShort(r.arrearsSen) : "—"}
-                  </td>
+                  </td>}
                 </tr>
               ))}
               {visibleRows.length === 0 && (
@@ -391,7 +401,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                 </tr>
               )}
             </tbody>
-            {visibleRows.length > 0 && (
+            {query.totals && visibleRows.length > 0 && (
               <tfoot className="sticky bottom-0 z-20">
                 <tr className="bg-[#fafafc] text-[var(--ink)]">
                   <td className="border-t border-black/10 bg-[#fafafc] px-3 py-3" />
@@ -409,10 +419,10 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                       {total > 0 ? formatRMShort(total) : <span className="text-[#c7c7cc]">—</span>}
                     </td>
                   ))}
-                  <td className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-t border-black/10 bg-[#fafafc] px-3 py-3 text-right font-heading font-bold tabular-nums">{formatRMShort(totalPaid)}</td>
-                  <td className={`sticky right-0 z-10 w-24 min-w-24 border-t border-black/10 bg-[#fafafc] px-3 py-3 text-right font-heading font-bold tabular-nums ${totalOwes > 0 ? "text-[#c2341a]" : "text-[#c7c7cc]"}`}>
+                  {query.totals && <td className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-t border-black/10 bg-[#fafafc] px-3 py-3 text-right font-heading font-bold tabular-nums">{formatRMShort(totalPaid)}</td>}
+                  {query.totals && <td className={`sticky right-0 z-10 w-24 min-w-24 border-t border-black/10 bg-[#fafafc] px-3 py-3 text-right font-heading font-bold tabular-nums ${totalOwes > 0 ? "text-[#c2341a]" : "text-[#c7c7cc]"}`}>
                     {totalOwes > 0 ? formatRMShort(totalOwes) : "—"}
-                  </td>
+                  </td>}
                 </tr>
               </tfoot>
             )}
