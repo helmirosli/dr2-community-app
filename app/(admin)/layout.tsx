@@ -1,4 +1,3 @@
-import { LoadingOverlay } from "@/app/components/loading-overlay";
 import { TourProvider } from "@/app/components/tour/tour-provider";
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary, getLocale } from "@/lib/i18n";
@@ -46,7 +45,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {children}
         </div>
       </div>
-      <LoadingOverlay />
     </TourProvider>
   );
 }
