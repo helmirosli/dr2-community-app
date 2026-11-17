@@ -232,3 +232,10 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .animate-drift { animation: jr2-drift 14s ease-in-out infinite; }
 .animate-rise { animation: jr2-rise 5s ease-in infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-glow, .animate-drift, .animate-rise { animation: none; } }
+
+/* House page: month tiles pop in one by one; the year ring draws itself. */
+@keyframes jr2-pop { 0% { opacity: 0; transform: translateY(10px) scale(0.92); } 100% { opacity: 1; transform: none; } }
+@keyframes jr2-ring { from { stroke-dashoffset: var(--ring); } }
+.animate-pop { animation: jr2-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.animate-ring { animation: jr2-ring 1.1s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .animate-pop, .animate-ring { animation: none; } }

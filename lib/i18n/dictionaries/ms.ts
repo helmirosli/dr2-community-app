@@ -323,6 +323,12 @@ const ms: Dictionary = {
     year: "Tahun",
     owed: "{count} bulan belum bayar tahun ini · {amount}",
     home: "Utama",
+    hello: "Hai, {name}",
+    thanks: "Semua dah bayar. Terima kasih!",
+    owedLabel: "{count} bulan belum bayar tahun ini",
+    payOwed: "Bayar {amount} sekarang",
+    monthsPaid: "bulan dibayar",
+    tapToPay: "Ketik untuk bayar",
   },
   statusBoard: {
     filterAll: "Semua",

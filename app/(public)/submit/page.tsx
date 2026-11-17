@@ -7,9 +7,9 @@ import { SubmitPaymentForm, type SubmitHouse } from "./submit-payment-form";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export default async function PublicSubmitPage({ searchParams }: { searchParams: Promise<{ unit?: string }> }) {
+export default async function PublicSubmitPage({ searchParams }: { searchParams: Promise<{ unit?: string; count?: string }> }) {
   const now = new Date();
-  const [{ unit }, t, locale, report, specialCollections] = await Promise.all([
+  const [{ unit, count }, t, locale, report, specialCollections] = await Promise.all([
     searchParams,
     getDictionary(),
     getLocale(),
@@ -61,6 +61,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
           <SubmitPaymentForm
             houses={houses}
             initialUnit={unit ?? ""}
+            initialCount={Math.min(12, Math.max(1, Number(count) || 1))}
             specialCollections={specialCollections}
             outstandingByUnit={outstandingByUnit}
             bank={{

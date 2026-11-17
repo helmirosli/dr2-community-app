@@ -23,12 +23,14 @@ function addMonths(year: number, month: number, n: number) {
 export function SubmitPaymentForm({
   houses,
   initialUnit,
+  initialCount = 1,
   specialCollections,
   outstandingByUnit,
   bank,
 }: {
   houses: SubmitHouse[];
   initialUnit: string;
+  initialCount?: number;
   specialCollections: SpecialCollection[];
   outstandingByUnit: Record<string, Record<string, number>>;
   bank: Bank;
@@ -41,7 +43,7 @@ export function SubmitPaymentForm({
   const [step, setStep] = useState(1);
   const [unit, setUnit] = useState(initialUnit);
   const [paymentType, setPaymentType] = useState<"MONTHLY_FEE" | "SPECIAL_COLLECTION">("MONTHLY_FEE");
-  const [count, setCount] = useState(1);
+  const [count, setCount] = useState(initialCount);
   const [otherAmount, setOtherAmount] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [collectionId, setCollectionId] = useState(specialCollections[0]?.id ?? "");

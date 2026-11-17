@@ -364,6 +364,12 @@ const en = {
     year: "Year",
     owed: "{count} months unpaid this year · {amount}",
     home: "Home",
+    hello: "Hi, {name}",
+    thanks: "All paid. Thank you!",
+    owedLabel: "{count} months unpaid this year",
+    payOwed: "Pay {amount} now",
+    monthsPaid: "months paid",
+    tapToPay: "Tap to pay",
   },
   statusBoard: {
     filterAll: "All",
