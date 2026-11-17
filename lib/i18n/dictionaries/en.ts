@@ -351,6 +351,9 @@ const en = {
     reference: "Put your house number in the transfer reference, e.g. \"JR2 No 12\".",
     noQr: "There is no QR code on purpose: the AJK can only match a transfer to a house by its reference.",
     staffLogin: "AJK login",
+    noLogin: "No login needed. Just your house number.",
+    step1: "Transfer your monthly fee to the account below.",
+    step3: "Send your receipt here. The AJK checks it and your month turns green.",
   },
   house: {
     title: "House {unit}",
@@ -379,6 +382,8 @@ const en = {
     paidUntil: "Paid until {month}",
     noPayment: "No payment yet",
     noMatch: "No houses match.",
+    monthsPaid: "{paid} of {due} months paid",
+    carriedFrom: "from {year}",
   },
   submitFlow: {
     title: "Send payment proof",

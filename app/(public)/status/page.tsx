@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { StatusPill, stateStyles } from "@/app/components/status";
+import { ProgressRing } from "@/app/components/progress-ring";
+import { StatusPill } from "@/app/components/status";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { clampReportYear, getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { prisma } from "@/lib/prisma";
 import { isFutureMonth, monthName, monthState, type MonthState } from "@/lib/status";
-import { StatusCards, type StatusCardRow } from "./status-cards";
+import { StatusBoard, type BoardCell, type BoardRow } from "./status-board";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -18,6 +19,8 @@ type StatusPageProps = {
 };
 
 const LEGEND: MonthState[] = ["paid", "ahead", "pending", "partial", "unpaid", "hold"];
+
+const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;
@@ -32,7 +35,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  const { rows: unsortedRows, specialCollections } = await getYearGridData({
+  const { rows, specialCollections } = await getYearGridData({
     year: selectedYear,
     includeInactive: true,
   });
@@ -56,7 +59,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
 
   const pendingMap = getPendingSubmissionsMap(pendingSubmissions);
 
-  // Fetch pending special collection submissions: key = "unitNumber:collectionId"
+  // Pending special-collection submissions: key = "unitNumber:collectionId"
   const pendingCollectionSubmissions = await prisma.publicPaymentSubmission.findMany({
     where: {
       paymentType: "SPECIAL_COLLECTION",
@@ -77,15 +80,6 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
     pendingCollectionMap.set(key, (pendingCollectionMap.get(key) ?? 0) + sub.amountSen);
   }
 
-  const rows = [...unsortedRows].sort((a, b) => {
-    const unitA = parseInt(a.unitNumber, 10);
-    const unitB = parseInt(b.unitNumber, 10);
-    return unitA - unitB;
-  });
-
-  const hasExtra = false; // no generic "Extra" column: collections carried forward are listed by name
-  const extraCols = specialCollections.length;
-
   const report = await getMonthlyReport({ year: currentYear, month: currentMonth, includeInactive: true });
   const paidUntilByUnit = new Map(
     report.rows.map((r) => [
@@ -94,183 +88,147 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
     ]),
   );
 
-  const view = rows.map((row) => ({
-    row,
-    cells: row.months.map((amountSen, i) => {
-      const pending = pendingMap.get(`${row.unitNumber}:${selectedYear}:${i + 1}`);
-      return {
-        amountSen,
-        pending,
-        state: monthState({
-          amountSen,
-          override: row.monthStatusOverrides[i],
-          residentStatus: row.monthStatus[i],
-          isFuture: isFutureMonth(selectedYear, i + 1, now),
-          pending: Boolean(pending),
-        }),
-      };
-    }),
-  }));
-
-  const cardRows: StatusCardRow[] = view.map(({ row, cells }) => {
-    const until = paidUntilByUnit.get(row.unitNumber);
-    return {
-      unit: row.unitNumber,
-      name: row.name,
-      states: cells.map((c) => c.state),
-      paidUntil: until ? t.statusBoard.paidUntil.replace("{month}", until) : t.statusBoard.noPayment,
-    };
-  });
-
   const holdLabel = (status: string, override: string | null) => {
     const s = override ?? status;
     return s === "FOR_SALE" ? t.residents.forSale : s === "MOVED_OUT" ? t.residents.movedOut : s === "EXEMPT" ? t.residents.exempt : "";
   };
 
+  // Rows arrive in numeric house order from getYearGridData.
+  const counts: Record<MonthState, number> = { paid: 0, ahead: 0, pending: 0, partial: 0, unpaid: 0, hold: 0, upcoming: 0 };
+
+  const monthPaid = Array<number>(12).fill(0);
+  const monthDue = Array<number>(12).fill(0);
+
+  const boardRows: BoardRow[] = rows.map((row) => {
+    const cells: BoardCell[] = row.months.map((amountSen, i) => {
+      const pending = pendingMap.get(`${row.unitNumber}:${selectedYear}:${i + 1}`);
+      const state = monthState({
+        amountSen,
+        override: row.monthStatusOverrides[i],
+        residentStatus: row.monthStatus[i],
+        isFuture: isFutureMonth(selectedYear, i + 1, now),
+        pending: Boolean(pending),
+      });
+      counts[state] += 1;
+      if (state === "paid" || state === "ahead") monthPaid[i] += 1;
+      if (state === "paid" || state === "ahead" || state === "pending" || state === "partial" || state === "unpaid") monthDue[i] += 1;
+      const text = pending
+        ? fmtCell(pending.appliedSen)
+        : state === "hold"
+          ? holdLabel(row.monthStatus[i], row.monthStatusOverrides[i])
+          : state === "paid" || state === "ahead"
+            ? ""
+            : amountSen
+              ? fmtCell(amountSen)
+              : "";
+      return { state, text };
+    });
+
+    const extras = specialCollections.map((sc): BoardCell | null => {
+      const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
+      const pendingAmountSen = pendingCollectionMap.get(`${row.unitNumber}:${sc.id}`) ?? 0;
+      if (pendingAmountSen) return { state: "pending", text: fmtCell(pendingAmountSen) };
+      if (!assignment) return null;
+      return assignment.outstanding > 0 ? { state: "partial", text: fmtCell(assignment.outstanding) } : { state: "paid", text: "" };
+    });
+
+    const until = paidUntilByUnit.get(row.unitNumber);
+    return {
+      unit: row.unitNumber,
+      name: row.name,
+      paidUntil: until ? t.statusBoard.paidUntil.replace("{month}", until) : t.statusBoard.noPayment,
+      cells,
+      extras,
+    };
+  });
+
+  // Year summary: of every month that has fallen due (or been paid ahead), how many are paid?
+  const paidCells = counts.paid + counts.ahead;
+  const dueCells = paidCells + counts.pending + counts.partial + counts.unpaid;
+  const pct = dueCells ? Math.round((paidCells / dueCells) * 100) : 0;
+
+  const inCurrentYear = selectedYear === currentYear;
+  const monthNames = Array.from({ length: 12 }, (_, i) => monthName(locale, selectedYear, i + 1));
+  const focusMonth = inCurrentYear ? currentMonth - 1 : selectedYear < currentYear ? 11 : 0;
+
   return (
     <>
-      <section className="px-4 pb-12 pt-12 sm:pt-16">
+      <section className="px-4 pb-24 pt-12 sm:pt-16">
         <div className="mx-auto grid max-w-3xl justify-items-center gap-4 text-center">
           <h1 className="font-heading text-[clamp(2.2rem,6vw,3.6rem)] font-bold leading-tight tracking-tight">{t.publicStatus.title}</h1>
           <p className="max-w-xl text-[#a1a1a6]">{t.publicStatus.subtitle.replace("{year}", String(selectedYear))}</p>
-          <div className="flex items-center gap-3">
-            <Link aria-label={String(selectedYear - 1)} href={`?year=${selectedYear - 1}`} className="rounded-full p-2 hover:bg-white/10">
+          <div className="flex items-center gap-1 rounded-full bg-white/10 p-1 ring-1 ring-white/10">
+            <Link aria-label={String(selectedYear - 1)} href={`?year=${selectedYear - 1}`} className="grid size-10 place-items-center rounded-full hover:bg-white/10">
               <ChevronLeft size={20} />
             </Link>
-            <span className="font-heading text-2xl font-bold tabular-nums">{selectedYear}</span>
-            <Link aria-label={String(selectedYear + 1)} href={`?year=${selectedYear + 1}`} className="rounded-full p-2 hover:bg-white/10">
+            <span className="px-2 font-heading text-2xl font-bold tabular-nums">{selectedYear}</span>
+            <Link aria-label={String(selectedYear + 1)} href={`?year=${selectedYear + 1}`} className="grid size-10 place-items-center rounded-full hover:bg-white/10">
               <ChevronRight size={20} />
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="bg-[var(--paper)] px-4 py-10 text-[var(--ink)] sm:py-14">
+      <section className="bg-[var(--paper)] px-4 pb-10 text-[var(--ink)] sm:pb-14">
         <div className="mx-auto grid max-w-7xl gap-6">
-          <div className="flex flex-wrap justify-center gap-2">
-            {LEGEND.map((s) => (
-              <StatusPill key={s} state={s} label={t.states[s]} />
-            ))}
-          </div>
-
-          {/* Phones: house cards */}
-          <div className="md:hidden">
-            <StatusCards
-              rows={cardRows}
-              labels={{
-                all: t.statusBoard.filterAll,
-                unpaid: t.statusBoard.filterUnpaid,
-                pending: t.statusBoard.filterPending,
-                search: t.statusBoard.search,
-                noMatch: t.statusBoard.noMatch,
-                states: t.states,
-              }}
-            />
-          </div>
-
-          {/* Tablet and up: the familiar year grid */}
-          <div className="hidden max-h-[75vh] overflow-auto rounded-3xl bg-white ring-1 ring-black/5 md:block">
-            <table className="w-full border-separate border-spacing-0 text-left text-xs">
-              <thead className="sticky top-0 z-20">
-                <tr className="bg-[var(--night)] text-white">
-                  <th className="sticky left-0 z-10 bg-[var(--night)] px-3 py-3 font-semibold">{t.publicStatus.unit}</th>
-                  <th className="min-w-36 px-3 py-3 font-semibold">{t.publicStatus.name}</th>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <th
-                      key={i}
-                      className={`px-1.5 py-3 text-center font-semibold ${
-                        selectedYear === currentYear && i + 1 === currentMonth ? "text-[var(--lime)]" : "text-[#c7cedd]"
-                      }`}
-                    >
-                      {monthName(locale, selectedYear, i + 1)}
-                    </th>
-                  ))}
-                  {specialCollections.map((sc) => (
-                    <th className="px-2 py-3 text-center font-semibold text-[#f5b400]" key={sc.id}>
-                      {sc.title}
-                      {sc.carriedFrom && <span className="block text-[10px] font-medium opacity-70">from {sc.carriedFrom}</span>}
-                    </th>
-                  ))}
-                  {hasExtra && specialCollections.length === 0 && (
-                    <th className="px-2 py-3 text-center font-semibold text-[#f5b400]">{t.publicStatus.extra}</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {view.map(({ row, cells }) => (
-                  <tr key={row.unitNumber} className="group">
-                    <td className="sticky left-0 z-10 border-b border-black/5 bg-white px-3 py-2 font-heading font-bold group-hover:bg-[#fafafa]">
-                      <Link href={`/rumah/${encodeURIComponent(row.unitNumber)}`} className="hover:text-[var(--blue)]">
-                        {row.unitNumber}
-                      </Link>
-                    </td>
-                    <td className="min-w-36 border-b border-black/5 px-3 py-2 font-medium group-hover:bg-[#fafafa]">{row.name}</td>
-                    {cells.map(({ amountSen, pending, state }, i) => (
-                      <td key={i} className="border-b border-black/5 p-1 text-center group-hover:bg-[#fafafa]">
-                        <span
-                          className={`grid min-h-8 min-w-12 place-items-center rounded-lg px-1 text-[11px] font-semibold ${stateStyles[state].tile}`}
-                          title={t.states[state]}
-                        >
-                          {pending
-                            ? fmtCell(pending.appliedSen)
-                            : state === "hold"
-                              ? holdLabel(row.monthStatus[i], row.monthStatusOverrides[i])
-                              : state === "paid" || state === "ahead"
-                                ? "✓"
-                                : amountSen
-                                  ? fmtCell(amountSen)
-                                  : ""}
-                        </span>
-                      </td>
-                    ))}
-                    {specialCollections.length > 0
-                      ? specialCollections.map((sc) => {
-                          const assignment = row.assignments.find((a) => a.specialCollectionId === sc.id);
-                          const pendingAmountSen = pendingCollectionMap.get(`${row.unitNumber}:${sc.id}`) ?? 0;
-                          const state: MonthState | null = pendingAmountSen
-                            ? "pending"
-                            : !assignment
-                              ? null
-                              : assignment.outstanding > 0
-                                ? "partial"
-                                : "paid";
-                          return (
-                            <td key={sc.id} className="border-b border-black/5 p-1 text-center group-hover:bg-[#fafafa]">
-                              {state ? (
-                                <span className={`grid min-h-8 place-items-center rounded-lg px-1 text-[11px] font-semibold ${stateStyles[state].tile}`}>
-                                  {pendingAmountSen ? fmtCell(pendingAmountSen) : assignment && assignment.outstanding > 0 ? fmtCell(assignment.outstanding) : "✓"}
-                                </span>
-                              ) : (
-                                <span className="text-[#c7c7cc]">—</span>
-                              )}
-                            </td>
-                          );
-                        })
-                      : extraCols > 0 && (
-                          <td className="border-b border-black/5 p-1 text-center">
-                            {row.extraOutstandingSen > 0 ? (
-                              <span className={`grid min-h-8 place-items-center rounded-lg text-[11px] font-semibold ${stateStyles.partial.tile}`}>
-                                {fmtCell(row.extraOutstandingSen)}
-                              </span>
-                            ) : row.extraDueSen > 0 ? (
-                              "✓"
-                            ) : (
-                              <span className="text-[#c7c7cc]">—</span>
-                            )}
-                          </td>
-                        )}
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td className="px-5 py-10 text-center text-[var(--ink-2)]" colSpan={14 + extraCols}>
-                      {t.publicStatus.noRecords}
-                    </td>
-                  </tr>
+          {/* Summary card: overlaps the night band above. */}
+          <div className="relative z-10 -mt-16 flex flex-wrap items-center gap-x-5 gap-y-5 rounded-[28px] sm:gap-x-8 bg-white p-5 shadow-[0_1px_0_rgba(0,0,0,.04),0_24px_48px_-28px_rgba(0,0,0,.3)] ring-1 ring-black/5 sm:p-7">
+            <ProgressRing value={paidCells} max={dueCells} size={96} stroke={6}>
+              <span className="font-heading text-xl font-bold tabular-nums">{pct}%</span>
+            </ProgressRing>
+            <div className="grid min-w-0 flex-1 basis-40 gap-3">
+              <div>
+                <p className="font-heading text-sm font-semibold text-[var(--ink-2)]">{selectedYear}</p>
+                <p className="font-heading text-xl font-bold leading-tight sm:text-2xl">{fill(t.statusBoard.monthsPaid, { paid: paidCells, due: dueCells })}</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {LEGEND.map((s) =>
+                  counts[s] > 0 ? <StatusPill key={s} state={s} label={`${t.states[s]} · ${counts[s]}`} /> : null,
                 )}
-              </tbody>
-            </table>
+              </div>
+            </div>
+            {/* How much of each month was collected, at a glance. */}
+            <div className="ml-auto hidden items-end gap-1.5 lg:flex" role="img" aria-label={monthNames.map((m, i) => `${m}: ${monthPaid[i]} / ${monthDue[i]}`).join(", ")}>
+              {monthNames.map((m, i) => {
+                const ratio = monthDue[i] ? monthPaid[i] / monthDue[i] : 0;
+                const isNow = inCurrentYear && i === currentMonth - 1;
+                return (
+                  <div key={i} className="grid justify-items-center gap-1.5" title={`${m}: ${monthPaid[i]} / ${monthDue[i]}`}>
+                    <span className="relative h-16 w-5 overflow-hidden rounded-full bg-[#eef0f4]">
+                      <span
+                        className="animate-grow absolute inset-x-0 bottom-0 origin-bottom rounded-full bg-[image:var(--blend)]"
+                        style={{ height: `${Math.round(ratio * 100)}%`, animationDelay: `${i * 45}ms` }}
+                      />
+                    </span>
+                    <span className={`text-[10px] font-semibold ${isNow ? "text-[var(--ink)]" : "text-[var(--ink-2)]"}`}>{m.slice(0, 1)}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          <StatusBoard
+            rows={boardRows}
+            months={monthNames}
+            collections={specialCollections.map((sc) => ({
+              id: sc.id,
+              title: sc.title,
+              note: sc.carriedFrom ? fill(t.statusBoard.carriedFrom, { year: sc.carriedFrom }) : null,
+            }))}
+            focusMonth={focusMonth}
+            highlightMonth={inCurrentYear ? currentMonth - 1 : null}
+            labels={{
+              all: t.statusBoard.filterAll,
+              unpaid: t.statusBoard.filterUnpaid,
+              pending: t.statusBoard.filterPending,
+              search: t.statusBoard.search,
+              noMatch: t.statusBoard.noMatch,
+              noRecords: t.publicStatus.noRecords,
+              unit: t.publicStatus.unit,
+              name: t.publicStatus.name,
+              states: t.states,
+            }}
+          />
         </div>
       </section>
     </>

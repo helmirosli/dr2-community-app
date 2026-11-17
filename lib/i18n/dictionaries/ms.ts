@@ -310,6 +310,9 @@ const ms: Dictionary = {
     reference: "Tulis nombor rumah anda dalam rujukan pindahan, cth. \"JR2 No 12\".",
     noQr: "Tiada kod QR dengan sengaja: AJK hanya boleh padankan pindahan kepada rumah melalui rujukannya.",
     staffLogin: "Log masuk AJK",
+    noLogin: "Tiada log masuk. Cukup dengan nombor rumah.",
+    step1: "Pindahkan yuran bulanan ke akaun di bawah.",
+    step3: "Hantar resit anda di sini. AJK menyemaknya dan bulan anda bertukar hijau.",
   },
   house: {
     title: "Rumah {unit}",
@@ -338,6 +341,8 @@ const ms: Dictionary = {
     paidUntil: "Sehingga {month}",
     noPayment: "Belum ada bayaran",
     noMatch: "Tiada rumah yang sepadan.",
+    monthsPaid: "{paid} daripada {due} bulan dibayar",
+    carriedFrom: "dari {year}",
   },
   submitFlow: {
     title: "Hantar bukti bayaran",

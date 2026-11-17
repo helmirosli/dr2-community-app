@@ -34,16 +34,18 @@ export function HouseTile({
   label,
   href,
   dark = false,
+  className: extra = "",
 }: {
   unit: string;
   state: MonthState;
   label: string;
   href?: string;
   dark?: boolean;
+  className?: string;
 }) {
   const className = `grid aspect-square place-items-center rounded-xl font-heading text-sm font-bold tabular-nums transition ${
     dark ? stateStyles[state].tileDark : stateStyles[state].tile
-  } ${href ? "hover:scale-105 focus-visible:scale-105" : ""}`;
+  } ${href ? "hover:scale-105 focus-visible:scale-105" : ""} ${extra}`;
   const title = `${unit}: ${label}`;
   return href ? (
     <Link href={href} className={className} title={title} aria-label={title}>

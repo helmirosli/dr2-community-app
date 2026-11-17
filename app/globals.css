@@ -239,3 +239,13 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .animate-pop { animation: jr2-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
 .animate-ring { animation: jr2-ring 1.1s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .animate-pop, .animate-ring { animation: none; } }
+
+/* Wide hero art floats gently, like an island. */
+@keyframes jr2-hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.animate-hover { animation: jr2-hover 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-hover { animation: none; } }
+
+/* Bars grow up from the baseline. */
+@keyframes jr2-grow { from { transform: scaleY(0); } }
+.animate-grow { animation: jr2-grow 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@media (prefers-reduced-motion: reduce) { .animate-grow { animation: none; } }

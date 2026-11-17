@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, CircleAlert, Clock } from "lucide-react";
 
+import { ProgressRing } from "@/app/components/progress-ring";
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
@@ -107,7 +108,6 @@ export default async function HousePage({
   const lamp = LAMP[thisMonthState];
   const submitHref = `/submit?unit=${encodeURIComponent(unit)}${owes ? `&count=${owedMonths.length}` : ""}`;
   const isThisMonth = (month: number) => year === now.getFullYear() && month === now.getMonth() + 1;
-  const RING = 2 * Math.PI * 26;
 
   return (
     <>
@@ -179,28 +179,7 @@ export default async function HousePage({
         <div className="mx-auto grid max-w-3xl gap-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <svg viewBox="0 0 60 60" className="size-14 -rotate-90" aria-hidden="true">
-                <defs>
-                  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#8ee53f" />
-                    <stop offset="1" stopColor="#22c7f2" />
-                  </linearGradient>
-                </defs>
-                <circle cx="30" cy="30" r="26" fill="none" stroke="#e3e3e8" strokeWidth="7" />
-                <circle
-                  cx="30"
-                  cy="30"
-                  r="26"
-                  fill="none"
-                  stroke="url(#ring)"
-                  strokeWidth="7"
-                  strokeLinecap="round"
-                  strokeDasharray={RING}
-                  strokeDashoffset={RING * (1 - paidCount / 12)}
-                  className="animate-ring"
-                  style={{ ["--ring" as string]: RING }}
-                />
-              </svg>
+              <ProgressRing value={paidCount} max={12} size={56} />
               <p className="leading-tight">
                 <span className="font-heading text-2xl font-bold tabular-nums">{paidCount}</span>
                 <span className="text-[var(--ink-2)]"> / 12</span>
