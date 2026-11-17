@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
@@ -271,12 +271,6 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
               </tbody>
             </table>
           </div>
-
-          {/* Privacy note: a quiet footnote, not a card. */}
-          <p className="mx-auto max-w-xl text-balance text-center text-[13px] leading-relaxed text-[var(--ink-2)]">
-            <ShieldCheck size={15} aria-hidden="true" className="mr-1.5 inline-block -translate-y-px align-middle text-[var(--leaf)]" />
-            <strong className="font-semibold text-[var(--ink)]">{t.publicStatus.privacyTitle}.</strong> {t.publicStatus.privacyDesc}
-          </p>
         </div>
       </section>
     </>
