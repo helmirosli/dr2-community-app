@@ -71,6 +71,11 @@ const ms: Dictionary = {
     submit: "Log masuk",
     submitting: "Sedang log masuk...",
     publicFormLink: "Buka borang penghuni →",
+    showPassword: "Tunjuk kata laluan",
+    hidePassword: "Sembunyi kata laluan",
+    capsLock: "Caps Lock sedang aktif",
+    residentNote: "Penduduk tidak perlu akaun.",
+    backHome: "Utama",
   },
   dashboard: {
     operations: "operasi",

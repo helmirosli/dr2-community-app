@@ -69,6 +69,11 @@ const en = {
     submit: "Sign in",
     submitting: "Signing in...",
     publicFormLink: "Open resident submission form →",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    capsLock: "Caps Lock is on",
+    residentNote: "Residents don't need an account.",
+    backHome: "Home",
   },
   dashboard: {
     operations: "operations",

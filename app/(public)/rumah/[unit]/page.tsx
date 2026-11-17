@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, CircleAlert, Clock } from "lucide-react";
 
+import { GuardhouseScene } from "@/app/components/guardhouse-scene";
 import { ProgressRing } from "@/app/components/progress-ring";
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
@@ -118,31 +119,7 @@ export default async function HousePage({
           </Link>
 
           {/* The house itself: a clay model whose lamp glows in this month's status colour. */}
-          <div aria-hidden="true" className="relative mx-auto aspect-square w-[min(300px,78vw)] md:w-full">
-            <div className="absolute inset-0 [mask-image:radial-gradient(closest-side,#000_62%,transparent)]">
-              <div className="animate-drift relative h-full w-full">
-                {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
-                <img src="/art/a2-login.webp" alt="" className="h-full w-full object-cover object-[50%_72%]" />
-                <span
-                  className="animate-glow absolute left-[49.5%] top-[37%] size-[46%] rounded-full"
-                  style={{ background: `radial-gradient(circle, rgb(${lamp}) 0, rgba(${lamp},0.85) 16%, rgba(${lamp},0.28) 42%, transparent 68%)` }}
-                />
-                <span className="absolute left-[49.5%] top-[57%] grid min-w-[17%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-lg border border-white/25 bg-[linear-gradient(180deg,#1b2a55,#0b1636)] px-2 py-1 font-heading text-[clamp(1.1rem,5vw,1.6rem)] font-extrabold tabular-nums text-white shadow-[0_3px_0_#050a1a,0_8px_18px_rgba(0,0,0,.5)]">
-                  {unit}
-                </span>
-              </div>
-            </div>
-            {allClear &&
-              [
-                { left: "22%", top: "80%", delay: "0s", color: "bg-[var(--lime)]" },
-                { left: "70%", top: "74%", delay: "1.2s", color: "bg-[var(--cyan)]" },
-                { left: "40%", top: "88%", delay: "2.3s", color: "bg-[var(--lime)]" },
-                { left: "82%", top: "86%", delay: "3.1s", color: "bg-[var(--cyan)]" },
-                { left: "58%", top: "92%", delay: "4s", color: "bg-[var(--lime)]" },
-              ].map((f) => (
-                <span key={f.left} className={`animate-rise absolute size-1.5 rounded-full ${f.color}`} style={{ left: f.left, top: f.top, animationDelay: f.delay }} />
-              ))}
-          </div>
+          <GuardhouseScene lamp={lamp} plate={unit} fireflies={allClear} className="w-[min(300px,78vw)] md:w-full" />
 
           <div className="grid justify-items-center gap-3 text-center md:justify-items-start md:text-left">
             <p className="text-blend font-heading text-sm font-semibold">{fill(t.house.hello, { name: firstName(row.name) })}</p>
