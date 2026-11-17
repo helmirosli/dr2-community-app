@@ -2,6 +2,8 @@ import type { Dictionary } from "./en";
 
 const ms: Dictionary = {
   common: {
+    showAmounts: "Tunjuk amaun",
+    hideAmounts: "Sembunyi amaun",
     signOut: "Log keluar",
     save: "Simpan",
     cancel: "Batal",
@@ -336,8 +338,6 @@ const ms: Dictionary = {
     paymentCount: "{n} pembayaran",
     paymentCountOne: "1 pembayaran",
     monthlyTotal: "Yuran bulanan",
-    showAmounts: "Tunjuk amaun",
-    hideAmounts: "Sembunyi amaun",
     specialTotal: "Kutipan khas",
     waitingReview: "{n} menunggu semakan",
     perMonthHint: "Ketik bulan untuk menapis",

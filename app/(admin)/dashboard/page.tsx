@@ -11,6 +11,7 @@ import {
 
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary, getLocale } from "@/lib/i18n";
+import { AmountEye } from "@/app/components/amount-veil";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { monthLabel } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
@@ -144,6 +145,7 @@ export default async function DashboardPage() {
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
+            <AmountEye className="grid size-11 place-items-center rounded-full bg-white text-[var(--ink-2)] shadow-sm ring-1 ring-black/10 transition hover:text-[var(--ink)] active:scale-95" />
             <Link className="ui-button-secondary" href="/submit">
               <FileText size={15} />
               <span>{t.dashboard.publicForm}</span>
@@ -267,10 +269,10 @@ export default async function DashboardPage() {
                 <Banknote className="text-cyan-700" size={18} />
               </div>
             </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{formatRM(currentMonthFeeCollection)}</p>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900"><span className="money">{formatRM(currentMonthFeeCollection)}</span></p>
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                <span>of {formatRM(monthlyTarget)} target</span>
+                <span>of <span className="money">{formatRM(monthlyTarget)}</span> target</span>
                 <span className="font-semibold text-cyan-700">{collectionProgress}%</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
@@ -315,17 +317,17 @@ export default async function DashboardPage() {
             </div>
             {specialCollectionDue > 0 ? (
               <>
-                <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900">{formatRM(specialCollectionPaid)}</p>
+                <p className="mt-3 text-2xl font-bold tracking-tight text-slate-900"><span className="money">{formatRM(specialCollectionPaid)}</span></p>
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                    <span>of {formatRM(specialCollectionDue)} due</span>
+                    <span>of <span className="money">{formatRM(specialCollectionDue)}</span> due</span>
                     <span className="font-semibold text-sky-700">{specialCollectionProgress}%</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
                     <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${specialCollectionProgress}%` }} />
                   </div>
                   {specialCollectionOutstanding > 0 && (
-                    <p className="mt-2 text-xs text-amber-600 font-medium">{formatRM(specialCollectionOutstanding)} outstanding</p>
+                    <p className="mt-2 text-xs text-amber-600 font-medium"><span className="money">{formatRM(specialCollectionOutstanding)}</span> outstanding</p>
                   )}
                 </div>
               </>
@@ -367,17 +369,17 @@ export default async function DashboardPage() {
             </div>
             <div className="mt-4">
               <div className="flex items-end justify-between">
-                <p className="text-2xl font-bold tracking-tight text-slate-900">{formatRM(ytdCollected)}</p>
+                <p className="text-2xl font-bold tracking-tight text-slate-900"><span className="money">{formatRM(ytdCollected)}</span></p>
                 <p className="text-sm font-semibold text-cyan-700">{ytdProgress}%</p>
               </div>
               <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
                 <div className="h-full rounded-full bg-cyan-600 transition-all" style={{ width: `${ytdProgress}%` }} />
               </div>
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
-                <span>YTD target: <strong className="text-slate-900">{formatRM(ytdTarget)}</strong></span>
+                <span>YTD target: <strong className="text-slate-900"><span className="money">{formatRM(ytdTarget)}</span></strong></span>
                 <span>{currentMonth} months × {residentCount} units × RM50</span>
                 {ytdGap > 0 && (
-                  <span className="text-amber-600 font-medium">{formatRM(ytdGap)} short</span>
+                  <span className="text-amber-600 font-medium"><span className="money">{formatRM(ytdGap)}</span> short</span>
                 )}
                 {ytdGap === 0 && ytdTarget > 0 && (
                   <span className="text-emerald-600 font-medium">On track ✓</span>

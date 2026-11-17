@@ -94,7 +94,7 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
             )}
           </div>
 
-          <AmountVeil showLabel={copy.showAmounts} hideLabel={copy.hideAmounts}>
+          <AmountVeil>
           <p className="font-heading text-[clamp(2.5rem,6vw,3.75rem)] font-extrabold leading-none tracking-tight tabular-nums">
             <span className="money text-blend">{formatRMShort(ledger.totalSen)}</span>
           </p>
