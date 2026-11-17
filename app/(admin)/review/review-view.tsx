@@ -46,7 +46,7 @@ function QueuePanel({ t, data }: { t: Dictionary; data: Item }) {
   const r = t.reviewInbox;
   const current = data.queue[data.index];
   return (
-    <aside className="hidden lg:sticky lg:top-4 lg:block lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto">
+    <aside className="hidden lg:sticky lg:top-4 lg:-mx-1.5 lg:block lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto lg:px-1.5 lg:pb-1.5">
       <h1 className="mb-3 font-heading text-xl font-bold">
         {r.title} <span className="text-sm font-medium text-[var(--ink-2)]">· {fill(r.count, { n: data.queue.length })}</span>
       </h1>
@@ -90,7 +90,7 @@ function QueueStrip({ t, data }: { t: Dictionary; data: Item }) {
         {r.title} <span className="text-sm font-medium text-[var(--ink-2)]">· {fill(r.count, { n: data.queue.length })}</span>
       </h1>
       {data.queue.length > 1 && (
-        <nav aria-label={r.title} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+        <nav aria-label={r.title} className="-mx-4 flex gap-2 overflow-x-auto px-4 py-1">
           {data.queue.map((s) => (
             <Link
               key={s.id}
