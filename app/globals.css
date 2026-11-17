@@ -285,3 +285,21 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   }
   .resident-row { grid-template-areas: "tile name block status month actions"; row-gap: 0; }
 }
+
+/* Collection households list: one row markup, two layouts (grid-areas). Phones stack under the tile; md+ uses columns. */
+.collection-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.4rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "tile name actions" "tile meta meta";
+}
+@media (min-width: 768px) {
+  .collection-row,
+  .collection-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) 6.5rem 8.5rem 9.5rem 7rem;
+  }
+  .collection-row { grid-template-areas: "tile name due paid status actions"; row-gap: 0; }
+}

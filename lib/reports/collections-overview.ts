@@ -6,9 +6,12 @@ export type CollectionHouse = {
   residentId: string;
   unit: string;
   name: string;
+  phone: string | null;
   dueSen: number;
   /** Paid so far, from the payments actually linked to this collection. */
   paidSen: number;
+  /** What the house's stored running total says it has paid (can differ from the linked payments). */
+  recordedSen: number;
   /** paid / pending (a receipt is waiting) / partial / unpaid; "upcoming" while the collection is still a draft. */
   state: MonthState;
 };
@@ -20,6 +23,8 @@ export type CollectionOverview = {
   status: "DRAFT" | "ACTIVE" | "CLOSED";
   amountPerResident: number;
   dueDate: Date | null;
+  eventStartDate: Date | null;
+  eventEndDate: Date | null;
   houses: CollectionHouse[];
   dueSen: number;
   paidSen: number;
@@ -40,9 +45,10 @@ export type CollectionOverview = {
  * "Paid" comes from linked payments, the same source as the collection's detail page, so the list and the
  * detail always show the same numbers.
  */
-export async function getCollectionsOverview(): Promise<CollectionOverview[]> {
+export async function getCollectionsOverview(only?: string): Promise<CollectionOverview[]> {
   const [collections, linked, waiting] = await Promise.all([
     prisma.specialCollection.findMany({
+      where: only ? { id: only } : undefined,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -51,18 +57,20 @@ export async function getCollectionsOverview(): Promise<CollectionOverview[]> {
         amountPerResident: true,
         status: true,
         dueDate: true,
+        eventStartDate: true,
+        eventEndDate: true,
         assignments: {
-          select: { residentId: true, amountDue: true, amountPaid: true, resident: { select: { unitNumber: true, name: true } } },
+          select: { residentId: true, amountDue: true, amountPaid: true, resident: { select: { unitNumber: true, name: true, phone: true } } },
         },
       },
     }),
     prisma.payment.groupBy({
       by: ["specialCollectionId", "residentId"],
-      where: { specialCollectionId: { not: null } },
+      where: { specialCollectionId: only ?? { not: null } },
       _sum: { amountSen: true },
     }),
     prisma.publicPaymentSubmission.findMany({
-      where: { paymentType: "SPECIAL_COLLECTION", status: "PENDING_REVIEW", specialCollectionId: { not: null } },
+      where: { paymentType: "SPECIAL_COLLECTION", status: "PENDING_REVIEW", specialCollectionId: only ?? { not: null } },
       select: { specialCollectionId: true, unitNumber: true },
     }),
   ]);
@@ -95,7 +103,7 @@ export async function getCollectionsOverview(): Promise<CollectionOverview[]> {
                 : c.status === "DRAFT"
                   ? "upcoming"
                   : "unpaid";
-        return { residentId: a.residentId, unit: a.resident.unitNumber, name: a.resident.name, dueSen: a.amountDue, paidSen, state };
+        return { residentId: a.residentId, unit: a.resident.unitNumber, name: a.resident.name, phone: a.resident.phone, dueSen: a.amountDue, paidSen, recordedSen: a.amountPaid, state };
       })
       .sort((x, y) => compareUnits(x.unit, y.unit));
 
@@ -108,6 +116,8 @@ export async function getCollectionsOverview(): Promise<CollectionOverview[]> {
       status: c.status,
       amountPerResident: c.amountPerResident,
       dueDate: c.dueDate,
+      eventStartDate: c.eventStartDate,
+      eventEndDate: c.eventEndDate,
       houses,
       dueSen,
       paidSen,
