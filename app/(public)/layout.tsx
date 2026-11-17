@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
 import { LocaleToggle } from "@/app/components/locale-toggle";
 
@@ -29,14 +30,48 @@ export default async function PublicLayout({ children }: { children: React.React
       {/* Last band stretches so the footer always sits at the bottom on short pages. */}
       <main className="flex flex-1 flex-col [&>section:last-child]:flex-1">{children}</main>
 
-      <footer className="border-t border-black/5 bg-[var(--paper)] text-xs text-[var(--ink-2)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
-          <p>
-            {t.publicLayout.footer} © {new Date().getFullYear()}
-          </p>
-          <Link href="/login" className="text-[var(--blue)] hover:underline">
-            {t.home.staffLogin} ›
-          </Link>
+      <footer className="border-t border-black/5 bg-[var(--paper)] text-[13px] text-[var(--ink-2)]">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 px-4 pb-8 pt-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+          {/* Brand */}
+          <div className="col-span-2 grid content-start gap-3 md:col-span-1">
+            <Link href="/" className="flex w-fit items-center gap-2.5">
+              <Image src="/jr2-logo.jpeg" alt="" width={36} height={36} className="rounded-full" />
+              <span className="font-heading text-base font-bold text-[var(--ink)]">{t.nav.brandName}</span>
+            </Link>
+            <p className="max-w-xs leading-relaxed">{t.publicLayout.about}</p>
+          </div>
+
+          {/* Residents */}
+          <nav aria-label={t.publicLayout.residents} className="grid content-start gap-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">{t.publicLayout.residents}</p>
+            <Link href="/" className="w-fit hover:text-[var(--ink)]">{t.publicLayout.checkHouse}</Link>
+            <Link href="/status" className="w-fit hover:text-[var(--ink)]">{t.home.statusTitle}</Link>
+            <Link href="/submit" className="w-fit hover:text-[var(--ink)]">{t.home.submitTitle}</Link>
+            <Link href="/#cara-bayar" className="w-fit hover:text-[var(--ink)]">{t.home.howToPay}</Link>
+          </nav>
+
+          {/* AJK */}
+          <div className="grid content-start gap-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">AJK</p>
+            <Link href="/login" className="w-fit hover:text-[var(--ink)]">{t.home.staffLogin} ›</Link>
+            <div className="flex items-center gap-2">
+              <span>{t.locale.switchLabel}</span>
+              <LocaleToggle />
+            </div>
+          </div>
+        </div>
+
+        {/* Fine print */}
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col gap-2 border-t border-black/5 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} {t.nav.brandName}
+            </p>
+            <p className="flex items-center gap-1.5">
+              <ShieldCheck size={13} className="shrink-0 text-[var(--leaf)]" aria-hidden="true" />
+              {t.publicLayout.privacyLine}
+            </p>
+          </div>
         </div>
       </footer>
     </div>

@@ -487,6 +487,10 @@ const ms: Dictionary = {
     zipCode: "Poskod",
   },
   publicLayout: {
+    about: "Yuran bulanan pondok pengawal Jalan Restu 2, Desa Restu. Semak rumah anda, lihat papan status dan hantar bukti bayaran di satu tempat.",
+    residents: "Penduduk",
+    checkHouse: "Semak rumah saya",
+    privacyLine: "Nombor telefon, butiran bank dan resit tidak pernah dipaparkan kepada umum.",
     residentPortal: "Portal Penduduk",
     status: "Status",
     submit: "Hantar",

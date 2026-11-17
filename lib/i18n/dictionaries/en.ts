@@ -485,6 +485,10 @@ const en = {
     privacyDesc: "This report shows payment status only. Bank details, phone numbers, and payment proof files are not displayed here.",
   },
   publicLayout: {
+    about: "Monthly guardhouse fees for Jalan Restu 2, Desa Restu. Check your house, see the status board and send your payment proof in one place.",
+    residents: "Residents",
+    checkHouse: "Check my house",
+    privacyLine: "Phone numbers, bank details and receipts are never shown publicly.",
     residentPortal: "Resident Portal",
     status: "Status",
     submit: "Submit",
