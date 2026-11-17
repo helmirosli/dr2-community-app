@@ -442,6 +442,7 @@ const en = {
     viewCollection: "View collection",
     showMore: "Show {n} more",
     nothingActive: "Nothing is being collected right now.",
+    lastCollection: "Last collection",
     emptyTitle: "No special collections yet",
     emptyBody: "Create one for Raya guard service, repairs or any other one-off payment.",
     tilesHint: "Tap a house to open it.",

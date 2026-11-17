@@ -401,6 +401,7 @@ const ms: Dictionary = {
     viewCollection: "Lihat kutipan",
     showMore: "Tunjuk {n} lagi",
     nothingActive: "Tiada kutipan sedang berjalan.",
+    lastCollection: "Kutipan terakhir",
     emptyTitle: "Belum ada kutipan khas",
     emptyBody: "Cipta satu untuk perkhidmatan pengawal Raya, pembaikan atau sebarang bayaran sekali sahaja.",
     tilesHint: "Ketik rumah untuk membukanya.",
