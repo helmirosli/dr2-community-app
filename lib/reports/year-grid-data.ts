@@ -11,6 +11,7 @@ export type YearGridAssignment = {
 };
 
 export type YearGridRow = {
+  residentId: string;
   no: number;
   unitNumber: string;
   name: string;
@@ -193,6 +194,7 @@ export async function getYearGridData({
     const extraOutstandingSen = Math.max(0, extraDueSen - extraPaidSen);
 
     return {
+      residentId: resident.id,
       no: index + 1,
       unitNumber: resident.unitNumber,
       name: resident.name,
