@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, Pencil, Plus, Sparkles } from "lucide-react";
+import { ChevronDown, Pencil, Plus } from "lucide-react";
 
 import { ProgressRing } from "@/app/components/progress-ring";
 import { CollectionHero, dueInfo } from "./collection-hero";
