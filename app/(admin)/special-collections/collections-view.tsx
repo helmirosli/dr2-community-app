@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronDown, Pencil, Plus, Sparkles } from "lucide-react";
+import { ChevronDown, Pencil, Plus } from "lucide-react";
 
 import { ProgressRing } from "@/app/components/progress-ring";
 import { CollectionHero, dueInfo } from "./collection-hero";
@@ -31,7 +31,7 @@ function CompactRow({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
           </Link>
           <span className="ui-chip bg-[#eef0f4] text-[#5d6779]">{isClosed ? copy.closed : copy.draft}</span>
           {isClosed && c.outstandingSen > 0 && (
-            <span className="ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: formatRMShort(c.outstandingSen) })}</span>
+            <span className="money ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: formatRMShort(c.outstandingSen) })}</span>
           )}
           {c.waitingCount > 0 && <span className="ui-chip bg-[#ddf5fd] text-[#0b6e8e]">{fill(copy.waiting, { n: c.waitingCount })}</span>}
         </div>
@@ -41,8 +41,8 @@ function CompactRow({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
       </div>
       <div className="col-span-2 flex items-center justify-between gap-3 sm:contents">
         <div className="flex items-baseline gap-2 sm:block sm:text-right">
-          <p className="font-heading font-bold tabular-nums text-[var(--ink)]">{formatRMShort(c.paidSen)}</p>
-          <p className="text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</p>
+          <p className="money font-heading font-bold tabular-nums text-[var(--ink)]">{formatRMShort(c.paidSen)}</p>
+          <p className="money text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</p>
         </div>
         <Link
           href={`/special-collections/${c.id}/edit`}
@@ -148,17 +148,30 @@ export function CollectionsView({ collections, t, locale, now }: { collections: 
             ))}
           </div>
         ) : (
-          <div className="ui-card flex flex-wrap items-center justify-between gap-4 p-5">
-            <p className="flex items-center gap-3 text-[var(--ink-2)]">
-              <span className="grid size-10 place-items-center rounded-2xl bg-[var(--paper)]">
-                <Sparkles size={18} aria-hidden="true" />
-              </span>
-              {copy.nothingActive}
-            </p>
-            <Link className="ui-button-secondary" href="/special-collections/new">
-              <Plus size={16} aria-hidden="true" />
-              {copy.newCollection}
-            </Link>
+          <div className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10">
+            <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.2),transparent_70%)]" />
+            <div aria-hidden="true" className="absolute inset-y-0 right-0 -z-10 w-full overflow-hidden opacity-25 grayscale [mask-image:linear-gradient(to_right,transparent,#000_45%)] sm:w-3/5 sm:opacity-50">
+              {/* eslint-disable-next-line @next/next/no-img-element -- decorative art */}
+              <img src="/art/a6-raya.webp" alt="" className="h-full w-full object-cover object-right" />
+            </div>
+            <div className="grid content-center justify-items-start gap-3 p-6 sm:p-8 lg:max-w-[60%]">
+              <h3 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{copy.nothingActive}</h3>
+              <p className="max-w-md text-[#a1a1a6]">{copy.emptyBody}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/special-collections/new"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--lime)] px-5 font-heading font-semibold text-[#06210b] shadow-[0_3px_0_#4d9a12] transition hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_#4d9a12]"
+                >
+                  <Plus size={16} aria-hidden="true" />
+                  {copy.newCollection}
+                </Link>
+                {closed[0] && (
+                  <Link href={`/special-collections/${closed[0].id}`} className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/10 px-4 text-sm font-semibold text-white ring-1 ring-white/15 transition hover:bg-white/15">
+                    {copy.lastCollection}: {closed[0].title}
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </Section>

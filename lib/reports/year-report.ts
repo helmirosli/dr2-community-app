@@ -47,17 +47,19 @@ export type ReportRow = {
 export type YearReport = {
   year: number;
   rows: ReportRow[];
-  collections: { id: string; title: string; carriedFrom?: number }[];
+  collections: { id: string; title: string }[];
   /** 0-based month to highlight (this month), or null when the year is not the current one. */
   highlightMonth: number | null;
 };
 
-export function parseReportParams(params: { year?: string; includeInactive?: string; q?: string; show?: string }) {
+export function parseReportParams(params: { year?: string; includeInactive?: string; q?: string; show?: string; totals?: string }) {
   const today = malaysiaToday();
   return {
     year: clampReportYear(params.year, today.year),
     includeInactive: params.includeInactive !== "off",
     q: params.q?.trim() ?? "",
+    /** Paid / Owes columns and the Total row are hidden unless asked for. */
+    totals: params.totals === "1",
     show: ((SHOWS as readonly string[]).includes(params.show ?? "") ? params.show : "all") as Show,
   };
 }
@@ -145,7 +147,7 @@ export async function getYearReport(year: number, includeInactive: boolean): Pro
   return {
     year,
     rows,
-    collections: specialCollections.map((sc) => ({ id: sc.id, title: sc.title, carriedFrom: sc.carriedFrom })),
+    collections: specialCollections.map((sc) => ({ id: sc.id, title: sc.title })),
     highlightMonth: year === today.year ? today.month - 1 : null,
   };
 }

@@ -39,7 +39,7 @@ function Bar() {
       timers.current.forEach(clearTimeout);
       timers.current = [];
       setGrow(false);
-      to("run");
+        to("run");
       requestAnimationFrame(() => requestAnimationFrame(() => setGrow(true)));
       later(finish, 20000); // never leave it hanging if nothing navigates
     };
@@ -76,9 +76,9 @@ function Bar() {
   if (phase === "idle") return null;
   const done = phase === "finish";
   return (
-    <div role="progressbar" aria-label="Loading" aria-busy={!done} className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[3px]">
+    <div role="progressbar" aria-label="Loading" aria-busy={!done} className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-1.5">
       <div
-        className="h-full bg-[image:var(--blend)] shadow-[0_0_10px_rgba(34,199,242,.7)]"
+        className="h-full bg-[image:var(--blend)] shadow-[0_0_14px_rgba(34,199,242,.9)]"
         style={{
           width: done ? "100%" : grow ? "85%" : "0%",
           opacity: done ? 0 : 1,

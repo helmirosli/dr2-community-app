@@ -2,6 +2,8 @@ import type { Dictionary } from "./en";
 
 const ms: Dictionary = {
   common: {
+    showAmounts: "Tunjuk amaun",
+    hideAmounts: "Sembunyi amaun",
     signOut: "Log keluar",
     save: "Simpan",
     cancel: "Batal",
@@ -399,6 +401,7 @@ const ms: Dictionary = {
     viewCollection: "Lihat kutipan",
     showMore: "Tunjuk {n} lagi",
     nothingActive: "Tiada kutipan sedang berjalan.",
+    lastCollection: "Kutipan terakhir",
     emptyTitle: "Belum ada kutipan khas",
     emptyBody: "Cipta satu untuk perkhidmatan pengawal Raya, pembaikan atau sebarang bayaran sekali sahaja.",
     tilesHint: "Ketik rumah untuk membukanya.",
@@ -424,6 +427,8 @@ const ms: Dictionary = {
   },
   reports: {
     title: "Laporan yuran penduduk",
+    showTotals: "Tunjuk jumlah",
+    hideTotals: "Sembunyi jumlah",
     heading: "Status pembayaran",
     subtitle: "Grid tahun-ikut-bulan untuk semua isi rumah. Setiap sel menunjukkan jumlah dibayar untuk bulan itu.",
     excel: "Excel",
@@ -456,7 +461,6 @@ const ms: Dictionary = {
     perMonthHint: "Kutipan setiap bulan. Ketik untuk buka laporannya.",
     carryTag: "bawa",
     pendingTag: "menunggu",
-    stillOwedFrom: "dari {year} · masih tertunggak",
     houseNo: "Rumah",
     nameCol: "Nama",
     housesInView: "rumah",
@@ -608,7 +612,6 @@ const ms: Dictionary = {
     noPayment: "Belum ada bayaran",
     noMatch: "Tiada rumah yang sepadan.",
     monthsPaid: "{paid} daripada {due} bulan dibayar",
-    carriedFrom: "dari {year}",
   },
   submitFlow: {
     title: "Hantar bukti bayaran",

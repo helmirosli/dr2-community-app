@@ -213,7 +213,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
             collections={specialCollections.map((sc) => ({
               id: sc.id,
               title: sc.title,
-              note: sc.carriedFrom ? fill(t.statusBoard.carriedFrom, { year: sc.carriedFrom }) : null,
+              note: null,
             }))}
             focusMonth={focusMonth}
             highlightMonth={inCurrentYear ? currentMonth - 1 : null}

@@ -223,7 +223,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
   const monthHeaders = MONTH_ABBR.map((m) => ({ header: `${m}-${String(year).slice(2)}`, key: m, width: 10 }));
   const extraHeaders = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ header: sc.carriedFrom ? `${sc.title.toUpperCase()} (from ${sc.carriedFrom})` : sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
+    ? specialCollections.map((sc) => ({ header: sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
     : [];
 
   sheet.columns = [
@@ -318,7 +318,7 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   }));
 
   const extraHeaderCells = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ text: sc.carriedFrom ? `${sc.title.toUpperCase()}\n(from ${sc.carriedFrom})` : sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
+    ? specialCollections.map((sc) => ({ text: sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
     : hasExtra
       ? [{ text: "EXTRA", bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }]
       : [];

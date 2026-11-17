@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
-import { LoadingOverlay } from "@/app/components/loading-overlay";
 import { LocaleToggle } from "@/app/components/locale-toggle";
 import { TourFooterLink } from "@/app/components/tour/tour-button";
 import { TourProvider } from "@/app/components/tour/tour-provider";
@@ -16,7 +15,6 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <TourProvider audience="resident" initialSeen={seen}>
-      <LoadingOverlay />
       <div className="flex min-h-screen flex-col bg-[var(--night)] text-[#f5f5f7]">
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--night)]/75 backdrop-blur-xl backdrop-saturate-150">
           <div className="mx-auto flex h-12 max-w-6xl items-center gap-5 px-4 text-[13px] text-[#d2d2d7] sm:px-6">

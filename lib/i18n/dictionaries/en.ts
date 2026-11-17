@@ -1,5 +1,7 @@
 const en = {
   common: {
+    showAmounts: "Show amounts",
+    hideAmounts: "Hide amounts",
     signOut: "Sign out",
     save: "Save",
     cancel: "Cancel",
@@ -440,6 +442,7 @@ const en = {
     viewCollection: "View collection",
     showMore: "Show {n} more",
     nothingActive: "Nothing is being collected right now.",
+    lastCollection: "Last collection",
     emptyTitle: "No special collections yet",
     emptyBody: "Create one for Raya guard service, repairs or any other one-off payment.",
     tilesHint: "Tap a house to open it.",
@@ -465,6 +468,8 @@ const en = {
   },
   reports: {
     title: "Resident fee report",
+    showTotals: "Show totals",
+    hideTotals: "Hide totals",
     heading: "Payment status",
     subtitle: "Year-by-month grid for all households. Each cell shows the amount paid for that month.",
     excel: "Excel",
@@ -497,7 +502,6 @@ const en = {
     perMonthHint: "Collected each month. Tap one to open its report.",
     carryTag: "carry",
     pendingTag: "pending",
-    stillOwedFrom: "from {year} · still owed",
     houseNo: "House",
     nameCol: "Name",
     housesInView: "houses",
@@ -649,7 +653,6 @@ const en = {
     noPayment: "No payment yet",
     noMatch: "No houses match.",
     monthsPaid: "{paid} of {due} months paid",
-    carriedFrom: "from {year}",
   },
   submitFlow: {
     title: "Send payment proof",
