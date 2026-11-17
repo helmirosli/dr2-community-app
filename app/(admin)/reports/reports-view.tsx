@@ -343,7 +343,6 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                 {report.collections.map((sc) => (
                   <th className="border-b border-black/5 bg-[#fafafc] px-2 py-3 text-center font-semibold text-[#8a6300]" key={sc.id}>
                     <span className="uppercase">{sc.title}</span>
-                    {sc.carriedFrom && <span className="block text-[10px] font-medium normal-case opacity-70">{fill(c.stillOwedFrom, { year: sc.carriedFrom })}</span>}
                   </th>
                 ))}
                 {query.totals && <th className="sticky right-24 z-10 w-24 min-w-24 shadow-[inset_1px_0_0_rgba(0,0,0,.06)] border-b border-black/5 bg-[#fafafc] px-3 py-3 text-right font-semibold uppercase">{c.paidCol}</th>}

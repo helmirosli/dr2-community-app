@@ -34,8 +34,6 @@ export type YearGridRow = {
 export type YearGridSpecialCollection = {
   id: string;
   title: string;
-  /** Set when the collection belongs to an earlier year but is carried into this one (still running or owed). */
-  carriedFrom?: number;
 };
 
 export type YearGridData = {
@@ -101,23 +99,12 @@ export async function getYearGridData({
   ]);
 
   sortByUnit(residents); // numeric house order, so row "no" follows 1, 2, … 10
-  // Which collections appear in this year's grid:
-  // - its own year (due date, else event date, else creation date) always shows there;
-  // - from the current year onward, an earlier collection is carried forward while it is still
-  //   ACTIVE or any house still owes, so the AJK can see who hasn't paid. Past years never carry.
-  const currentYear = new Date().getFullYear();
+  // A collection appears only in its own year: its due date, else event date, else creation date.
   const yearCollections: YearGridSpecialCollection[] = specialCollections
-    .map((c) => {
-      const ownYear = (c.dueDate ?? c.eventStartDate ?? c.createdAt).getFullYear();
-      const unfinished = c.status === "ACTIVE" || c.assignments.some((a) => a.amountPaid < a.amountDue);
-      if (ownYear === year) return { id: c.id, title: c.title, ownYear };
-      if (ownYear < year && year >= currentYear && unfinished) return { id: c.id, title: c.title, ownYear, carriedFrom: ownYear };
-      return null;
-    })
-    .filter((c): c is YearGridSpecialCollection & { ownYear: number } => c !== null)
-    .sort((a, b) => a.ownYear - b.ownYear)
+    .map((c) => ({ id: c.id, title: c.title, ownYear: (c.dueDate ?? c.eventStartDate ?? c.createdAt).getFullYear() }))
+    .filter((c) => c.ownYear === year)
     .slice(0, 5)
-    .map(({ id, title, carriedFrom }) => ({ id, title, ...(carriedFrom ? { carriedFrom } : {}) }));
+    .map(({ id, title }) => ({ id, title }));
 
   const residentIds = residents.map((resident) => resident.id);
   const residentAuditLogs = residentIds.length

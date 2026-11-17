@@ -499,7 +499,6 @@ const en = {
     perMonthHint: "Collected each month. Tap one to open its report.",
     carryTag: "carry",
     pendingTag: "pending",
-    stillOwedFrom: "from {year} · still owed",
     houseNo: "House",
     nameCol: "Name",
     housesInView: "houses",
@@ -651,7 +650,6 @@ const en = {
     noPayment: "No payment yet",
     noMatch: "No houses match.",
     monthsPaid: "{paid} of {due} months paid",
-    carriedFrom: "from {year}",
   },
   submitFlow: {
     title: "Send payment proof",

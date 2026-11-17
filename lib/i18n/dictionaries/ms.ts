@@ -458,7 +458,6 @@ const ms: Dictionary = {
     perMonthHint: "Kutipan setiap bulan. Ketik untuk buka laporannya.",
     carryTag: "bawa",
     pendingTag: "menunggu",
-    stillOwedFrom: "dari {year} · masih tertunggak",
     houseNo: "Rumah",
     nameCol: "Nama",
     housesInView: "rumah",
@@ -610,7 +609,6 @@ const ms: Dictionary = {
     noPayment: "Belum ada bayaran",
     noMatch: "Tiada rumah yang sepadan.",
     monthsPaid: "{paid} daripada {due} bulan dibayar",
-    carriedFrom: "dari {year}",
   },
   submitFlow: {
     title: "Hantar bukti bayaran",

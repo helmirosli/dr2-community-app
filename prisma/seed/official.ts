@@ -115,7 +115,7 @@ async function main() {
   const rayaHouses = residents.filter((r) => r.rayaDueSen);
   if (rayaHouses.length > 0) {
     const raya = await prisma.specialCollection.create({
-      data: { title: "Raya 2026", description: "Raya collection from the AJK payment sheet", amountPerResident: 4000, status: "ACTIVE" },
+      data: { title: "Raya 2026", description: "Raya collection from the AJK payment sheet", amountPerResident: 4000, dueDate: new Date(Date.UTC(2026, 2, 31)), status: "ACTIVE" },
     });
     for (const r of rayaHouses) {
       const residentId = ids.get(r.unitNumber)!;

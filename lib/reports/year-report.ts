@@ -47,7 +47,7 @@ export type ReportRow = {
 export type YearReport = {
   year: number;
   rows: ReportRow[];
-  collections: { id: string; title: string; carriedFrom?: number }[];
+  collections: { id: string; title: string }[];
   /** 0-based month to highlight (this month), or null when the year is not the current one. */
   highlightMonth: number | null;
 };
@@ -147,7 +147,7 @@ export async function getYearReport(year: number, includeInactive: boolean): Pro
   return {
     year,
     rows,
-    collections: specialCollections.map((sc) => ({ id: sc.id, title: sc.title, carriedFrom: sc.carriedFrom })),
+    collections: specialCollections.map((sc) => ({ id: sc.id, title: sc.title })),
     highlightMonth: year === today.year ? today.month - 1 : null,
   };
 }
