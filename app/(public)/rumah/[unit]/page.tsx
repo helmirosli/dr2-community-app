@@ -3,6 +3,7 @@ import { Check, ChevronLeft, ChevronRight, CircleAlert, Clock } from "lucide-rea
 
 import { GuardhouseScene, LAMP_BY_STATE } from "@/app/components/guardhouse-scene";
 import { ProgressRing } from "@/app/components/progress-ring";
+import { TourButton } from "@/app/components/tour/tour-button";
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
@@ -102,12 +103,17 @@ export default async function HousePage({
     <>
       <section className="relative overflow-hidden px-4 pb-14 pt-8 sm:pt-12">
         <div className="mx-auto grid max-w-4xl items-center gap-x-10 gap-y-2 md:grid-cols-[340px_1fr]">
-          <Link href="/" className="inline-flex items-center gap-1 text-sm text-[var(--cyan)] hover:underline md:col-span-2">
-            <ChevronLeft size={16} /> {t.house.home}
-          </Link>
+          <div className="flex items-center justify-between gap-3 md:col-span-2">
+            <Link href="/" className="inline-flex items-center gap-1 text-sm text-[var(--cyan)] hover:underline">
+              <ChevronLeft size={16} /> {t.house.home}
+            </Link>
+            <TourButton id="resident-house" />
+          </div>
 
           {/* The house itself: a clay model whose lamp glows in this month's status colour. */}
-          <GuardhouseScene lamp={lamp} plate={unit} fireflies={allClear} className="w-[min(300px,78vw)] md:w-full" />
+          <div data-tour="rumah-lamp">
+            <GuardhouseScene lamp={lamp} plate={unit} fireflies={allClear} className="w-[min(300px,78vw)] md:w-full" />
+          </div>
 
           <div className="grid justify-items-center gap-3 text-center md:justify-items-start md:text-left">
             <p className="text-blend font-heading text-sm font-semibold">{fill(t.house.hello, { name: firstName(row.name) })}</p>
@@ -131,6 +137,7 @@ export default async function HousePage({
 
             <Link
               href={submitHref}
+              data-tour="rumah-pay"
               className="mt-2 inline-flex items-center gap-2 rounded-full bg-[var(--lime)] px-6 py-3 font-heading font-semibold text-[#06210b] shadow-[0_4px_0_#4d9a12,0_14px_30px_-8px_rgba(142,229,63,.6)] transition hover:brightness-105 active:translate-y-[3px] active:shadow-[0_1px_0_#4d9a12]"
             >
               {owes ? fill(t.house.payOwed, { amount: formatRM(owedSen) }) : t.house.payNext}
@@ -151,7 +158,7 @@ export default async function HousePage({
                 <span className="block text-xs text-[var(--ink-2)]">{t.house.monthsPaid}</span>
               </p>
             </div>
-            <div className="flex items-center gap-1 rounded-full bg-white p-1 shadow-sm">
+            <div data-tour="rumah-year" className="flex items-center gap-1 rounded-full bg-white p-1 shadow-sm">
               <Link aria-label={`${t.house.year} ${year - 1}`} href={`?year=${year - 1}`} className="grid size-10 place-items-center rounded-full hover:bg-black/5">
                 <ChevronLeft size={20} />
               </Link>
@@ -162,7 +169,7 @@ export default async function HousePage({
             </div>
           </div>
 
-          <ol className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+          <ol data-tour="rumah-months" className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             {months.map(({ month, amountSen, state }, i) => {
               const Icon = state === "paid" || state === "ahead" ? Check : state === "pending" ? Clock : state === "unpaid" || state === "partial" ? CircleAlert : null;
               const payable = state === "unpaid" || state === "partial";

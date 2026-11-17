@@ -21,7 +21,7 @@ export default async function SpecialCollectionsPage() {
         title={t.collections.title}
         subtitle={t.collections.subtitle}
         actions={
-          <Link className="ui-button-primary" href="/special-collections/new">
+          <Link data-tour="collections-new" className="ui-button-primary" href="/special-collections/new">
             <Plus aria-hidden="true" size={16} />
             {t.collections.newCollection}
           </Link>

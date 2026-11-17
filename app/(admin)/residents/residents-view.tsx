@@ -57,7 +57,7 @@ function Hero({ t, locale, dir, filters, href }: { t: Dictionary; locale: Locale
   const pills = (["pending", "partial", "unpaid"] as const).filter((s) => (dir.month.counts[s] ?? 0) > 0);
 
   return (
-    <section aria-label={c.housesHeading} className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
+    <section aria-label={c.housesHeading} data-tour="houses-hero" className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
       <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-80 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.26),transparent_70%)]" />
       <span aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-8 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(142,229,63,.18),transparent_70%)]" />
 
@@ -127,7 +127,7 @@ function Controls({ t, dir, filters, view, perPage, href }: { t: Dictionary; dir
   const hasFilters = Boolean(filters.q || filters.status);
 
   return (
-    <section className="ui-card grid gap-3 p-4 sm:p-5">
+    <section data-tour="houses-filters" className="ui-card grid gap-3 p-4 sm:p-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <nav aria-label={t.common.status} className="flex flex-wrap gap-2">
           {tabs.map((s) => {
@@ -163,7 +163,7 @@ function Controls({ t, dir, filters, view, perPage, href }: { t: Dictionary; dir
             )}
           </form>
 
-          <div className="grid h-11 shrink-0 grid-cols-2 rounded-full bg-[var(--paper)] p-1 text-[13px] font-semibold" role="group">
+          <div data-tour="houses-view" className="grid h-11 shrink-0 grid-cols-2 rounded-full bg-[var(--paper)] p-1 text-[13px] font-semibold" role="group">
             {([
               ["map", t.today.map, LayoutGrid],
               ["list", t.today.list, List],
@@ -279,7 +279,7 @@ function MapView({ t, residents }: { t: Dictionary; residents: DirectoryResident
   let tileIndex = 0;
 
   return (
-    <section className="ui-card grid gap-7 p-5 sm:p-6">
+    <section data-tour="houses-list" className="ui-card grid gap-7 p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Legend t={t} residents={residents} />
         <p className="text-xs text-[var(--ink-2)]">{c.tapHint}</p>
@@ -377,7 +377,7 @@ export function ResidentsView({
       ) : view === "map" ? (
         <MapView t={t} residents={dir.residents} />
       ) : (
-        <section className="ui-card overflow-hidden">
+        <section data-tour="houses-list" className="ui-card overflow-hidden">
           <div aria-hidden="true" className="resident-head hidden border-b border-black/5 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--ink-2)] md:grid">
             <span className="col-span-2">{c.residentName}</span>
             <span>{c.block}</span>

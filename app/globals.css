@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "driver.js/dist/driver.css";
 
 :root {
   /* JR2 palette, sampled from public/jr2-logo.jpeg (see docs/superpowers/specs/2026-11-16-jr2-redesign-design.md §3) */
@@ -331,3 +332,40 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 @keyframes jr2-grow-x { from { transform: scaleX(0); } }
 .animate-grow-x { animation: jr2-grow-x 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
 @media (prefers-reduced-motion: reduce) { .animate-grow-x { animation: none; } }
+
+/* Walkthrough tours (driver.js): its base stylesheet is imported at the top; these rules put the popover in the night and lime look. */
+.driver-popover.jr2-tour {
+  font-family: var(--font-body), system-ui, sans-serif;
+  width: min(340px, calc(100vw - 32px));
+  min-width: 0;
+  max-width: none;
+  padding: 18px 18px 14px;
+  color: #e8ecf8;
+  background: linear-gradient(180deg, var(--night-3), var(--night-2));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 28px 64px -16px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.jr2-tour .driver-popover-title { padding-right: 30px; font-family: var(--font-heading), sans-serif; font-size: 1.1rem; font-weight: 700; line-height: 1.3; color: #fff; }
+.jr2-tour .driver-popover-description { margin-top: 6px; font-size: 0.9rem; line-height: 1.55; color: #c7cedd; }
+.jr2-tour .driver-popover-footer { flex-wrap: wrap; justify-content: flex-start; gap: 8px 12px; margin-top: 16px; }
+.jr2-tour .driver-popover-progress-text { white-space: nowrap; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: #8e9ab8; }
+.jr2-tour .driver-popover-close-btn { top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 999px; font-size: 20px; line-height: 28px; color: #8e9ab8; }
+.jr2-tour .driver-popover-close-btn:hover, .jr2-tour .driver-popover-close-btn:focus-visible { color: #fff; background: rgba(255, 255, 255, 0.1); }
+.jr2-tour .driver-popover-navigation-btns { gap: 8px; margin-left: auto; }
+.jr2-tour .driver-popover-navigation-btns button + button { margin-inline-start: 0; }
+.jr2-tour .driver-popover-footer-btn { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; font-family: var(--font-heading), sans-serif; font-size: 13px; font-weight: 700; transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s; }
+.jr2-tour .driver-popover-prev-btn { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.jr2-tour .driver-popover-prev-btn:hover, .jr2-tour .driver-popover-prev-btn:focus-visible { background: rgba(255, 255, 255, 0.18); }
+.jr2-tour .driver-popover-next-btn { background: var(--lime); color: #06210b; box-shadow: 0 3px 0 #4d9a12; }
+.jr2-tour .driver-popover-next-btn:hover, .jr2-tour .driver-popover-next-btn:focus-visible { background: var(--lime); filter: brightness(1.06); }
+.jr2-tour .driver-popover-next-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #4d9a12; }
+.jr2-tour-skip { all: unset; box-sizing: border-box; cursor: pointer; padding: 8px 2px; font-size: 13px; font-weight: 600; color: #8e9ab8; }
+.jr2-tour-skip:hover, .jr2-tour-skip:focus-visible { color: #fff; text-decoration: underline; }
+/* A lime ring marks the element being explained, so it stands out on dark surfaces like the sidebar too. */
+.driver-active .driver-active-element { outline: 2px solid rgba(142, 229, 63, 0.9); outline-offset: 4px; }
+/* The arrow takes the colour of the popover edge it sits on. */
+.jr2-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--night-3); }
+.jr2-tour .driver-popover-arrow-side-top { border-top-color: var(--night-2); }
+.jr2-tour .driver-popover-arrow-side-left { border-left-color: #0f1b3f; }
+.jr2-tour .driver-popover-arrow-side-right { border-right-color: #0f1b3f; }

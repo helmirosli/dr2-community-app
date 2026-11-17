@@ -87,7 +87,7 @@ export function CollectionHero({
   const Title = detail ? "h1" : "h3";
 
   return (
-    <article className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10">
+    <article data-tour={detail ? "collection-hero" : "collections-card"} className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10">
       {/* Raya guardhouse art fading into the navy; it only comes alive while the collection is running (all off under reduced motion). */}
       <div
         aria-hidden="true"
@@ -216,6 +216,7 @@ export function CollectionHero({
             <>
               <Link
                 href={`/special-collections/${c.id}`}
+                data-tour="collections-open"
                 className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--lime)] px-5 font-heading font-semibold text-[#06210b] shadow-[0_3px_0_#4d9a12] transition hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_#4d9a12]"
               >
                 {copy.viewCollection}

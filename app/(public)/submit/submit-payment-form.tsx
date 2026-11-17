@@ -144,7 +144,7 @@ export function SubmitPaymentForm({
       })()}
 
       {/* Step indicator */}
-      <ol className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+      <ol data-tour="submit-steps" className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
         {steps.map((name, i) => (
           <li key={name} className="grid gap-1.5" aria-current={step === i + 1 ? "step" : undefined}>
             <span className={`h-1 rounded-full ${step > i ? "bg-[image:var(--blend)]" : "bg-[#e8e8ed]"}`} />
@@ -156,7 +156,7 @@ export function SubmitPaymentForm({
       </ol>
 
       {/* Step 1: house */}
-      <div hidden={step !== 1} className="grid gap-3">
+      <div data-tour="submit-house" hidden={step !== 1} className="grid gap-3">
         <label className="ui-label" htmlFor="unit">
           {f.houseLabel}
         </label>

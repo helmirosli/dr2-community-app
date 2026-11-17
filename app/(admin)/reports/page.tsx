@@ -35,7 +35,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         title={`${t.reports.heading} — ${query.year}`}
         subtitle={t.reports.title}
         actions={
-          <>
+          <div data-tour="reports-export" className="flex flex-wrap items-center gap-2">
             <a className="ui-button-secondary" href={`/reports/yearly.xlsx?${exportQuery}`}>
               <FileSpreadsheet size={15} />
               {t.reports.excel}
@@ -45,7 +45,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
               {t.reports.pdf}
             </a>
             {/* Upload (file comparison) is on hold (KIV); route redirects to /reports. */}
-          </>
+          </div>
         }
       />
       <ReportsView t={t} locale={locale} report={report} query={query} />

@@ -86,7 +86,7 @@ function Hero({ t, locale, report, rows, href, includeInactive }: { t: Dictionar
   const pct = dueCells > 0 ? Math.round((paidCells / dueCells) * 100) : 0;
 
   return (
-    <section aria-label={fill(c.collectedIn, { year: report.year })} className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
+    <section aria-label={fill(c.collectedIn, { year: report.year })} data-tour="reports-hero" className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
       <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-80 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.26),transparent_70%)]" />
       <span aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-8 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(142,229,63,.18),transparent_70%)]" />
 
@@ -195,7 +195,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
       <Hero t={t} locale={locale} report={report} rows={filteredRows} href={href} includeInactive={query.includeInactive} />
 
       {/* Stat tiles double as the status filter */}
-      <nav aria-label="Filter houses by status" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 [&>*:last-child]:max-sm:col-span-2">
+      <nav aria-label="Filter houses by status" data-tour="reports-filters" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 [&>*:last-child]:max-sm:col-span-2">
         {stats.map((st) => {
           const active = query.show === st.key;
           return (
@@ -217,7 +217,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
         })}
       </nav>
 
-      <section className="ui-card overflow-hidden">
+      <section data-tour="reports-grid" className="ui-card overflow-hidden">
         {/* Year switcher, house scope, search */}
         <div className="flex flex-col gap-3 border-b border-black/5 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-3">

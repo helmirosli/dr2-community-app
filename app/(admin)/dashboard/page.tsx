@@ -161,7 +161,7 @@ export default async function DashboardPage() {
 
         {/* Review queue summary (spec §5.6) */}
         <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <div className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white">
+          <div data-tour="today-review" className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] text-white">
             {/* Guardhouse art (A2) on the right, fading into the navy. While payments wait it comes alive:
                 lamp glow pulses, the camera drifts slowly and fireflies rise (all off under reduced motion). */}
             <div
@@ -237,7 +237,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* House strip: this month's status per house */}
-          <div className="ui-card grid content-start gap-4 p-5">
+          <div data-tour="today-houses" className="ui-card grid content-start gap-4 p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-slate-900">{t.today.houses}</h2>
               <Link href="/residents?view=map" className="text-xs font-semibold text-[var(--blue)] hover:underline">

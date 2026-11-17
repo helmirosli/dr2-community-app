@@ -56,7 +56,7 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
   const removable = "inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-white/20";
 
   return (
-    <section aria-label={copy.collected} className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
+    <section aria-label={copy.collected} data-tour="payments-hero" className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
       <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-80 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.26),transparent_70%)]" />
       <span aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-8 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(142,229,63,.18),transparent_70%)]" />
 
@@ -171,7 +171,7 @@ function Filters({ t, filters, perPage, ledger, href, now }: { t: Dictionary; fi
   ];
 
   return (
-    <section className="ui-card p-4 sm:p-5">
+    <section data-tour="payments-filters" className="ui-card p-4 sm:p-5">
       <form method="get" action="/payments" className="grid gap-3">
         {filters.type && <input type="hidden" name="type" value={filters.type} />}
         {perPage !== DEFAULT_PER_PAGE && <input type="hidden" name="perPage" value={perPage} />}
@@ -425,7 +425,7 @@ export function PaymentsView({
       <Hero t={t} locale={locale} ledger={ledger} filters={filters} href={href} now={now} />
       <Filters t={t} filters={filters} perPage={perPage} ledger={ledger} href={href} now={now} />
 
-      <section className="ui-card overflow-hidden">
+      <section data-tour="payments-list" className="ui-card overflow-hidden">
         {ledger.totalCount === 0 ? (
           <EmptyState t={t} hasFilters={hasFilters} href={href} />
         ) : (

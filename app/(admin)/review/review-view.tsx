@@ -46,7 +46,7 @@ function QueuePanel({ t, data }: { t: Dictionary; data: Item }) {
   const r = t.reviewInbox;
   const current = data.queue[data.index];
   return (
-    <aside className="hidden lg:sticky lg:top-4 lg:-mx-1.5 lg:block lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto lg:px-1.5 lg:pb-1.5">
+    <aside data-tour="review-queue" className="hidden lg:sticky lg:top-4 lg:-mx-1.5 lg:block lg:max-h-[calc(100vh-2rem)] lg:self-start lg:overflow-y-auto lg:px-1.5 lg:pb-1.5">
       <h1 className="mb-3 font-heading text-xl font-bold">
         {r.title} <span className="text-sm font-medium text-[var(--ink-2)]">· {fill(r.count, { n: data.queue.length })}</span>
       </h1>
@@ -85,7 +85,7 @@ function QueueStrip({ t, data }: { t: Dictionary; data: Item }) {
   const r = t.reviewInbox;
   const current = data.queue[data.index];
   return (
-    <div className="grid gap-3 lg:hidden">
+    <div data-tour="review-queue" className="grid gap-3 lg:hidden">
       <h1 className="font-heading text-xl font-bold">
         {r.title} <span className="text-sm font-medium text-[var(--ink-2)]">· {fill(r.count, { n: data.queue.length })}</span>
       </h1>
@@ -191,7 +191,7 @@ function Comparison({ t, locale, item }: { t: Dictionary; locale: Locale; item: 
   const good = failing === 0;
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-7">
+    <section data-tour="review-verdict" className="@container relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-7">
       <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.24),transparent_70%)]" />
       <span aria-hidden="true" className={`pointer-events-none absolute -bottom-28 left-6 -z-10 size-64 rounded-full ${good ? "bg-[radial-gradient(circle,rgba(142,229,63,.2),transparent_70%)]" : "bg-[radial-gradient(circle,rgba(245,180,0,.18),transparent_70%)]"}`} />
 
@@ -203,17 +203,17 @@ function Comparison({ t, locale, item }: { t: Dictionary; locale: Locale; item: 
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-5">
-        <div className="grid content-start gap-1">
+      <div className="mt-6 grid grid-cols-2 gap-5 @max-[18rem]:grid-cols-1">
+        <div className="grid min-w-0 content-start gap-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#8e9ab8]">{r.claim}</p>
-          <p className="font-heading text-[clamp(1.9rem,4.5vw,2.9rem)] font-extrabold leading-none tracking-tight tabular-nums">
+          <p className="font-heading text-[clamp(1.9rem,9cqw,2.9rem)] font-extrabold leading-none tracking-tight tabular-nums">
             <span className="text-blend">{formatRMShort(item.amountSen)}</span>
           </p>
           <p className="text-sm text-[#c7cedd]">{isMonthly ? monthsLabel(t, locale, item.months) : (item.collectionTitle ?? "—")}</p>
         </div>
-        <div className="grid content-start gap-1">
+        <div className="grid min-w-0 content-start gap-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#8e9ab8]">{r.expectedShort}</p>
-          <p className={`font-heading text-[clamp(1.9rem,4.5vw,2.9rem)] font-extrabold leading-none tracking-tight tabular-nums ${item.diffSen === 0 ? "text-white" : "text-[#f5b400]"}`}>{formatRMShort(item.expectedSen)}</p>
+          <p className={`font-heading text-[clamp(1.9rem,9cqw,2.9rem)] font-extrabold leading-none tracking-tight tabular-nums ${item.diffSen === 0 ? "text-white" : "text-[#f5b400]"}`}>{formatRMShort(item.expectedSen)}</p>
           <p className="text-sm text-[#c7cedd]">
             {isMonthly ? (
               <>
@@ -375,7 +375,7 @@ export function ReviewView({ t, locale, data, actions }: { t: Dictionary; locale
           <div className="min-w-0 xl:col-start-2 xl:row-start-1">
             <Comparison t={t} locale={locale} item={item} />
           </div>
-          <div className="grid min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1 [&>*]:h-full">
+          <div data-tour="review-receipt" className="grid min-w-0 xl:col-start-1 xl:row-span-2 xl:row-start-1 [&>*]:h-full">
             <Receipt t={t} item={item} />
           </div>
           <div className="min-w-0 xl:col-start-2 xl:row-start-2">

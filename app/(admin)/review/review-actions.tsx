@@ -77,7 +77,7 @@ export function ReviewActions({
   }
 
   return (
-    <div className={`${bar} grid grid-cols-[1fr_2fr] gap-2.5`}>
+    <div data-tour="review-actions" className={`${bar} grid grid-cols-[1fr_2fr] gap-2.5`}>
       <button
         type="button"
         onClick={() => setRejecting(true)}

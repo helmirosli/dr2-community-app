@@ -1,7 +1,9 @@
 import { LoadingOverlay } from "@/app/components/loading-overlay";
+import { TourProvider } from "@/app/components/tour/tour-provider";
 import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { parseSeen } from "@/lib/tours/state";
 import { AdminHeader } from "./admin-header";
 import { AdminNav } from "./admin-nav";
 
@@ -30,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .join("");
 
   return (
-    <>
+    <TourProvider audience="staff" role={user.role === "ADMIN" ? "ADMIN" : "AJK"} initialSeen={parseSeen(user.tourState)}>
       <div className="min-h-screen max-w-full overflow-x-clip bg-[var(--paper)] lg:grid lg:grid-cols-[264px_1fr]">
         <AdminNav user={{ name: user.name, role: user.role }} pendingCount={pendingCount} />
         <div className="min-w-0 w-full pb-24 lg:pb-0">
@@ -45,6 +47,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </div>
       <LoadingOverlay />
-    </>
+    </TourProvider>
   );
 }

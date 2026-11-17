@@ -85,7 +85,7 @@ function Hero({ t, locale, d }: { t: Dictionary; locale: Locale; d: ResidentDeta
   const textValue = "text-sm font-semibold sm:text-base";
 
   return (
-    <section className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
+    <section data-tour="house-hero" className="relative isolate overflow-hidden rounded-[28px] bg-[var(--night)] p-6 text-white shadow-[0_30px_60px_-30px_rgba(5,10,26,.7)] ring-1 ring-white/10 sm:p-8">
       <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-24 -z-10 size-80 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.24),transparent_70%)]" />
       <span aria-hidden="true" className="pointer-events-none absolute -bottom-28 left-8 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(142,229,63,.16),transparent_70%)]" />
 
@@ -173,7 +173,7 @@ function Hero({ t, locale, d }: { t: Dictionary; locale: Locale; d: ResidentDeta
 
         <div className="flex flex-wrap items-center gap-3">
           {active && (
-            <Link href={`/payments/new?residentId=${d.id}`} className={RAISED_BUTTON}>
+            <Link href={`/payments/new?residentId=${d.id}`} data-tour="house-record" className={RAISED_BUTTON}>
               <ReceiptText size={16} aria-hidden="true" />
               {t.payments.recordPayment}
             </Link>
@@ -185,7 +185,7 @@ function Hero({ t, locale, d }: { t: Dictionary; locale: Locale; d: ResidentDeta
         </div>
 
         {d.phone ? (
-          <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-white/5 p-2.5 ring-1 ring-white/10 sm:w-fit sm:min-w-72 sm:flex-nowrap sm:p-1.5 sm:pl-4">
+          <div data-tour="house-contact" className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-white/5 p-2.5 ring-1 ring-white/10 sm:w-fit sm:min-w-72 sm:flex-nowrap sm:p-1.5 sm:pl-4">
             <span className="flex min-w-0 items-center gap-2 pl-1.5 sm:pl-0">
               <Phone size={15} aria-hidden="true" className="shrink-0 text-[#8e9ab8]" />
               <span className="truncate font-heading font-semibold tabular-nums">{d.phone}</span>
@@ -237,7 +237,7 @@ function YearCard({ t, locale, d, href }: { t: Dictionary; locale: Locale; d: Re
   const arrow = "grid size-10 place-items-center rounded-full transition";
 
   return (
-    <section className="ui-card grid grid-cols-1 gap-5 p-5 sm:p-6">
+    <section data-tour="house-year" className="ui-card grid grid-cols-1 gap-5 p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1 rounded-full bg-[var(--paper)] p-1">
           {prev ? (
@@ -575,7 +575,7 @@ function History({ t, locale, d, perPage, href }: { t: Dictionary; locale: Local
   const active = d.status === "ACTIVE";
 
   return (
-    <section className="ui-card overflow-hidden">
+    <section data-tour="house-history" className="ui-card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-black/5 px-4 py-4 sm:px-5">
         <div className="grid gap-0.5">
           <h2 className="ui-section-title">{c.historyTitle}</h2>

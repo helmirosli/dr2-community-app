@@ -2,6 +2,7 @@ import { getDictionary, getLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { firstName, monthName } from "@/lib/status";
+import { TourButton } from "@/app/components/tour/tour-button";
 import { SubmitPaymentForm, type SubmitHouse } from "./submit-payment-form";
 
 export const runtime = "nodejs";
@@ -55,6 +56,9 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
       <section className="px-4 pb-10 pt-12 text-center sm:pt-16">
         <h1 className="font-heading text-[clamp(2.2rem,6vw,3.6rem)] font-bold leading-tight tracking-tight">{t.submitFlow.title}</h1>
         <p className="mx-auto mt-3 max-w-lg text-[#a1a1a6]">{t.submitFlow.subtitle}</p>
+        <div className="mt-5 flex justify-center">
+          <TourButton id="resident-submit" />
+        </div>
       </section>
       <section className="bg-[var(--paper)] px-4 py-10 text-[var(--ink)] sm:py-14">
         <div className="mx-auto max-w-xl">

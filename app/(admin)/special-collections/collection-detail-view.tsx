@@ -164,7 +164,7 @@ export function CollectionDetailView({
             <span className="ml-2 font-sans text-sm font-normal text-[var(--ink-2)]">{fill(copy.householdsTotal, { n: c.houses.length })}</span>
           </h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <nav aria-label={copy.householdsHeading} className="grid grid-cols-3 rounded-full bg-[var(--paper)] p-1 sm:inline-grid sm:w-auto">
+            <nav aria-label={copy.householdsHeading} data-tour="collection-tabs" className="grid grid-cols-3 rounded-full bg-[var(--paper)] p-1 sm:inline-grid sm:w-auto">
               {tabs.map((tab) => {
                 const active = params.filter === tab.key;
                 return (
@@ -228,7 +228,7 @@ export function CollectionDetailView({
               <span>{copy.statusColumn}</span>
               <span />
             </div>
-            <ul className="divide-y divide-black/5">
+            <ul data-tour="collection-list" className="divide-y divide-black/5">
               {rows.map((h) => (
                 <HouseRow key={h.residentId} h={h} t={t} />
               ))}

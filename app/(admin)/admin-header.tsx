@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bell } from "lucide-react";
 
 import { GlobalHeaderSearch } from "@/app/components/global-header-search";
+import { TourHelpButton } from "@/app/components/tour/tour-menu";
 import { useLivePendingCount } from "./use-pending-count";
 
 /**
@@ -35,9 +36,12 @@ export function AdminHeader({
           <p className="truncate text-xs text-[var(--ink-2)]">{date}</p>
         </div>
 
-        <GlobalHeaderSearch />
+        <div data-tour="header-search">
+          <GlobalHeaderSearch />
+        </div>
 
         <div className="flex items-center justify-end gap-2">
+          <TourHelpButton />
           <Link
             href="/review"
             aria-label={`${reviewLabel}${pending ? ` (${pending})` : ""}`}

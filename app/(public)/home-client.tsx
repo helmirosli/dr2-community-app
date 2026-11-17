@@ -11,6 +11,7 @@ export function UnitLookup({ label, placeholder, button }: { label: string; plac
 
   return (
     <form
+      data-tour="home-lookup"
       className="flex w-full max-w-md items-stretch gap-2 rounded-full bg-white/10 p-1.5 shadow-[0_20px_40px_-20px_rgba(34,199,242,.35)] ring-1 ring-white/15 backdrop-blur transition focus-within:ring-2 focus-within:ring-[var(--cyan)]"
       onSubmit={(e) => {
         e.preventDefault();

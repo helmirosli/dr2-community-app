@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import {
   FileSpreadsheet,
   Gift,
+  HelpCircle,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -23,6 +24,7 @@ import {
 import { logout } from "@/lib/actions/auth";
 import { useDictionary } from "@/lib/i18n/context";
 import { LocaleToggle } from "@/app/components/locale-toggle";
+import { TourList, TourReset } from "@/app/components/tour/tour-menu";
 import { useLivePendingCount } from "./use-pending-count";
 
 type User = { name: string; role: string };
@@ -140,7 +142,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
           <Brand />
         </div>
 
-        <nav aria-label="Main navigation" className="grid flex-1 content-start gap-5 px-3">
+        <nav aria-label="Main navigation" data-tour="nav-main" className="grid flex-1 content-start gap-5 px-3">
           {sections.map((section) => (
             <section key={section.title}>
               <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-[#5f6b88]">{section.title}</p>
@@ -151,6 +153,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
                     <Link
                       key={href}
                       href={href}
+                      data-tour={href === "/settings" ? "nav-settings" : undefined}
                       aria-current={active ? "page" : undefined}
                       className={`flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
                         active ? "bg-[var(--night-3)] text-white" : "hover:bg-white/5 hover:text-white"
@@ -170,7 +173,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
             <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-[#5f6b88]">{t.nav.quickActions}</p>
             <div className="grid gap-0.5">
               {quickActions.map((a) => (
-                <Link key={a.href} href={a.href} className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-white/5 hover:text-white">
+                <Link key={a.href} href={a.href} data-tour={a.href === "/payments/new" ? "nav-record" : undefined} className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm hover:bg-white/5 hover:text-white">
                   <Plus size={14} aria-hidden="true" className="text-[var(--cyan)]" />
                   {a.label}
                 </Link>
@@ -199,6 +202,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
       {/* Mobile bottom tab bar */}
       <nav
         aria-label="Main navigation"
+        data-tour="nav-main"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[var(--night)]/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
         <div className="grid grid-cols-5">
@@ -208,6 +212,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
               <Link
                 key={href}
                 href={href}
+                data-tour={href === "/payments/new" ? "nav-record" : undefined}
                 aria-current={active ? "page" : undefined}
                 className={`relative flex flex-col items-center gap-1 py-2 text-[11px] font-medium ${active ? "text-[var(--lime)]" : "text-[#8e9ab8]"}`}
               >
@@ -223,6 +228,7 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
           })}
           <button
             type="button"
+            data-tour="help-entry"
             onClick={() => setMoreOpen((v) => !v)}
             aria-expanded={moreOpen}
             aria-controls="admin-more-sheet"
@@ -256,6 +262,18 @@ export function AdminNav({ user, pendingCount: initialPending }: { user: User; p
                   </Link>
                 ))}
             </div>
+            <details className="group rounded-2xl bg-[var(--night-3)]">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 px-4 text-[15px] font-medium text-white [&::-webkit-details-marker]:hidden">
+                <HelpCircle size={20} aria-hidden="true" />
+                {t.tour.ui.help}
+              </summary>
+              <div className="max-h-[34vh] overflow-y-auto px-2">
+                <TourList tone="dark" onPlay={() => setMoreOpen(false)} />
+              </div>
+              <div className="border-t border-white/10 px-2 pb-2 pt-1">
+                <TourReset tone="dark" />
+              </div>
+            </details>
             <UserCard user={user} />
             <form action={logout}>
               <LogoutButton />

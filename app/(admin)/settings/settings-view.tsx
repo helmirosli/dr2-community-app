@@ -43,7 +43,7 @@ export function SettingsView({ t, currentUser, passwordHash, users }: SettingsVi
       <PageHeader title={t.settings.title} subtitle={t.settings.subtitle} />
 
       {/* Your account */}
-      <section className="ui-card grid gap-6 p-6">
+      <section data-tour="settings-account" className="ui-card grid gap-6 p-6">
         <div className="flex items-center gap-4">
           <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-[image:var(--blend)] font-heading text-2xl font-extrabold text-[#06210b]">
             {initials(currentUser.name)}
@@ -68,7 +68,7 @@ export function SettingsView({ t, currentUser, passwordHash, users }: SettingsVi
 
       {/* Team — admin only */}
       {isAdmin && (
-        <section className="ui-card grid gap-5 p-6">
+        <section data-tour="settings-team" className="ui-card grid gap-5 p-6">
           <div className="flex items-center gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#ddf5fd] text-[#0b6e8e]">
               <Users size={18} aria-hidden="true" />
@@ -119,7 +119,7 @@ export function SettingsView({ t, currentUser, passwordHash, users }: SettingsVi
 
       {/* Info */}
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="ui-card p-5">
+        <div data-tour="settings-roles" className="ui-card p-5">
           <h3 className="ui-section-title">{t.settings.rolesExplained}</h3>
           <ul className="mt-3 grid gap-2 text-sm text-[var(--ink-2)]">
             {ROLES.map((r) => (

@@ -214,7 +214,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
       <form action={action} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="grid gap-6">
           {/* Resident */}
-          <section className="ui-card grid gap-4 p-6">
+          <section data-tour="pay-resident" className="ui-card grid gap-4 p-6">
             <div>
               <h2 className="ui-section-title">Resident</h2>
               <p className="ui-hint mt-0.5">Search by house number or name.</p>
@@ -290,7 +290,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
           </section>
 
           {/* What it's for */}
-          <section className="ui-card grid gap-5 p-6">
+          <section data-tour="pay-type" className="ui-card grid gap-5 p-6">
             <div>
               <h2 className="ui-section-title">What is it for?</h2>
               <p className="ui-hint mt-0.5">Monthly fees cover months; special collections are one-off.</p>
@@ -395,7 +395,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
           </section>
 
           {/* Amount & method */}
-          <section className="ui-card grid gap-4 p-6">
+          <section data-tour="pay-amount" className="ui-card grid gap-4 p-6">
             <h2 className="ui-section-title">Payment</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="ui-label">
@@ -451,7 +451,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
           </section>
 
           {/* Proof & notes */}
-          <section className="ui-card grid gap-4 p-6">
+          <section data-tour="pay-proof" className="ui-card grid gap-4 p-6">
             <div>
               <h2 className="ui-section-title">Proof &amp; notes</h2>
               <p className="ui-hint mt-0.5">Optional, but a receipt makes audits painless.</p>

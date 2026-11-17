@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Landmark, LayoutGrid, Send } from "lucide-react";
 
 import { ProgressRing } from "@/app/components/progress-ring";
+import { TourButton } from "@/app/components/tour/tour-button";
 import { HouseTile, StatusPill } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { formatRM } from "@/lib/money";
@@ -75,6 +76,7 @@ export default async function HomePage() {
           <div className="mt-2 grid w-full justify-items-center gap-3">
             <UnitLookup label={t.home.unitLabel} placeholder={t.home.unitPlaceholder} button={t.home.check} />
             <p className="text-sm text-[#86868b]">{t.home.noLogin}</p>
+            <TourButton id="resident-home" />
           </div>
         </div>
         <div className="relative mx-auto mt-2 max-w-6xl sm:-mt-10">
@@ -101,7 +103,7 @@ export default async function HomePage() {
       {/* Highlights: paper band */}
       <section className="bg-[var(--paper)] py-16 text-[var(--ink)] sm:py-24">
         <div className="mx-auto grid max-w-5xl gap-5 px-4 sm:grid-cols-6">
-          <div className="grid gap-6 rounded-[28px] bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,.04),0_24px_48px_-28px_rgba(0,0,0,.2)] sm:col-span-4 sm:p-8">
+          <div data-tour="home-houses" className="grid gap-6 rounded-[28px] bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,.04),0_24px_48px_-28px_rgba(0,0,0,.2)] sm:col-span-4 sm:p-8">
             <div className="flex items-center justify-between gap-5">
               <div className="grid gap-2">
                 <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--ink-2)]">
@@ -230,7 +232,7 @@ export default async function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element -- decorative art; multiply blends its white backdrop into the page */}
               <img src="/art/a4-submit-success.webp" alt="" width={600} height={450} className="animate-float mix-blend-multiply [mask-image:radial-gradient(closest-side,#000_70%,transparent)]" />
             </div>
-            <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#17285a_0%,#0b1636_55%,#050a1a_100%)] p-6 text-white shadow-[0_40px_80px_-30px_rgba(36,99,232,.55)] ring-1 ring-white/10 sm:p-7">
+            <div data-tour="home-pay" className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#17285a_0%,#0b1636_55%,#050a1a_100%)] p-6 text-white shadow-[0_40px_80px_-30px_rgba(36,99,232,.55)] ring-1 ring-white/10 sm:p-7">
               <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-[radial-gradient(circle,rgba(34,199,242,.35),transparent_70%)]" />
               <span aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-12 size-52 rounded-full bg-[radial-gradient(circle,rgba(142,229,63,.28),transparent_70%)]" />
               <dl className="relative grid gap-5">
