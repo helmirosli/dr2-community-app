@@ -7,41 +7,35 @@ import { useDictionary } from "@/lib/i18n/context";
 
 /**
  * Money figures (anything marked className="money") stay blurred until the eye is pressed, so a screen left open
- * or shared does not show them. One switch for every page: it is remembered for the browser session and applied
- * as data-veil on <html>; the blur itself lives in globals.css (and also covers the moment before this loads).
+ * or shared does not show them. One switch for every page, applied as data-veil on <html>. It lives in memory, so
+ * a reload starts hidden again; the blur itself is in globals.css and also covers the moment before this loads.
  */
-const KEY = "dr2_amounts";
+let shown = false;
 const listeners = new Set<() => void>();
-const shownNow = () => {
-  try {
-    return sessionStorage.getItem(KEY) === "1";
-  } catch {
-    return false;
-  }
-};
-const apply = (shown: boolean) => {
+const apply = () => {
   document.documentElement.dataset.veil = shown ? "off" : "on";
 };
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  apply(shownNow());
+  apply();
   return () => void listeners.delete(listener);
 }
-function setShown(shown: boolean) {
-  try {
-    sessionStorage.setItem(KEY, shown ? "1" : "0");
-  } catch {}
-  apply(shown);
+const snapshot = () => shown;
+function toggle() {
+  shown = !shown;
+  apply();
   listeners.forEach((l) => l());
 }
 
-export function AmountEye({ className = "" }: { className?: string }) {
+export function AmountEye({ className = "", withLabel = false }: { className?: string; withLabel?: boolean }) {
   const { t } = useDictionary();
-  const shown = useSyncExternalStore(subscribe, shownNow, () => false);
-  const label = shown ? t.common.hideAmounts : t.common.showAmounts;
+  const visible = useSyncExternalStore(subscribe, snapshot, () => false);
+  const label = visible ? t.common.hideAmounts : t.common.showAmounts;
   return (
-    <button type="button" onClick={() => setShown(!shown)} aria-pressed={shown} aria-label={label} title={label} className={className}>
-      {shown ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+    <button type="button" onClick={toggle} aria-pressed={visible} aria-label={label} title={label} className={className}>
+      {/* The icon shows the state: open eye = amounts visible, crossed eye = hidden. */}
+      {visible ? <Eye size={18} aria-hidden="true" /> : <EyeOff size={18} aria-hidden="true" />}
+      {withLabel && <span className="text-sm font-semibold">{label}</span>}
     </button>
   );
 }

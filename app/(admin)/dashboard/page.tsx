@@ -145,7 +145,7 @@ export default async function DashboardPage() {
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <AmountEye className="grid size-11 place-items-center rounded-full bg-white text-[var(--ink-2)] shadow-sm ring-1 ring-black/10 transition hover:text-[var(--ink)] active:scale-95" />
+            <AmountEye withLabel className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-4 text-[var(--ink)] shadow-sm ring-1 ring-black/10 transition hover:bg-[var(--paper)] active:scale-95" />
             <Link className="ui-button-secondary" href="/submit">
               <FileText size={15} />
               <span>{t.dashboard.publicForm}</span>
