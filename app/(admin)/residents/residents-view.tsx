@@ -29,7 +29,7 @@ const STATUS_STYLE: Record<ResidentStatus, { chip: string; bar: string; dot: str
   MOVED_OUT: { chip: "bg-[#eef0f4] text-[#5d6779]", bar: "bg-[var(--hold)]", dot: "bg-[var(--hold)]" },
 };
 
-function statusLabel(t: Dictionary, s: ResidentStatus) {
+export function statusLabel(t: Dictionary, s: ResidentStatus) {
   return s === "FOR_SALE" ? t.residents.forSale : s === "MOVED_OUT" ? t.residents.movedOut : s === "EXEMPT" ? t.residents.exempt : t.residents.active;
 }
 

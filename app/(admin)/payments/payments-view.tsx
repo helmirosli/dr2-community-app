@@ -8,18 +8,9 @@ import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
 import { formatRM, formatRMShort } from "@/lib/money";
 import { DEFAULT_PER_PAGE, PER_PAGE_OPTIONS, type Ledger, type LedgerFilters, type LedgerPayment } from "@/lib/reports/payments-ledger";
-import { monthName } from "@/lib/status";
+import { coverageLabel, monthName } from "@/lib/status";
 import { fill } from "@/lib/text";
-import { TILE_RAISED } from "@/app/components/status";
-
-
-
-
-// Same colours as the payment form: monthly fees green, special collections amber.
-const TONE = {
-  MONTHLY_FEE: { tile: "bg-[#e2f7e1] text-[#1c7a33]", icon: "text-[#1c7a33]" },
-  SPECIAL_COLLECTION: { tile: "bg-[#fff4d6] text-[#8a6300]", icon: "text-[#8a6300]" },
-} as const;
+import { TILE_RAISED, TYPE_TONE } from "@/app/components/status";
 
 type Over = Partial<Record<"q" | "type" | "from" | "to" | "page", string | number>>;
 
@@ -49,14 +40,6 @@ function scopeLabel(f: LedgerFilters, locale: Locale, copy: Dictionary["payments
     return `${formatDate(dateAt(f.from), locale)} – ${formatDate(dateAt(f.to), locale)}`;
   }
   return f.from ? fill(copy.fromOnly, { date: formatDate(dateAt(f.from), locale) }) : fill(copy.untilOnly, { date: formatDate(dateAt(f.to), locale) });
-}
-
-/** "Jul 2026", "Jul – Nov 2026" or "Nov 2026 – Feb 2027". */
-function coverageLabel(locale: Locale, first: { year: number; month: number }, last: { year: number; month: number }) {
-  const short = (m: number) => monthName(locale, first.year, m, "short");
-  if (first.year === last.year && first.month === last.month) return `${short(first.month)} ${first.year}`;
-  if (first.year === last.year) return `${short(first.month)} – ${short(last.month)} ${first.year}`;
-  return `${short(first.month)} ${first.year} – ${monthName(locale, last.year, last.month, "short")} ${last.year}`;
 }
 
 function Chip({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -290,7 +273,7 @@ function Filters({ t, filters, perPage, ledger, href, now }: { t: Dictionary; fi
 function PaymentRow({ p, t, locale, highlight }: { p: LedgerPayment; t: Dictionary; locale: Locale; highlight: boolean }) {
   const copy = t.payments;
   const isMonthly = p.type === "MONTHLY_FEE";
-  const tone = TONE[p.type];
+  const tone = TYPE_TONE[p.type];
   const loc = locale === "ms" ? "ms-MY" : "en-MY";
   const day = dateAt(p.date);
   const dayText = new Intl.DateTimeFormat(loc, { day: "numeric", month: "short", timeZone: "UTC" }).format(day);
@@ -337,7 +320,7 @@ function PaymentRow({ p, t, locale, highlight }: { p: LedgerPayment; t: Dictiona
             <span className="text-[var(--ink-2)]">—</span>
           )
         ) : p.collection ? (
-          <Link href={`/special-collections/${p.collection.id}`} className="inline-flex min-w-0 items-center gap-1.5 font-medium text-[var(--ink)] hover:text-[var(--blue)] hover:underline">
+          <Link href={`/special-collections/${p.collection.id}`} className="inline-flex min-w-0 max-w-full items-center gap-1.5 font-medium text-[var(--ink)] hover:text-[var(--blue)] hover:underline">
             <Sparkles size={13} aria-hidden="true" className={`shrink-0 ${tone.icon}`} />
             <span className="truncate">{p.collection.title}</span>
           </Link>

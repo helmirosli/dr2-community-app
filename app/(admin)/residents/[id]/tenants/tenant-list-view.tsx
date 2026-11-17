@@ -14,7 +14,7 @@ type Tenant = {
 
 type ResidentData = { id: string; name: string; unitNumber: string; tenants: Tenant[] };
 
-const initials = (name: string) =>
+export const initials = (name: string) =>
   name
     .split(/\s+/)
     .filter(Boolean)

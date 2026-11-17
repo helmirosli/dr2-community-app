@@ -21,6 +21,12 @@ export const stateStyles: Record<MonthState, { pill: string; dot: string; tile: 
   upcoming: { pill: "bg-white text-[#aeaeb2] ring-1 ring-inset ring-[#d2d2d7]", dot: "bg-[#d2d2d7]", tile: "bg-white text-[#aeaeb2] ring-1 ring-inset ring-[#d2d2d7]", tileDark: "bg-[#13224a] text-[#5f6b88]" },
 };
 
+/** Monthly fees are green, special collections amber: the same colours in the payment form, the ledger and a house's history. */
+export const TYPE_TONE = {
+  MONTHLY_FEE: { tile: "bg-[#e2f7e1] text-[#1c7a33]", icon: "text-[#1c7a33]" },
+  SPECIAL_COLLECTION: { tile: "bg-[#fff4d6] text-[#8a6300]", icon: "text-[#8a6300]" },
+} as const;
+
 export function StatusPill({ state, label, className = "" }: { state: MonthState; label: string; className?: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${stateStyles[state].pill} ${className}`}>

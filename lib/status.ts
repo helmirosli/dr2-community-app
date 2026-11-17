@@ -43,3 +43,11 @@ export function monthName(locale: string, year: number, month: number, style: "s
   const fmt = new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", style === "long" ? { month: "long", year: "numeric" } : { month: "short" });
   return fmt.format(new Date(year, month - 1, 1));
 }
+
+/** "Jul 2026", "Jul – Nov 2026" or "Nov 2026 – Feb 2027": the months a payment paid for. */
+export function coverageLabel(locale: string, first: { year: number; month: number }, last: { year: number; month: number }) {
+  const short = (year: number, month: number) => monthName(locale, year, month, "short");
+  if (first.year === last.year && first.month === last.month) return `${short(first.year, first.month)} ${first.year}`;
+  if (first.year === last.year) return `${short(first.year, first.month)} – ${short(last.year, last.month)} ${first.year}`;
+  return `${short(first.year, first.month)} ${first.year} – ${short(last.year, last.month)} ${last.year}`;
+}

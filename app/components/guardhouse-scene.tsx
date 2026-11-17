@@ -1,3 +1,16 @@
+import type { MonthState } from "@/lib/status";
+
+/** Lamp colour ("r,g,b") for a house's state this month: the resident's own page and the AJK's page for that house match. */
+export const LAMP_BY_STATE: Record<MonthState, string> = {
+  paid: "142,229,63",
+  ahead: "142,229,63",
+  pending: "34,199,242",
+  partial: "245,180,0",
+  unpaid: "255,90,54",
+  hold: "142,154,175",
+  upcoming: "34,199,242",
+};
+
 const FIREFLIES = [
   { left: "22%", top: "80%", delay: "0s", color: "bg-[var(--lime)]" },
   { left: "70%", top: "74%", delay: "1.2s", color: "bg-[var(--cyan)]" },

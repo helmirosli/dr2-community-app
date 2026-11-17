@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, CircleAlert, Clock } from "lucide-react";
 
-import { GuardhouseScene } from "@/app/components/guardhouse-scene";
+import { GuardhouseScene, LAMP_BY_STATE } from "@/app/components/guardhouse-scene";
 import { ProgressRing } from "@/app/components/progress-ring";
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
@@ -10,22 +10,10 @@ import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
-import { firstName, isFutureMonth, monthName, monthState, type MonthState } from "@/lib/status";
+import { firstName, isFutureMonth, monthName, monthState } from "@/lib/status";
 import { fill } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
-
-/** Lamp colour (r,g,b) for this month's status. */
-const LAMP: Record<MonthState, string> = {
-  paid: "142,229,63",
-  ahead: "142,229,63",
-  pending: "34,199,242",
-  partial: "245,180,0",
-  unpaid: "255,90,54",
-  hold: "142,154,175",
-  upcoming: "34,199,242",
-};
-
 
 export default async function HousePage({
   params,
@@ -106,7 +94,7 @@ export default async function HousePage({
   const paidCount = months.filter((m) => m.state === "paid" || m.state === "ahead").length;
   const owes = owedMonths.length > 0;
   const allClear = !owes && (thisMonthState === "paid" || thisMonthState === "ahead");
-  const lamp = LAMP[thisMonthState];
+  const lamp = LAMP_BY_STATE[thisMonthState];
   const submitHref = `/submit?unit=${encodeURIComponent(unit)}${owes ? `&count=${owedMonths.length}` : ""}`;
   const isThisMonth = (month: number) => year === now.getFullYear() && month === now.getMonth() + 1;
 

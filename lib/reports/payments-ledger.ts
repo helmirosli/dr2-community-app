@@ -106,7 +106,7 @@ function buildWhere(f: LedgerFilters, parts: { dates: boolean; type: boolean }):
 
 const monthKeyOf = (d: Date) => d.toISOString().slice(0, 7);
 
-const rowSelect = {
+export const paymentRowSelect = {
   id: true,
   residentId: true,
   paymentType: true,
@@ -120,6 +120,25 @@ const rowSelect = {
   specialCollection: { select: { id: true, title: true } },
   uploads: { select: { id: true, originalFilename: true, storagePath: true, mimeType: true, url: true } },
 } satisfies Prisma.PaymentSelect;
+
+/** One payment row as the ledger and the house page show it. */
+export function toLedgerPayment(p: Prisma.PaymentGetPayload<{ select: typeof paymentRowSelect }>): LedgerPayment {
+  return {
+    id: p.id,
+    residentId: p.residentId,
+    unit: p.resident.unitNumber,
+    name: p.resident.name,
+    date: p.paymentDate.toISOString().slice(0, 10),
+    type: p.paymentType,
+    amountSen: p.amountSen,
+    method: p.method,
+    referenceNo: p.referenceNo,
+    notes: p.notes,
+    months: p.coverages.length > 0 ? { first: p.coverages[0], last: p.coverages[p.coverages.length - 1], count: p.coverages.length } : null,
+    collection: p.specialCollection,
+    uploads: p.uploads,
+  };
+}
 
 /** One page of the payment ledger plus the totals, month bars and counts the page shows. */
 export async function getPaymentsLedger(filters: LedgerFilters, requestedPage: number, perPage: number): Promise<Ledger> {
@@ -140,7 +159,7 @@ export async function getPaymentsLedger(filters: LedgerFilters, requestedPage: n
       orderBy: [{ paymentDate: "desc" }, { createdAt: "desc" }],
       skip: (page - 1) * perPage,
       take: perPage,
-      select: rowSelect,
+      select: paymentRowSelect,
     });
 
   const [byType, barRows, waitingReview, firstTry] = await Promise.all([
@@ -194,24 +213,7 @@ export async function getPaymentsLedger(filters: LedgerFilters, requestedPage: n
   }
 
   return {
-    payments: rows.map((p) => ({
-      id: p.id,
-      residentId: p.residentId,
-      unit: p.resident.unitNumber,
-      name: p.resident.name,
-      date: p.paymentDate.toISOString().slice(0, 10),
-      type: p.paymentType,
-      amountSen: p.amountSen,
-      method: p.method,
-      referenceNo: p.referenceNo,
-      notes: p.notes,
-      months:
-        p.coverages.length > 0
-          ? { first: p.coverages[0], last: p.coverages[p.coverages.length - 1], count: p.coverages.length }
-          : null,
-      collection: p.specialCollection,
-      uploads: p.uploads,
-    })),
+    payments: rows.map(toLedgerPayment),
     page,
     totalPages,
     totalCount,

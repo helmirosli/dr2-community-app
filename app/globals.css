@@ -308,3 +308,26 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 @keyframes jr2-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
 .animate-shake { animation: jr2-shake 0.45s ease-in-out; }
 @media (prefers-reduced-motion: reduce) { .animate-shake { animation: none; } }
+
+/* A house's payment history: one row markup, two layouts. Phones: date leaf, what it was for and the amount, then date · method and the proof button. md+: columns. */
+.history-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.2rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "leaf for amount" "leaf meta proof";
+}
+@media (min-width: 768px) {
+  .history-row,
+  .history-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) minmax(0, 1.2fr) 7.5rem 7rem;
+  }
+  .history-row { grid-template-areas: "leaf for meta amount proof"; row-gap: 0; }
+}
+
+/* Progress bars fill in from the left. */
+@keyframes jr2-grow-x { from { transform: scaleX(0); } }
+.animate-grow-x { animation: jr2-grow-x 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@media (prefers-reduced-motion: reduce) { .animate-grow-x { animation: none; } }
