@@ -46,6 +46,7 @@ export type PaymentMinAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  specialCollectionId: string | null
 }
 
 export type PaymentMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type PaymentMaxAggregateOutputType = {
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  specialCollectionId: string | null
 }
 
 export type PaymentCountAggregateOutputType = {
@@ -74,6 +76,7 @@ export type PaymentCountAggregateOutputType = {
   createdById: number
   createdAt: number
   updatedAt: number
+  specialCollectionId: number
   _all: number
 }
 
@@ -98,6 +101,7 @@ export type PaymentMinAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  specialCollectionId?: true
 }
 
 export type PaymentMaxAggregateInputType = {
@@ -112,6 +116,7 @@ export type PaymentMaxAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  specialCollectionId?: true
 }
 
 export type PaymentCountAggregateInputType = {
@@ -126,6 +131,7 @@ export type PaymentCountAggregateInputType = {
   createdById?: true
   createdAt?: true
   updatedAt?: true
+  specialCollectionId?: true
   _all?: true
 }
 
@@ -227,6 +233,7 @@ export type PaymentGroupByOutputType = {
   createdById: string | null
   createdAt: Date
   updatedAt: Date
+  specialCollectionId: string | null
   _count: PaymentCountAggregateOutputType | null
   _avg: PaymentAvgAggregateOutputType | null
   _sum: PaymentSumAggregateOutputType | null
@@ -264,10 +271,12 @@ export type PaymentWhereInput = {
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
+  specialCollectionId?: Prisma.StringNullableFilter<"Payment"> | string | null
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   coverages?: Prisma.PaymentCoverageListRelationFilter
   uploads?: Prisma.UploadListRelationFilter
+  specialCollection?: Prisma.XOR<Prisma.SpecialCollectionNullableScalarRelationFilter, Prisma.SpecialCollectionWhereInput> | null
 }
 
 export type PaymentOrderByWithRelationInput = {
@@ -282,10 +291,12 @@ export type PaymentOrderByWithRelationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   resident?: Prisma.ResidentOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   coverages?: Prisma.PaymentCoverageOrderByRelationAggregateInput
   uploads?: Prisma.UploadOrderByRelationAggregateInput
+  specialCollection?: Prisma.SpecialCollectionOrderByWithRelationInput
 }
 
 export type PaymentWhereUniqueInput = Prisma.AtLeast<{
@@ -303,10 +314,12 @@ export type PaymentWhereUniqueInput = Prisma.AtLeast<{
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
+  specialCollectionId?: Prisma.StringNullableFilter<"Payment"> | string | null
   resident?: Prisma.XOR<Prisma.ResidentScalarRelationFilter, Prisma.ResidentWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   coverages?: Prisma.PaymentCoverageListRelationFilter
   uploads?: Prisma.UploadListRelationFilter
+  specialCollection?: Prisma.XOR<Prisma.SpecialCollectionNullableScalarRelationFilter, Prisma.SpecialCollectionWhereInput> | null
 }, "id">
 
 export type PaymentOrderByWithAggregationInput = {
@@ -321,6 +334,7 @@ export type PaymentOrderByWithAggregationInput = {
   createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PaymentCountOrderByAggregateInput
   _avg?: Prisma.PaymentAvgOrderByAggregateInput
   _max?: Prisma.PaymentMaxOrderByAggregateInput
@@ -343,6 +357,7 @@ export type PaymentScalarWhereWithAggregatesInput = {
   createdById?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Payment"> | Date | string
+  specialCollectionId?: Prisma.StringNullableWithAggregatesFilter<"Payment"> | string | null
 }
 
 export type PaymentCreateInput = {
@@ -359,6 +374,7 @@ export type PaymentCreateInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutPaymentsInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadCreateNestedManyWithoutPaymentInput
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutPaymentsInput
 }
 
 export type PaymentUncheckedCreateInput = {
@@ -373,6 +389,7 @@ export type PaymentUncheckedCreateInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutPaymentInput
 }
@@ -391,6 +408,7 @@ export type PaymentUpdateInput = {
   createdBy?: Prisma.UserUpdateOneWithoutPaymentsNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutPaymentNestedInput
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutPaymentsNestedInput
 }
 
 export type PaymentUncheckedUpdateInput = {
@@ -405,6 +423,7 @@ export type PaymentUncheckedUpdateInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUncheckedUpdateManyWithoutPaymentNestedInput
 }
@@ -421,6 +440,7 @@ export type PaymentCreateManyInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
 }
 
 export type PaymentUpdateManyMutationInput = {
@@ -447,6 +467,7 @@ export type PaymentUncheckedUpdateManyInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PaymentListRelationFilter = {
@@ -471,6 +492,7 @@ export type PaymentCountOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
 }
 
 export type PaymentAvgOrderByAggregateInput = {
@@ -489,6 +511,7 @@ export type PaymentMaxOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
 }
 
 export type PaymentMinOrderByAggregateInput = {
@@ -503,6 +526,7 @@ export type PaymentMinOrderByAggregateInput = {
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  specialCollectionId?: Prisma.SortOrder
 }
 
 export type PaymentSumOrderByAggregateInput = {
@@ -583,6 +607,48 @@ export type PaymentUpdateOneRequiredWithoutCoveragesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentUpdateToOneWithWhereWithoutCoveragesInput, Prisma.PaymentUpdateWithoutCoveragesInput>, Prisma.PaymentUncheckedUpdateWithoutCoveragesInput>
 }
 
+export type PaymentCreateNestedManyWithoutSpecialCollectionInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PaymentCreateWithoutSpecialCollectionInput[] | Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput | Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PaymentCreateManySpecialCollectionInputEnvelope
+  connect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+}
+
+export type PaymentUncheckedCreateNestedManyWithoutSpecialCollectionInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PaymentCreateWithoutSpecialCollectionInput[] | Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput | Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PaymentCreateManySpecialCollectionInputEnvelope
+  connect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+}
+
+export type PaymentUpdateManyWithoutSpecialCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PaymentCreateWithoutSpecialCollectionInput[] | Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput | Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput[]
+  upsert?: Prisma.PaymentUpsertWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PaymentUpsertWithWhereUniqueWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PaymentCreateManySpecialCollectionInputEnvelope
+  set?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  disconnect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  delete?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  connect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  update?: Prisma.PaymentUpdateWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PaymentUpdateWithWhereUniqueWithoutSpecialCollectionInput[]
+  updateMany?: Prisma.PaymentUpdateManyWithWhereWithoutSpecialCollectionInput | Prisma.PaymentUpdateManyWithWhereWithoutSpecialCollectionInput[]
+  deleteMany?: Prisma.PaymentScalarWhereInput | Prisma.PaymentScalarWhereInput[]
+}
+
+export type PaymentUncheckedUpdateManyWithoutSpecialCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput> | Prisma.PaymentCreateWithoutSpecialCollectionInput[] | Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput[]
+  connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput | Prisma.PaymentCreateOrConnectWithoutSpecialCollectionInput[]
+  upsert?: Prisma.PaymentUpsertWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PaymentUpsertWithWhereUniqueWithoutSpecialCollectionInput[]
+  createMany?: Prisma.PaymentCreateManySpecialCollectionInputEnvelope
+  set?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  disconnect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  delete?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  connect?: Prisma.PaymentWhereUniqueInput | Prisma.PaymentWhereUniqueInput[]
+  update?: Prisma.PaymentUpdateWithWhereUniqueWithoutSpecialCollectionInput | Prisma.PaymentUpdateWithWhereUniqueWithoutSpecialCollectionInput[]
+  updateMany?: Prisma.PaymentUpdateManyWithWhereWithoutSpecialCollectionInput | Prisma.PaymentUpdateManyWithWhereWithoutSpecialCollectionInput[]
+  deleteMany?: Prisma.PaymentScalarWhereInput | Prisma.PaymentScalarWhereInput[]
+}
+
 export type PaymentCreateNestedOneWithoutUploadsInput = {
   create?: Prisma.XOR<Prisma.PaymentCreateWithoutUploadsInput, Prisma.PaymentUncheckedCreateWithoutUploadsInput>
   connectOrCreate?: Prisma.PaymentCreateOrConnectWithoutUploadsInput
@@ -654,6 +720,7 @@ export type PaymentCreateWithoutResidentInput = {
   createdBy?: Prisma.UserCreateNestedOneWithoutPaymentsInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadCreateNestedManyWithoutPaymentInput
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutPaymentsInput
 }
 
 export type PaymentUncheckedCreateWithoutResidentInput = {
@@ -667,6 +734,7 @@ export type PaymentUncheckedCreateWithoutResidentInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutPaymentInput
 }
@@ -712,6 +780,7 @@ export type PaymentScalarWhereInput = {
   createdById?: Prisma.StringNullableFilter<"Payment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Payment"> | Date | string
+  specialCollectionId?: Prisma.StringNullableFilter<"Payment"> | string | null
 }
 
 export type PaymentCreateWithoutCoveragesInput = {
@@ -727,6 +796,7 @@ export type PaymentCreateWithoutCoveragesInput = {
   resident: Prisma.ResidentCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutPaymentsInput
   uploads?: Prisma.UploadCreateNestedManyWithoutPaymentInput
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutPaymentsInput
 }
 
 export type PaymentUncheckedCreateWithoutCoveragesInput = {
@@ -741,6 +811,7 @@ export type PaymentUncheckedCreateWithoutCoveragesInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
   uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -773,6 +844,7 @@ export type PaymentUpdateWithoutCoveragesInput = {
   resident?: Prisma.ResidentUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutPaymentsNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutPaymentNestedInput
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutPaymentsNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutCoveragesInput = {
@@ -787,7 +859,66 @@ export type PaymentUncheckedUpdateWithoutCoveragesInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   uploads?: Prisma.UploadUncheckedUpdateManyWithoutPaymentNestedInput
+}
+
+export type PaymentCreateWithoutSpecialCollectionInput = {
+  id?: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  referenceNo?: string | null
+  notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  resident: Prisma.ResidentCreateNestedOneWithoutPaymentsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutPaymentsInput
+  coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutPaymentInput
+  uploads?: Prisma.UploadCreateNestedManyWithoutPaymentInput
+}
+
+export type PaymentUncheckedCreateWithoutSpecialCollectionInput = {
+  id?: string
+  residentId: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  referenceNo?: string | null
+  notes?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutPaymentInput
+  uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutPaymentInput
+}
+
+export type PaymentCreateOrConnectWithoutSpecialCollectionInput = {
+  where: Prisma.PaymentWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput>
+}
+
+export type PaymentCreateManySpecialCollectionInputEnvelope = {
+  data: Prisma.PaymentCreateManySpecialCollectionInput | Prisma.PaymentCreateManySpecialCollectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentUpsertWithWhereUniqueWithoutSpecialCollectionInput = {
+  where: Prisma.PaymentWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentUpdateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedUpdateWithoutSpecialCollectionInput>
+  create: Prisma.XOR<Prisma.PaymentCreateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedCreateWithoutSpecialCollectionInput>
+}
+
+export type PaymentUpdateWithWhereUniqueWithoutSpecialCollectionInput = {
+  where: Prisma.PaymentWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentUpdateWithoutSpecialCollectionInput, Prisma.PaymentUncheckedUpdateWithoutSpecialCollectionInput>
+}
+
+export type PaymentUpdateManyWithWhereWithoutSpecialCollectionInput = {
+  where: Prisma.PaymentScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentUpdateManyMutationInput, Prisma.PaymentUncheckedUpdateManyWithoutSpecialCollectionInput>
 }
 
 export type PaymentCreateWithoutUploadsInput = {
@@ -803,6 +934,7 @@ export type PaymentCreateWithoutUploadsInput = {
   resident: Prisma.ResidentCreateNestedOneWithoutPaymentsInput
   createdBy?: Prisma.UserCreateNestedOneWithoutPaymentsInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutPaymentInput
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutPaymentsInput
 }
 
 export type PaymentUncheckedCreateWithoutUploadsInput = {
@@ -817,6 +949,7 @@ export type PaymentUncheckedCreateWithoutUploadsInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutPaymentInput
 }
 
@@ -849,6 +982,7 @@ export type PaymentUpdateWithoutUploadsInput = {
   resident?: Prisma.ResidentUpdateOneRequiredWithoutPaymentsNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutPaymentsNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutPaymentNestedInput
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutPaymentsNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutUploadsInput = {
@@ -863,6 +997,7 @@ export type PaymentUncheckedUpdateWithoutUploadsInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
@@ -879,6 +1014,7 @@ export type PaymentCreateWithoutCreatedByInput = {
   resident: Prisma.ResidentCreateNestedOneWithoutPaymentsInput
   coverages?: Prisma.PaymentCoverageCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadCreateNestedManyWithoutPaymentInput
+  specialCollection?: Prisma.SpecialCollectionCreateNestedOneWithoutPaymentsInput
 }
 
 export type PaymentUncheckedCreateWithoutCreatedByInput = {
@@ -892,6 +1028,7 @@ export type PaymentUncheckedCreateWithoutCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
   coverages?: Prisma.PaymentCoverageUncheckedCreateNestedManyWithoutPaymentInput
   uploads?: Prisma.UploadUncheckedCreateNestedManyWithoutPaymentInput
 }
@@ -933,6 +1070,7 @@ export type PaymentCreateManyResidentInput = {
   createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
 }
 
 export type PaymentUpdateWithoutResidentInput = {
@@ -948,6 +1086,7 @@ export type PaymentUpdateWithoutResidentInput = {
   createdBy?: Prisma.UserUpdateOneWithoutPaymentsNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutPaymentNestedInput
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutPaymentsNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutResidentInput = {
@@ -961,12 +1100,74 @@ export type PaymentUncheckedUpdateWithoutResidentInput = {
   createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUncheckedUpdateManyWithoutPaymentNestedInput
 }
 
 export type PaymentUncheckedUpdateManyWithoutResidentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PaymentCreateManySpecialCollectionInput = {
+  id?: string
+  residentId: string
+  paymentType: $Enums.PaymentType
+  amountSen: number
+  paymentDate: Date | string
+  method: $Enums.PaymentMethod
+  referenceNo?: string | null
+  notes?: string | null
+  createdById?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PaymentUpdateWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resident?: Prisma.ResidentUpdateOneRequiredWithoutPaymentsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutPaymentsNestedInput
+  coverages?: Prisma.PaymentCoverageUpdateManyWithoutPaymentNestedInput
+  uploads?: Prisma.UploadUpdateManyWithoutPaymentNestedInput
+}
+
+export type PaymentUncheckedUpdateWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
+  paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+  amountSen?: Prisma.IntFieldUpdateOperationsInput | number
+  paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  method?: Prisma.EnumPaymentMethodFieldUpdateOperationsInput | $Enums.PaymentMethod
+  referenceNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutPaymentNestedInput
+  uploads?: Prisma.UploadUncheckedUpdateManyWithoutPaymentNestedInput
+}
+
+export type PaymentUncheckedUpdateManyWithoutSpecialCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  residentId?: Prisma.StringFieldUpdateOperationsInput | string
   paymentType?: Prisma.EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
   amountSen?: Prisma.IntFieldUpdateOperationsInput | number
   paymentDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -989,6 +1190,7 @@ export type PaymentCreateManyCreatedByInput = {
   notes?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  specialCollectionId?: string | null
 }
 
 export type PaymentUpdateWithoutCreatedByInput = {
@@ -1004,6 +1206,7 @@ export type PaymentUpdateWithoutCreatedByInput = {
   resident?: Prisma.ResidentUpdateOneRequiredWithoutPaymentsNestedInput
   coverages?: Prisma.PaymentCoverageUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUpdateManyWithoutPaymentNestedInput
+  specialCollection?: Prisma.SpecialCollectionUpdateOneWithoutPaymentsNestedInput
 }
 
 export type PaymentUncheckedUpdateWithoutCreatedByInput = {
@@ -1017,6 +1220,7 @@ export type PaymentUncheckedUpdateWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverages?: Prisma.PaymentCoverageUncheckedUpdateManyWithoutPaymentNestedInput
   uploads?: Prisma.UploadUncheckedUpdateManyWithoutPaymentNestedInput
 }
@@ -1032,6 +1236,7 @@ export type PaymentUncheckedUpdateManyWithoutCreatedByInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  specialCollectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1086,10 +1291,12 @@ export type PaymentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  specialCollectionId?: boolean
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
   coverages?: boolean | Prisma.Payment$coveragesArgs<ExtArgs>
   uploads?: boolean | Prisma.Payment$uploadsArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
   _count?: boolean | Prisma.PaymentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["payment"]>
 
@@ -1105,8 +1312,10 @@ export type PaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  specialCollectionId?: boolean
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
 }, ExtArgs["result"]["payment"]>
 
 export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1121,8 +1330,10 @@ export type PaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  specialCollectionId?: boolean
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
 }, ExtArgs["result"]["payment"]>
 
 export type PaymentSelectScalar = {
@@ -1137,23 +1348,27 @@ export type PaymentSelectScalar = {
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  specialCollectionId?: boolean
 }
 
-export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "residentId" | "paymentType" | "amountSen" | "paymentDate" | "method" | "referenceNo" | "notes" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
+export type PaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "residentId" | "paymentType" | "amountSen" | "paymentDate" | "method" | "referenceNo" | "notes" | "createdById" | "createdAt" | "updatedAt" | "specialCollectionId", ExtArgs["result"]["payment"]>
 export type PaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
   coverages?: boolean | Prisma.Payment$coveragesArgs<ExtArgs>
   uploads?: boolean | Prisma.Payment$uploadsArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
   _count?: boolean | Prisma.PaymentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PaymentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
 }
 export type PaymentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   resident?: boolean | Prisma.ResidentDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.Payment$createdByArgs<ExtArgs>
+  specialCollection?: boolean | Prisma.Payment$specialCollectionArgs<ExtArgs>
 }
 
 export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1163,6 +1378,7 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdBy: Prisma.$UserPayload<ExtArgs> | null
     coverages: Prisma.$PaymentCoveragePayload<ExtArgs>[]
     uploads: Prisma.$UploadPayload<ExtArgs>[]
+    specialCollection: Prisma.$SpecialCollectionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1176,6 +1392,10 @@ export type $PaymentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdById: string | null
     createdAt: Date
     updatedAt: Date
+    /**
+     * Which special collection a SPECIAL_COLLECTION payment was for (null for monthly fees).
+     */
+    specialCollectionId: string | null
   }, ExtArgs["result"]["payment"]>
   composites: {}
 }
@@ -1574,6 +1794,7 @@ export interface Prisma__PaymentClient<T, Null = never, ExtArgs extends runtime.
   createdBy<T extends Prisma.Payment$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   coverages<T extends Prisma.Payment$coveragesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$coveragesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentCoveragePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   uploads<T extends Prisma.Payment$uploadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$uploadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  specialCollection<T extends Prisma.Payment$specialCollectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Payment$specialCollectionArgs<ExtArgs>>): Prisma.Prisma__SpecialCollectionClient<runtime.Types.Result.GetResult<Prisma.$SpecialCollectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1614,6 +1835,7 @@ export interface PaymentFieldRefs {
   readonly createdById: Prisma.FieldRef<"Payment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Payment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Payment", 'DateTime'>
+  readonly specialCollectionId: Prisma.FieldRef<"Payment", 'String'>
 }
     
 
@@ -2079,6 +2301,25 @@ export type Payment$uploadsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.UploadScalarFieldEnum | Prisma.UploadScalarFieldEnum[]
+}
+
+/**
+ * Payment.specialCollection
+ */
+export type Payment$specialCollectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SpecialCollection
+   */
+  select?: Prisma.SpecialCollectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SpecialCollection
+   */
+  omit?: Prisma.SpecialCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SpecialCollectionInclude<ExtArgs> | null
+  where?: Prisma.SpecialCollectionWhereInput
 }
 
 /**

@@ -52,6 +52,7 @@ export type UserCountAggregateOutputType = {
   role: number
   createdAt: number
   updatedAt: number
+  tourState: number
   _all: number
 }
 
@@ -84,6 +85,7 @@ export type UserCountAggregateInputType = {
   role?: true
   createdAt?: true
   updatedAt?: true
+  tourState?: true
   _all?: true
 }
 
@@ -167,6 +169,7 @@ export type UserGroupByOutputType = {
   role: $Enums.UserRole
   createdAt: Date
   updatedAt: Date
+  tourState: runtime.JsonValue
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -198,6 +201,7 @@ export type UserWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  tourState?: Prisma.JsonFilter<"User">
   payments?: Prisma.PaymentListRelationFilter
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionListRelationFilter
 }
@@ -210,6 +214,7 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  tourState?: Prisma.SortOrder
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionOrderByRelationAggregateInput
 }
@@ -225,6 +230,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  tourState?: Prisma.JsonFilter<"User">
   payments?: Prisma.PaymentListRelationFilter
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionListRelationFilter
 }, "id" | "email">
@@ -237,6 +243,7 @@ export type UserOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  tourState?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -253,6 +260,7 @@ export type UserScalarWhereWithAggregatesInput = {
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  tourState?: Prisma.JsonWithAggregatesFilter<"User">
 }
 
 export type UserCreateInput = {
@@ -263,6 +271,7 @@ export type UserCreateInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutReviewedByInput
 }
@@ -275,6 +284,7 @@ export type UserUncheckedCreateInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
 }
@@ -287,6 +297,7 @@ export type UserUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutReviewedByNestedInput
 }
@@ -299,6 +310,7 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
 }
@@ -311,6 +323,7 @@ export type UserCreateManyInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUpdateManyMutationInput = {
@@ -321,6 +334,7 @@ export type UserUpdateManyMutationInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -331,6 +345,7 @@ export type UserUncheckedUpdateManyInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -346,6 +361,7 @@ export type UserCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  tourState?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -412,6 +428,7 @@ export type UserCreateWithoutPaymentsInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionCreateNestedManyWithoutReviewedByInput
 }
 
@@ -423,6 +440,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUncheckedCreateNestedManyWithoutReviewedByInput
 }
 
@@ -450,6 +468,7 @@ export type UserUpdateWithoutPaymentsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUpdateManyWithoutReviewedByNestedInput
 }
 
@@ -461,6 +480,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   reviewedSubmissions?: Prisma.PublicPaymentSubmissionUncheckedUpdateManyWithoutReviewedByNestedInput
 }
 
@@ -472,6 +492,7 @@ export type UserCreateWithoutReviewedSubmissionsInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentCreateNestedManyWithoutCreatedByInput
 }
 
@@ -483,6 +504,7 @@ export type UserUncheckedCreateWithoutReviewedSubmissionsInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
@@ -510,6 +532,7 @@ export type UserUpdateWithoutReviewedSubmissionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUpdateManyWithoutCreatedByNestedInput
 }
 
@@ -521,6 +544,7 @@ export type UserUncheckedUpdateWithoutReviewedSubmissionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tourState?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
@@ -572,6 +596,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  tourState?: boolean
   payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
   reviewedSubmissions?: boolean | Prisma.User$reviewedSubmissionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -585,6 +610,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  tourState?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -595,6 +621,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  tourState?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -605,9 +632,10 @@ export type UserSelectScalar = {
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  tourState?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "role" | "createdAt" | "updatedAt" | "tourState", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payments?: boolean | Prisma.User$paymentsArgs<ExtArgs>
   reviewedSubmissions?: boolean | Prisma.User$reviewedSubmissionsArgs<ExtArgs>
@@ -630,6 +658,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: $Enums.UserRole
     createdAt: Date
     updatedAt: Date
+    /**
+     * Walkthrough tours this person has finished or skipped: { "<tourId>": <version seen> }.
+     */
+    tourState: runtime.JsonValue
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1062,6 +1094,7 @@ export interface UserFieldRefs {
   readonly role: Prisma.FieldRef<"User", 'UserRole'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly tourState: Prisma.FieldRef<"User", 'Json'>
 }
     
 

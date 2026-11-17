@@ -1,67 +1,92 @@
 import { expandMonthRange, type MonthCoverage } from "@/lib/months";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 
+const MAX_CARRY_FORWARD_MONTHS = 24;
+
+/**
+ * Spreads a payment over the selected months, topping up partially paid months
+ * first, then carries any remainder forward month by month (max 24 months).
+ * The single allocator for official payments, approved submissions and the
+ * pending preview on /status and /reports.
+ */
 export function buildMonthlyCoverageRows(
   residentId: string,
   coveredMonths: MonthCoverage[],
   amountSen: number,
   existingCoverageMap?: Map<string, number>, // key: "year:month", value: amountApplied
 ) {
+  const months = [...coveredMonths];
+  const last = coveredMonths.at(-1);
+
+  if (last) {
+    let { year, month } = last;
+    for (let i = 0; i < MAX_CARRY_FORWARD_MONTHS; i += 1) {
+      month += 1;
+      if (month > 12) {
+        month = 1;
+        year += 1;
+      }
+      months.push({ year, month });
+    }
+  }
+
   const rows = [];
   let remainingAmountSen = amountSen;
 
-  // Process initially selected months - smart distribution for partial payments
-  for (const coverage of coveredMonths) {
+  for (const { year, month } of months) {
     if (remainingAmountSen <= 0) break;
 
-    const key = `${coverage.year}:${coverage.month}`;
-    const existingAmount = existingCoverageMap?.get(key) ?? 0;
+    const existingAmount = existingCoverageMap?.get(`${year}:${month}`) ?? 0;
     const amountNeeded = Math.max(0, DEFAULT_MONTHLY_FEE_SEN - existingAmount);
+    // ponytail: a month that's already fully paid still takes a full fee (kept from the original logic).
     const amountApplied = Math.min(amountNeeded || DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
     remainingAmountSen -= amountApplied;
 
     rows.push({
       residentId,
-      year: coverage.year,
-      month: coverage.month,
+      year,
+      month,
       amountApplied,
       status: existingAmount + amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? ("PAID" as const) : ("PARTIAL" as const),
     });
   }
 
-  // Auto-extend to next months if there's remaining amount (carry-forward)
-  if (remainingAmountSen > 0 && coveredMonths.length > 0) {
-    let currentYear = coveredMonths[coveredMonths.length - 1].year;
-    let currentMonth = coveredMonths[coveredMonths.length - 1].month + 1;
-    let monthsExtended = 0;
-    const MAX_EXTEND_MONTHS = 24;
+  return rows;
+}
 
-    while (remainingAmountSen > 0 && monthsExtended < MAX_EXTEND_MONTHS) {
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear += 1;
-      }
+export type PendingSubmission = {
+  unitNumber: string;
+  amountSen: number;
+  coverageStartYear: number;
+  coverageStartMonth: number;
+  coverageEndYear: number;
+  coverageEndMonth: number;
+};
 
-      const key = `${currentYear}:${currentMonth}`;
-      const existingAmount = existingCoverageMap?.get(key) ?? 0;
-      const amountNeeded = Math.max(0, DEFAULT_MONTHLY_FEE_SEN - existingAmount);
-      const amountApplied = Math.min(amountNeeded || DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
-      remainingAmountSen -= amountApplied;
+export type PendingMonthInfo = {
+  appliedSen: number;
+  isCarryForward: boolean;
+  totalPending: number;
+};
 
-      rows.push({
-        residentId,
-        year: currentYear,
-        month: currentMonth,
-        amountApplied,
-        status: existingAmount + amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? ("PAID" as const) : ("PARTIAL" as const),
+/** Pending (not yet approved) submissions, keyed "unit:year:month", for the status grids. */
+export function getPendingSubmissionsMap(submissions: PendingSubmission[]) {
+  const map = new Map<string, PendingMonthInfo>();
+
+  for (const sub of submissions) {
+    const months = expandMonthRange(sub.coverageStartYear, sub.coverageStartMonth, sub.coverageEndYear, sub.coverageEndMonth);
+    const rows = buildMonthlyCoverageRows(sub.unitNumber, months, sub.amountSen);
+
+    rows.forEach((row, index) => {
+      map.set(`${sub.unitNumber}:${row.year}:${row.month}`, {
+        appliedSen: row.amountApplied,
+        isCarryForward: index > 0,
+        totalPending: sub.amountSen,
       });
-
-      currentMonth += 1;
-      monthsExtended += 1;
-    }
+    });
   }
 
-  return rows;
+  return map;
 }
 
 export function getCoverageMonthCount(

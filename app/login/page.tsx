@@ -1,75 +1,17 @@
-import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
-import { LoginForm } from "./login-form";
+import { LoginStage } from "./login-form";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function LoginPage() {
-  const [currentUser, userCount] = await Promise.all([
-    getCurrentUser(),
-    prisma.user.count(),
-  ]);
+  const [currentUser, userCount] = await Promise.all([getCurrentUser(), prisma.user.count()]);
 
   if (currentUser) redirect("/dashboard");
   if (userCount === 0) redirect("/setup");
 
-  const t = await getDictionary();
-
-  return (
-    <main className="flex min-h-screen flex-col md:flex-row">
-      {/* Left — branding + live stats */}
-      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-brand-gradient px-10 py-16 text-white md:w-1/2">
-        <div className="flex flex-col items-center text-center">
-          <Image
-            src="/jr2-logo.jpeg"
-            alt="Desa Restu 2 @ Sepang"
-            width={110}
-            height={110}
-            className="rounded-full ring-4 ring-white/30 drop-shadow-xl"
-            priority
-          />
-          <p className="mt-5 text-base font-light tracking-wide text-white/80">{t.login.welcomeTo}</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">{t.login.communityName}</h1>
-          <p className="mt-2 max-w-xs text-sm leading-6 text-white/70">{t.login.tagline}</p>
-        </div>
-
-
-        {/* Wave separator */}
-        <div className="absolute right-0 top-0 hidden h-full md:block" style={{ width: 72 }}>
-          <svg className="h-full w-full" viewBox="0 0 72 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-            <path fill="rgba(255,255,255,0.12)" d="M72,0 C12,100 12,200 72,300 C12,400 12,500 72,600 C12,700 12,750 72,800 L72,0Z" />
-            <path fill="rgba(255,255,255,0.18)" d="M72,0 C20,110 20,220 72,330 C20,440 20,550 72,660 C20,730 20,780 72,800 L72,0Z" />
-            <path fill="white" d="M72,0 C28,120 28,240 72,360 C28,480 28,600 72,720 C28,760 28,800 72,800 L72,0Z" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Right — sign in form */}
-      <div className="flex flex-col items-center justify-center bg-white px-8 py-16 md:w-1/2">
-        <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-slate-900">{t.login.title}</h2>
-          <p className="mt-1 text-sm text-slate-500">{t.login.subtitle}</p>
-
-          <div className="mt-8">
-            <LoginForm />
-          </div>
-
-          <div className="mt-6 flex justify-center gap-4 text-sm">
-            <Link className="font-medium text-brand-700 hover:opacity-80" href="/status">
-              Payment Status →
-            </Link>
-            <Link className="font-medium text-brand-700 hover:opacity-80" href="/submit">
-              Submit Payment →
-            </Link>
-          </div>
-        </div>
-      </div>
-    </main>
-  );
+  return <LoginStage />;
 }

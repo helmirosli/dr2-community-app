@@ -1,30 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { Lexend, Source_Sans_3 } from "next/font/google";
+import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
-import { LayoutWrapper } from "./layout-wrapper";
 import { I18nProvider } from "@/lib/i18n/context";
 import { getDictionary, getLocale } from "@/lib/i18n";
 
-const lexend = Lexend({
+const interTight = Inter_Tight({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
-const sourceSans = Source_Sans_3({
+const inter = Inter({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "DR2 Community Fee System",
-  description: "Resident fee dashboard and public payment submission form.",
+  // Absolute base for the OG image URL in link previews. Set NEXT_PUBLIC_SITE_URL in production.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: { default: "JR2 Desa Restu", template: "%s · JR2 Desa Restu" },
+  description: "Yuran pondok pengawal Jalan Restu 2: semak status rumah anda dan hantar bukti bayaran.",
+  openGraph: {
+    title: "JR2 Desa Restu",
+    description: "Semak status rumah anda dan hantar bukti bayaran yuran pondok pengawal.",
+    locale: "ms_MY",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#050a1a",
 };
 
 export default async function RootLayout({
@@ -38,11 +45,11 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${lexend.variable} ${sourceSans.variable} h-full antialiased`}
+      className={`${interTight.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <I18nProvider locale={locale} dictionary={dictionary}>
-          <LayoutWrapper>{children}</LayoutWrapper>
+          {children}
         </I18nProvider>
       </body>
     </html>

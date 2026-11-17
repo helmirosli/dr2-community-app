@@ -1,12 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
-import { Storage } from "@google-cloud/storage";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, normalize, sep } from "node:path";
 
-const allowedMimeTypes = new Set([
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+import { Storage } from "@google-cloud/storage";
 
 const allowedExtensions = new Map([
   ["application/pdf", ".pdf"],
@@ -33,6 +29,31 @@ export function getUploadLimitBytes() {
   }
 
   return 5 * 1024 * 1024;
+}
+
+// Local development without real Google credentials: keep uploads on disk in ./uploads (gitignored).
+// Production always uses GCS.
+const LOCAL_UPLOAD_ROOT = join(process.cwd(), "uploads");
+
+export function usesLocalUploads() {
+  if (process.env.NODE_ENV === "production") return false;
+  const email = process.env.GCS_CLIENT_EMAIL ?? "";
+  return !email || !process.env.GCS_PRIVATE_KEY || email.startsWith("your-");
+}
+
+function localUploadPath(relativePath: string) {
+  const full = normalize(join(LOCAL_UPLOAD_ROOT, relativePath));
+  if (!full.startsWith(LOCAL_UPLOAD_ROOT + sep)) throw new Error("Invalid upload path.");
+  return full;
+}
+
+/** Reads a locally stored upload (dev only); null if missing. */
+export async function readLocalUpload(relativePath: string) {
+  try {
+    return await readFile(localUploadPath(relativePath));
+  } catch {
+    return null;
+  }
 }
 
 export function getGcsBucket() {
@@ -104,6 +125,10 @@ export function getSingleUploadedFile(formData: FormData, fieldName: string) {
 }
 
 export async function removeStoredUpload(relativePath: string) {
+  if (usesLocalUploads()) {
+    await rm(localUploadPath(relativePath), { force: true });
+    return;
+  }
   const { bucket } = getGcsBucket();
   await bucket.file(relativePath).delete({ ignoreNotFound: true });
 }
@@ -113,7 +138,6 @@ export async function storeProofUpload(
   uploadScope = "public-submissions"
 ): Promise<StoredUpload> {
   const originalFilename = file.name.trim();
-  const mimeType = file.type;
   const sizeBytes = file.size;
   const uploadLimitBytes = getUploadLimitBytes();
 
@@ -131,33 +155,21 @@ export async function storeProofUpload(
     );
   }
 
-  if (!allowedMimeTypes.has(mimeType)) {
-    throw new Error("Proof file must be a PDF, JPG, PNG, or WebP image.");
-  }
-
-  const extension = originalFilename.substring(
-    originalFilename.lastIndexOf(".")
-  ).toLowerCase();
-
-  const expectedExtension = allowedExtensions.get(mimeType);
-
-  if (
-    !expectedExtension ||
-    (mimeType === "image/jpeg"
-      ? ![".jpg", ".jpeg"].includes(extension)
-      : extension !== expectedExtension)
-  ) {
-    throw new Error("Proof file extension does not match file type.");
-  }
-
+  // Trust the bytes, not the name or the browser's reported type: phone downloads are often
+  // misnamed (a WebP saved as .jpg). Accept any real JPEG/PNG/WebP/PDF and store it as what it is.
   const buffer = Buffer.from(await file.arrayBuffer());
+  const detected = detectFileType(buffer);
 
-  if (!hasAllowedFileSignature(buffer, mimeType)) {
-    throw new Error("File content does not match file type.");
+  if (!detected) {
+    throw new Error(
+      isHeic(buffer)
+        ? "iPhone HEIC photos aren't supported. Please send a screenshot of the receipt, or a JPG/PNG/PDF."
+        : "Proof file must be a real PDF, JPG, PNG or WebP image."
+    );
   }
 
-  const storedExtension =
-    mimeType === "image/jpeg" ? ".jpg" : expectedExtension;
+  const mimeType = detected;
+  const storedExtension = allowedExtensions.get(mimeType)!;
 
   const storedFilename = `${randomUUID()}${storedExtension}`;
 
@@ -165,17 +177,19 @@ export async function storeProofUpload(
 
   const contentHash = createHash("sha256").update(buffer).digest("hex");
 
-  const { bucket } = getGcsBucket();
+  let url: string;
 
-  const gcsFile = bucket.file(gcsPath);
-
-  await gcsFile.save(buffer, {
-    contentType: mimeType,
-    resumable: false,
-  });
-
-  const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
-  const url = `${baseUrl}/${gcsPath}`;
+  if (usesLocalUploads()) {
+    const target = localUploadPath(gcsPath);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, buffer);
+    url = `/api/uploads/${gcsPath}`;
+  } else {
+    const { bucket } = getGcsBucket();
+    await bucket.file(gcsPath).save(buffer, { contentType: mimeType, resumable: false });
+    const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
+    url = `${baseUrl}/${gcsPath}`;
+  }
 
   return {
     originalFilename,
@@ -188,29 +202,15 @@ export async function storeProofUpload(
   };
 }
 
-function hasAllowedFileSignature(buffer: Buffer, mimeType: string) {
-  if (mimeType === "application/pdf") {
-    return buffer.subarray(0, 4).toString("utf8") === "%PDF";
-  }
+/** Identifies an allowed proof file from its first bytes; null if it isn't one. */
+export function detectFileType(buffer: Buffer): "application/pdf" | "image/jpeg" | "image/png" | "image/webp" | null {
+  if (buffer.subarray(0, 4).toString("latin1") === "%PDF") return "application/pdf";
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return "image/jpeg";
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png";
+  if (buffer.subarray(0, 4).toString("latin1") === "RIFF" && buffer.subarray(8, 12).toString("latin1") === "WEBP") return "image/webp";
+  return null;
+}
 
-  if (mimeType === "image/jpeg") {
-    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-  }
-
-  if (mimeType === "image/png") {
-    return buffer
-      .subarray(0, 8)
-      .equals(
-        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
-      );
-  }
-
-  if (mimeType === "image/webp") {
-    return (
-      buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
-      buffer.subarray(8, 12).toString("ascii") === "WEBP"
-    );
-  }
-
-  return false;
+function isHeic(buffer: Buffer) {
+  return buffer.subarray(4, 8).toString("latin1") === "ftyp" && /^(hei[cx]|hev[cx]|mif1|msf1)$/.test(buffer.subarray(8, 12).toString("latin1"));
 }

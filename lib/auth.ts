@@ -18,6 +18,8 @@ export type DashboardUser = {
   name: string;
   email: string;
   role: "ADMIN" | "AJK" | "VIEWER";
+  /** Walkthrough tours already seen, as stored: read it with parseSeen(). */
+  tourState: unknown;
 };
 
 function getAuthSecret() {
@@ -124,6 +126,7 @@ export async function getCurrentUser(): Promise<DashboardUser | null> {
       name: true,
       email: true,
       role: true,
+      tourState: true,
     },
   });
 

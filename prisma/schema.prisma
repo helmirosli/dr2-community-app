@@ -69,7 +69,7 @@ enum SpecialCollectionStatus {
 }
 
 model Resident {
-  id          String            @id @default(cuid())
+  id          String            @id @default(uuid(7))
   unitNumber  String            @unique
   name        String
   phone       String?
@@ -96,7 +96,7 @@ model Resident {
 }
 
 model Tenant {
-  id           String          @id @default(cuid())
+  id           String          @id @default(uuid(7))
   residentId   String
   resident     Resident        @relation(fields: [residentId], references: [id], onDelete: Cascade)
   name         String
@@ -110,7 +110,7 @@ model Tenant {
 }
 
 model ResidentVehicle {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid(7))
   residentId  String
   resident    Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
   make        String
@@ -123,7 +123,7 @@ model ResidentVehicle {
 }
 
 model TenantVehicle {
-  id          String  @id @default(cuid())
+  id          String  @id @default(uuid(7))
   tenantId    String
   tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   make        String
@@ -137,7 +137,7 @@ model TenantVehicle {
 
 
 model FeePlan {
-  id            String            @id @default(cuid())
+  id            String            @id @default(uuid(7))
   name          String
   amountSen     Int
   frequency     String            @default("MONTHLY")
@@ -152,7 +152,7 @@ model FeePlan {
 }
 
 model Payment {
-  id          String            @id @default(cuid())
+  id          String            @id @default(uuid(7))
   residentId  String
   resident    Resident          @relation(fields: [residentId], references: [id])
   paymentType PaymentType
@@ -167,14 +167,18 @@ model Payment {
   updatedAt   DateTime          @updatedAt
   coverages   PaymentCoverage[]
   uploads     Upload[]
+  /// Which special collection a SPECIAL_COLLECTION payment was for (null for monthly fees).
+  specialCollectionId String?
+  specialCollection   SpecialCollection? @relation(fields: [specialCollectionId], references: [id])
 
   @@index([residentId, paymentDate])
   @@index([paymentType])
+  @@index([specialCollectionId])
   @@schema("desarestu_db")
 }
 
 model PaymentCoverage {
-  id            String         @id @default(cuid())
+  id            String         @id @default(uuid(7))
   paymentId     String
   payment       Payment        @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   residentId    String
@@ -193,7 +197,7 @@ model PaymentCoverage {
 }
 
 model SpecialCollection {
-  id                String                         @id @default(cuid())
+  id                String                         @id @default(uuid(7))
   title             String
   description       String?
   amountPerResident Int
@@ -203,6 +207,7 @@ model SpecialCollection {
   status            SpecialCollectionStatus        @default(DRAFT)
   assignments       SpecialCollectionAssignment[]
   submissions       PublicPaymentSubmission[]
+  payments          Payment[]
   createdAt         DateTime                       @default(now())
   updatedAt         DateTime                       @updatedAt
 
@@ -210,7 +215,7 @@ model SpecialCollection {
 }
 
 model SpecialCollectionAssignment {
-  id                  String            @id @default(cuid())
+  id                  String            @id @default(uuid(7))
   specialCollectionId String
   specialCollection   SpecialCollection @relation(fields: [specialCollectionId], references: [id], onDelete: Cascade)
   residentId          String
@@ -226,7 +231,7 @@ model SpecialCollectionAssignment {
 }
 
 model Upload {
-  id               String                   @id @default(cuid())
+  id               String                   @id @default(uuid(7))
   paymentId        String?
   payment          Payment?                 @relation(fields: [paymentId], references: [id])
   submissionId     String?
@@ -244,7 +249,7 @@ model Upload {
 }
 
 model PublicPaymentSubmission {
-  id                   String            @id @default(cuid())
+  id                   String            @id @default(uuid(7))
   unitNumber           String
   residentName         String
   phone                String
@@ -274,13 +279,15 @@ model PublicPaymentSubmission {
 }
 
 model User {
-  id                  String                    @id @default(cuid())
+  id                  String                    @id @default(uuid(7))
   name                String
   email               String                    @unique
   passwordHash        String
   role                UserRole                  @default(AJK)
   createdAt           DateTime                  @default(now())
   updatedAt           DateTime                  @updatedAt
+  /// Walkthrough tours this person has finished or skipped: { "<tourId>": <version seen> }.
+  tourState           Json                      @default("{}")
   payments            Payment[]
   reviewedSubmissions PublicPaymentSubmission[]
 
@@ -288,7 +295,7 @@ model User {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
+  id         String   @id @default(uuid(7))
   entityType String
   entityId   String
   action     String

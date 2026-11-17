@@ -1,0 +1,74 @@
+// Self-check for the fee allocator. Run: npm run check:coverage
+import assert from "node:assert/strict";
+
+import { DEFAULT_MONTHLY_FEE_SEN as FEE } from "@/lib/money";
+import { buildMonthlyCoverageRows, getPendingSubmissionsMap } from "@/lib/payments/coverage";
+import { monthState } from "@/lib/status";
+import { detectFileType } from "@/lib/uploads";
+import { sortByUnit } from "@/lib/units";
+
+const pick = (rows: ReturnType<typeof buildMonthlyCoverageRows>) =>
+  rows.map((r) => `${r.year}-${r.month}:${r.amountApplied}:${r.status}`);
+
+assert.equal(FEE, 5000);
+
+// Exact payment for the selected months.
+assert.deepEqual(pick(buildMonthlyCoverageRows("r", [{ year: 2025, month: 1 }, { year: 2025, month: 2 }], 10000)), [
+  "2025-1:5000:PAID",
+  "2025-2:5000:PAID",
+]);
+
+// Overpayment carries forward into the next month as PARTIAL.
+assert.deepEqual(pick(buildMonthlyCoverageRows("r", [{ year: 2025, month: 1 }, { year: 2025, month: 2 }], 12500)), [
+  "2025-1:5000:PAID",
+  "2025-2:5000:PAID",
+  "2025-3:2500:PARTIAL",
+]);
+
+// Underpayment stops early.
+assert.deepEqual(pick(buildMonthlyCoverageRows("r", [{ year: 2025, month: 1 }, { year: 2025, month: 2 }], 3000)), [
+  "2025-1:3000:PARTIAL",
+]);
+
+// Tops up an existing partial month, then carries the rest; wraps December → January.
+assert.deepEqual(
+  pick(buildMonthlyCoverageRows("r", [{ year: 2025, month: 12 }], 5000, new Map([["2025:12", 2000]]))),
+  ["2025-12:3000:PAID", "2026-1:2000:PARTIAL"],
+);
+
+// Pending submissions preview on /status and /reports uses the same allocator.
+const pending = getPendingSubmissionsMap([
+  { unitNumber: "7", amountSen: 12500, coverageStartYear: 2025, coverageStartMonth: 1, coverageEndYear: 2025, coverageEndMonth: 2 },
+]);
+assert.deepEqual([...pending.entries()], [
+  ["7:2025:1", { appliedSen: 5000, isCarryForward: false, totalPending: 12500 }],
+  ["7:2025:2", { appliedSen: 5000, isCarryForward: true, totalPending: 12500 }],
+  ["7:2025:3", { appliedSen: 2500, isCarryForward: true, totalPending: 12500 }],
+]);
+
+// Status language used by every grid, tile and pill.
+const st = (amountSen: number | null, extra: Partial<Parameters<typeof monthState>[0]> = {}) =>
+  monthState({ amountSen, residentStatus: "ACTIVE", isFuture: false, ...extra });
+assert.equal(st(5000), "paid");
+assert.equal(st(5000, { isFuture: true }), "ahead");
+assert.equal(st(2000), "partial");
+assert.equal(st(null), "unpaid");
+assert.equal(st(null, { isFuture: true }), "upcoming");
+assert.equal(st(null, { pending: true }), "pending");
+assert.equal(st(null, { residentStatus: "EXEMPT" }), "hold");
+assert.equal(st(5000, { residentStatus: "FOR_SALE" }), "paid"); // payments still show after a house goes up for sale
+assert.equal(st(null, { residentStatus: "FOR_SALE" }), "hold");
+assert.equal(st(null, { override: "MOVED_OUT" }), "hold");
+
+// Proof uploads are identified by content, so a misnamed WebP-as-.jpg is still accepted.
+assert.equal(detectFileType(Buffer.from([0xff, 0xd8, 0xff, 0xe0])), "image/jpeg");
+assert.equal(detectFileType(Buffer.from("RIFF\0\0\0\0WEBPVP8 ", "latin1")), "image/webp");
+assert.equal(detectFileType(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0])), "image/png");
+assert.equal(detectFileType(Buffer.from("%PDF-1.7", "latin1")), "application/pdf");
+assert.equal(detectFileType(Buffer.from("\0\0\0\x18ftypheic", "latin1")), null);
+assert.equal(detectFileType(Buffer.from("<html>", "latin1")), null);
+
+// House numbers sort numerically, not as text.
+assert.deepEqual(sortByUnit(["1", "11", "2", "12A", "12", "3"].map((unitNumber) => ({ unitNumber }))).map((r) => r.unitNumber), ["1", "2", "3", "11", "12", "12A"]);
+
+console.log("coverage self-check: ok");

@@ -1,22 +1,40 @@
 @import "tailwindcss";
+@import "driver.js/dist/driver.css";
 
 :root {
-  --background: #f3f6fb;
-  --foreground: #0f172a;
-  --muted: #64748b;
+  /* JR2 palette, sampled from public/jr2-logo.jpeg (see docs/superpowers/specs/2026-11-16-jr2-redesign-design.md §3) */
+  --night: #050a1a;
+  --night-2: #0b1636;
+  --night-3: #13224a;
+  --lime: #8ee53f;
+  --leaf: #2eb84a;
+  --cyan: #22c7f2;
+  --blue: #2463e8;
+  --blend: linear-gradient(100deg, #8ee53f, #2eb84a 30%, #22c7f2 65%, #2463e8);
+  --paper: #f5f5f7;
+  --ink: #1d1d1f;
+  --ink-2: #6e6e73;
+  --due: #ff5a36;
+  --amber: #e0a100;
+  --hold: #8e9aaf;
 
-  --brand-50: #e9f1ff;
-  --brand-100: #cfe0ff;
-  --brand-500: #0b5fff;
-  --brand-600: #084de0;
-  --brand-700: #053a9b;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --muted: var(--ink-2);
 
-  --success-50: #e9f9ef;
-  --success-600: #137a3d;
-  --danger-50: #fff0f2;
-  --danger-600: #c81e40;
-  --warning-50: #fff8e6;
-  --warning-600: #9a6a00;
+  /* Legacy names used across the admin pages, remapped onto the JR2 blue. */
+  --brand-50: #eaf1fe;
+  --brand-100: #d3e2fd;
+  --brand-500: var(--blue);
+  --brand-600: #1b52c9;
+  --brand-700: #173f9c;
+
+  --success-50: #e2f7e1;
+  --success-600: #1c7a33;
+  --danger-50: #ffe6e0;
+  --danger-600: #c2341a;
+  --warning-50: #fff4d6;
+  --warning-600: #8a6300;
 }
 
 @theme inline {
@@ -31,6 +49,16 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible { outline-color: var(--cyan); }
+
+.text-blend {
+  background: var(--blend);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .bg-brand { background: var(--brand-500); }
@@ -38,13 +66,13 @@ body {
 .bg-brand-50 { background: var(--brand-50); }
 .text-brand-700 { color: var(--brand-700); }
 
-h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, sans-serif; }
+h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, sans-serif; letter-spacing: -0.02em; }
 
 .ui-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.125rem;
   background: #fff;
-  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .ui-label {
@@ -60,7 +88,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .ui-textarea {
   width: 100%;
   border: 1px solid #cbd5e1;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem;
   background: #fff;
   padding: 0.625rem 0.875rem;
   color: #0f172a;
@@ -71,8 +99,8 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .ui-select:focus,
 .ui-textarea:focus {
   outline: none;
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.14);
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34, 199, 242, 0.25);
 }
 
 .ui-textarea { min-height: 6rem; }
@@ -95,7 +123,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   justify-content: center;
   gap: 0.5rem;
   min-height: 2.75rem;
-  border-radius: 0.625rem;
+  border-radius: 999px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -107,7 +135,9 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   color: #fff;
 }
 .ui-button-primary:hover { background: var(--brand-600); }
-.ui-button-primary:focus { outline: none; box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.2); }
+.ui-button-primary:focus-visible,
+.ui-button-secondary:focus-visible,
+.ui-button-danger:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 
 .ui-button-secondary {
   border: 1px solid #cbd5e1;
@@ -120,7 +150,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   background: var(--danger-600);
   color: #fff;
 }
-.ui-button-danger:hover { background: #a31334; }
+.ui-button-danger:hover { background: #a32a14; }
 
 .ui-button-primary:disabled,
 .ui-button-secondary:disabled,
@@ -138,13 +168,204 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 }
 
 .ui-alert-success {
-  border-color: #bbf7d0;
+  border-color: #b7e8bd;
   background: var(--success-50);
   color: var(--success-600);
 }
 
 .ui-alert-error {
-  border-color: #fecdd3;
+  border-color: #ffc9bc;
   background: var(--danger-50);
   color: var(--danger-600);
 }
+
+/* ---- Admin building blocks (redesign polish pass) ---- */
+
+/* Tables: quiet header, hairline rows, hover tint. Use on <table>. */
+.ui-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: 0.875rem; }
+.ui-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #fafafc; color: var(--ink-2);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.7rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.06); white-space: nowrap;
+}
+.ui-table tbody td { padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.05); vertical-align: middle; }
+.ui-table tbody tr:last-child td { border-bottom: 0; }
+.ui-table tbody tr:hover td { background: #fafafc; }
+
+/* Filter/search bar that sits on top of a card. */
+.ui-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+.ui-search {
+  display: flex; flex: 1 1 14rem; align-items: center; gap: 0.5rem; min-width: 0;
+  border-radius: 999px; background: var(--paper); padding: 0.55rem 1rem;
+}
+.ui-search:focus-within { outline: 3px solid rgba(34, 199, 242, 0.35); }
+.ui-search input { min-width: 0; flex: 1; background: transparent; outline: none; font-size: 0.9rem; }
+
+/* Card section title + form sections. */
+.ui-section-title { font-family: var(--font-heading), sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.ui-form-section { display: grid; gap: 1rem; padding: 1.5rem; }
+.ui-form-section + .ui-form-section { border-top: 1px solid rgba(0, 0, 0, 0.06); }
+.ui-hint { font-size: 0.8rem; color: var(--ink-2); }
+
+/* Small status chip for record states (Active, Draft, Closed…). */
+.ui-chip { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 600; }
+
+/* Empty state inside a card. */
+.ui-empty { display: grid; justify-items: center; gap: 0.5rem; padding: 3rem 1.5rem; text-align: center; color: var(--ink-2); }
+
+.ui-label { color: var(--ink); }
+.ui-select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #86868b 50%), linear-gradient(135deg, #86868b 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 2.25rem; }
+
+/* Gentle "alive" float for small illustrations (empty states). Off for reduced motion. */
+@keyframes jr2-float {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-8px) rotate(1.5deg); }
+}
+.animate-float { animation: jr2-float 4.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-float { animation: none; } }
+
+/* Living guardhouse scene on the Today review card (lamp glow, slow drift, fireflies). */
+@keyframes jr2-glow { 0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.85); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); } }
+@keyframes jr2-drift { 0%, 100% { transform: scale(1.04) translate(0, 0); } 50% { transform: scale(1.09) translate(-1.5%, -1%); } }
+@keyframes jr2-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-70px); opacity: 0; } }
+.animate-glow { animation: jr2-glow 3.2s ease-in-out infinite; }
+.animate-drift { animation: jr2-drift 14s ease-in-out infinite; }
+.animate-rise { animation: jr2-rise 5s ease-in infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-glow, .animate-drift, .animate-rise { animation: none; } }
+
+/* House page: month tiles pop in one by one; the year ring draws itself. */
+@keyframes jr2-pop { 0% { opacity: 0; transform: translateY(10px) scale(0.92); } 100% { opacity: 1; transform: none; } }
+@keyframes jr2-ring { from { stroke-dashoffset: var(--ring); } }
+.animate-pop { animation: jr2-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+.animate-ring { animation: jr2-ring 1.1s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .animate-pop, .animate-ring { animation: none; } }
+
+/* Wide hero art floats gently, like an island. */
+@keyframes jr2-hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.animate-hover { animation: jr2-hover 7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-hover { animation: none; } }
+
+/* Bars grow up from the baseline. */
+@keyframes jr2-grow { from { transform: scaleY(0); } }
+.animate-grow { animation: jr2-grow 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@media (prefers-reduced-motion: reduce) { .animate-grow { animation: none; } }
+
+/* Payments ledger: one row markup, two layouts (rows share a grid-areas template). Phones stack three lines beside a house tile; md+ uses columns. */
+.ledger-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.15rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "tile name amount" "tile for proof" "tile meta meta";
+}
+@media (min-width: 768px) {
+  .ledger-row,
+  .ledger-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 6rem minmax(0, 1.7fr) 7.5rem 7rem;
+  }
+  .ledger-row { grid-template-areas: "tile name date for amount proof" "tile name date meta amount proof"; }
+}
+
+/* Residents list: one row markup, two layouts (grid-areas). Phones: tile + name + contact buttons, chips underneath; md+: columns. */
+.resident-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.4rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "tile name actions" "tile meta meta";
+}
+@media (min-width: 768px) {
+  .resident-row,
+  .resident-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) 6rem 8rem 9rem 7rem;
+  }
+  .resident-row { grid-template-areas: "tile name block status month actions"; row-gap: 0; }
+}
+
+/* Collection households list: one row markup, two layouts (grid-areas). Phones stack under the tile; md+ uses columns. */
+.collection-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.4rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "tile name actions" "tile meta meta";
+}
+@media (min-width: 768px) {
+  .collection-row,
+  .collection-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) 6.5rem 8.5rem 9.5rem 7rem;
+  }
+  .collection-row { grid-template-areas: "tile name due paid status actions"; row-gap: 0; }
+}
+
+/* A short side-to-side shake for an error that has just appeared. */
+@keyframes jr2-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+.animate-shake { animation: jr2-shake 0.45s ease-in-out; }
+@media (prefers-reduced-motion: reduce) { .animate-shake { animation: none; } }
+
+/* A house's payment history: one row markup, two layouts. Phones: date leaf, what it was for and the amount, then date · method and the proof button. md+: columns. */
+.history-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.2rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "leaf for amount" "leaf meta proof";
+}
+@media (min-width: 768px) {
+  .history-row,
+  .history-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) minmax(0, 1.2fr) 7.5rem 7rem;
+  }
+  .history-row { grid-template-areas: "leaf for meta amount proof"; row-gap: 0; }
+}
+
+/* Progress bars fill in from the left. */
+@keyframes jr2-grow-x { from { transform: scaleX(0); } }
+.animate-grow-x { animation: jr2-grow-x 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@media (prefers-reduced-motion: reduce) { .animate-grow-x { animation: none; } }
+
+/* Walkthrough tours (driver.js): its base stylesheet is imported at the top; these rules put the popover in the night and lime look. */
+.driver-popover.jr2-tour {
+  font-family: var(--font-body), system-ui, sans-serif;
+  width: min(340px, calc(100vw - 32px));
+  min-width: 0;
+  max-width: none;
+  padding: 18px 18px 14px;
+  color: #e8ecf8;
+  background: linear-gradient(180deg, var(--night-3), var(--night-2));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 28px 64px -16px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.jr2-tour .driver-popover-title { padding-right: 30px; font-family: var(--font-heading), sans-serif; font-size: 1.1rem; font-weight: 700; line-height: 1.3; color: #fff; }
+.jr2-tour .driver-popover-description { margin-top: 6px; font-size: 0.9rem; line-height: 1.55; color: #c7cedd; }
+.jr2-tour .driver-popover-footer { flex-wrap: wrap; justify-content: flex-start; gap: 8px 12px; margin-top: 16px; }
+.jr2-tour .driver-popover-progress-text { white-space: nowrap; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: #8e9ab8; }
+.jr2-tour .driver-popover-close-btn { top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 999px; font-size: 20px; line-height: 28px; color: #8e9ab8; }
+.jr2-tour .driver-popover-close-btn:hover, .jr2-tour .driver-popover-close-btn:focus-visible { color: #fff; background: rgba(255, 255, 255, 0.1); }
+.jr2-tour .driver-popover-navigation-btns { gap: 8px; margin-left: auto; }
+.jr2-tour .driver-popover-navigation-btns button + button { margin-inline-start: 0; }
+.jr2-tour .driver-popover-footer-btn { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; font-family: var(--font-heading), sans-serif; font-size: 13px; font-weight: 700; transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s; }
+.jr2-tour .driver-popover-prev-btn { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.jr2-tour .driver-popover-prev-btn:hover, .jr2-tour .driver-popover-prev-btn:focus-visible { background: rgba(255, 255, 255, 0.18); }
+.jr2-tour .driver-popover-next-btn { background: var(--lime); color: #06210b; box-shadow: 0 3px 0 #4d9a12; }
+.jr2-tour .driver-popover-next-btn:hover, .jr2-tour .driver-popover-next-btn:focus-visible { background: var(--lime); filter: brightness(1.06); }
+.jr2-tour .driver-popover-next-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #4d9a12; }
+.jr2-tour-skip { all: unset; box-sizing: border-box; cursor: pointer; padding: 8px 2px; font-size: 13px; font-weight: 600; color: #8e9ab8; }
+.jr2-tour-skip:hover, .jr2-tour-skip:focus-visible { color: #fff; text-decoration: underline; }
+/* A lime ring marks the element being explained, so it stands out on dark surfaces like the sidebar too. */
+.driver-active .driver-active-element { outline: 2px solid rgba(142, 229, 63, 0.9); outline-offset: 4px; }
+/* The arrow takes the colour of the popover edge it sits on. */
+.jr2-tour .driver-popover-arrow-side-bottom { border-bottom-color: var(--night-3); }
+.jr2-tour .driver-popover-arrow-side-top { border-top-color: var(--night-2); }
+.jr2-tour .driver-popover-arrow-side-left { border-left-color: #0f1b3f; }
+.jr2-tour .driver-popover-arrow-side-right { border-right-color: #0f1b3f; }

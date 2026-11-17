@@ -1,6 +1,7 @@
 import { monthKey } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { normalizeMonthlyAppliedByMonth } from "@/lib/reports/monthly";
+import { sortByUnit } from "@/lib/units";
 
 export type YearGridAssignment = {
   specialCollectionId: string;
@@ -10,6 +11,7 @@ export type YearGridAssignment = {
 };
 
 export type YearGridRow = {
+  residentId: string;
   no: number;
   unitNumber: string;
   name: string;
@@ -17,6 +19,9 @@ export type YearGridRow = {
   isForSale: boolean;
   months: (number | null)[];
   monthStatusOverrides: (("FOR_SALE" | "MOVED_OUT" | "EXEMPT") | null)[];
+  /** The house's status at the end of each month (from status-change history), so a house that became
+   *  "For sale" in November still shows its earlier months as normal (paid / unpaid). */
+  monthStatus: ("ACTIVE" | "EXEMPT" | "FOR_SALE" | "MOVED_OUT")[];
   assignments: YearGridAssignment[];
   /** @deprecated use assignments map instead */
   extraOutstandingSen: number;
@@ -29,6 +34,8 @@ export type YearGridRow = {
 export type YearGridSpecialCollection = {
   id: string;
   title: string;
+  /** Set when the collection belongs to an earlier year but is carried into this one (still running or owed). */
+  carriedFrom?: number;
 };
 
 export type YearGridData = {
@@ -60,8 +67,6 @@ export async function getYearGridData({
   year: number;
   includeInactive?: boolean;
 }): Promise<YearGridData> {
-  const yearStart = new Date(year, 0, 1);
-  const yearEnd = new Date(year + 1, 0, 1);
 
   const [residents, specialCollections] = await Promise.all([
     prisma.resident.findMany({
@@ -81,19 +86,38 @@ export async function getYearGridData({
       },
     }),
     prisma.specialCollection.findMany({
-      where: {
-        status: { in: ["ACTIVE", "CLOSED"] },
-        OR: [
-          { dueDate: { gte: yearStart, lt: yearEnd } },
-          { eventStartDate: { gte: yearStart, lt: yearEnd } },
-          { status: "ACTIVE" },
-        ],
+      where: { status: { in: ["ACTIVE", "CLOSED"] } }, // year is decided below from the dates
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        dueDate: true,
+        eventStartDate: true,
+        createdAt: true,
+        assignments: { select: { amountDue: true, amountPaid: true } },
       },
-      select: { id: true, title: true },
       orderBy: { createdAt: "asc" },
-      take: 5,
     }),
   ]);
+
+  sortByUnit(residents); // numeric house order, so row "no" follows 1, 2, … 10
+  // Which collections appear in this year's grid:
+  // - its own year (due date, else event date, else creation date) always shows there;
+  // - from the current year onward, an earlier collection is carried forward while it is still
+  //   ACTIVE or any house still owes, so the AJK can see who hasn't paid. Past years never carry.
+  const currentYear = new Date().getFullYear();
+  const yearCollections: YearGridSpecialCollection[] = specialCollections
+    .map((c) => {
+      const ownYear = (c.dueDate ?? c.eventStartDate ?? c.createdAt).getFullYear();
+      const unfinished = c.status === "ACTIVE" || c.assignments.some((a) => a.amountPaid < a.amountDue);
+      if (ownYear === year) return { id: c.id, title: c.title, ownYear };
+      if (ownYear < year && year >= currentYear && unfinished) return { id: c.id, title: c.title, ownYear, carriedFrom: ownYear };
+      return null;
+    })
+    .filter((c): c is YearGridSpecialCollection & { ownYear: number } => c !== null)
+    .sort((a, b) => a.ownYear - b.ownYear)
+    .slice(0, 5)
+    .map(({ id, title, carriedFrom }) => ({ id, title, ...(carriedFrom ? { carriedFrom } : {}) }));
 
   const residentIds = residents.map((resident) => resident.id);
   const residentAuditLogs = residentIds.length
@@ -137,29 +161,24 @@ export async function getYearGridData({
       })),
     );
 
-    const residentLogs = logsByResidentId.get(resident.id) ?? [];
-    const latestMoveIn = [...residentLogs]
-      .reverse()
-      .find(
-        (log) =>
-          log.createdAt.getFullYear() === year &&
-          log.beforeStatus === "FOR_SALE" &&
-          log.afterStatus === "ACTIVE",
-      );
-
-    if (latestMoveIn) {
-      const moveInMonth = latestMoveIn.createdAt.getMonth() + 1;
-      for (let i = 1; i < moveInMonth && i <= YEAR_END_MONTH; i++) {
-        monthStatusOverrides[i - 1] = "FOR_SALE";
-      }
-    }
+    // Status at the end of each month: the last status change before that month ended; before the
+    // first recorded change, the status it changed from; with no history, today's status.
+    const residentLogs = (logsByResidentId.get(resident.id) ?? []).filter((log) => log.afterStatus);
+    const monthStatus = Array.from({ length: YEAR_END_MONTH }, (_, i) => {
+      const monthEnd = new Date(year, i + 1, 1);
+      const last = [...residentLogs].reverse().find((log) => log.createdAt < monthEnd);
+      if (last?.afterStatus) return last.afterStatus;
+      return residentLogs[0]?.beforeStatus ?? resident.status;
+    });
 
     for (let i = 1; i <= 12; i++) {
       const key = monthKey(year, i);
       const amount = normalizedByMonth.get(key) ?? 0;
       if (amount > 0) {
+        // Payments always show, whatever the house's status was.
         months[i - 1] = amount;
-        monthStatusOverrides[i - 1] = null;
+      } else if (monthStatus[i - 1] !== "ACTIVE") {
+        monthStatusOverrides[i - 1] = monthStatus[i - 1] as "FOR_SALE" | "MOVED_OUT" | "EXEMPT";
       }
     }
 
@@ -175,6 +194,7 @@ export async function getYearGridData({
     const extraOutstandingSen = Math.max(0, extraDueSen - extraPaidSen);
 
     return {
+      residentId: resident.id,
       no: index + 1,
       unitNumber: resident.unitNumber,
       name: resident.name,
@@ -182,6 +202,7 @@ export async function getYearGridData({
       isForSale: resident.status === "FOR_SALE" || resident.status === "MOVED_OUT",
       months,
       monthStatusOverrides,
+      monthStatus,
       assignments,
       extraDueSen,
       extraPaidSen,
@@ -191,7 +212,7 @@ export async function getYearGridData({
 
   return {
     rows,
-    specialCollections: specialCollections.map((c) => ({ id: c.id, title: c.title })),
+    specialCollections: yearCollections,
     year,
   };
 }

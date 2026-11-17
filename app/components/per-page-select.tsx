@@ -21,9 +21,11 @@ export function PerPageSelect({ perPage, options = [10, 25, 50, 100] }: PerPageS
   }
 
   return (
-    <div className="relative inline-flex items-center">
+    <label className="relative inline-flex items-center gap-1.5 text-[13px] text-[var(--ink-2)]">
+      <span className="hidden sm:inline">Show</span>
       <select
-        className="appearance-none rounded-lg border border-slate-200 bg-white py-1.5 pl-3 pr-7 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        aria-label="Rows per page"
+        className="h-8 appearance-none rounded-full bg-[var(--paper)] pl-3 pr-7 text-[13px] font-semibold text-[var(--ink)] tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)]"
         value={perPage}
         onChange={handleChange}
       >
@@ -31,7 +33,7 @@ export function PerPageSelect({ perPage, options = [10, 25, 50, 100] }: PerPageS
           <option key={n} value={n}>{n}</option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2 text-slate-400" size={12} />
-    </div>
+      <ChevronDown className="pointer-events-none absolute right-2.5 text-[var(--ink-2)]" size={12} aria-hidden="true" />
+    </label>
   );
 }

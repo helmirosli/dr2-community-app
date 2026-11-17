@@ -183,14 +183,32 @@ export async function updateSpecialCollection(
     if (input.data.assignToAll || input.data.selectedResidents.length > 0) {
       const currentAssignments = await prisma.specialCollectionAssignment.findMany({
         where: { specialCollectionId: collectionId },
-        select: { residentId: true },
+        select: { residentId: true, amountPaid: true },
       });
 
       const currentResidents = new Set(currentAssignments.map((a) => a.residentId));
-      const newResidents = new Set(input.data.selectedResidents);
+      // "Assign to all" sends no explicit list: target every active house (as create does). Previously
+      // the empty list made this remove every existing assignment, including houses that had paid.
+      const newResidents = new Set(
+        input.data.assignToAll
+          ? (await prisma.resident.findMany({ where: { status: "ACTIVE" }, select: { id: true } })).map((r) => r.id)
+          : input.data.selectedResidents,
+      );
 
-      // Remove assignments not in new selection
-      const toRemove = [...currentResidents].filter((id) => !newResidents.has(id));
+      // Never drop an assignment that already has money against it (paid amount or linked payments):
+      // that would orphan the house's payment record for this collection.
+      const linked = await prisma.payment.findMany({
+        where: { specialCollectionId: collectionId },
+        select: { residentId: true },
+        distinct: ["residentId"],
+      });
+      const hasMoney = new Set([
+        ...currentAssignments.filter((a) => a.amountPaid > 0).map((a) => a.residentId),
+        ...linked.map((p) => p.residentId),
+      ]);
+
+      // Remove assignments not in new selection (unpaid ones only)
+      const toRemove = [...currentResidents].filter((id) => !newResidents.has(id) && !hasMoney.has(id));
       if (toRemove.length > 0) {
         await prisma.specialCollectionAssignment.deleteMany({
           where: {

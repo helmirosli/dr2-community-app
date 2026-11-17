@@ -99,14 +99,17 @@ export async function createTenant(
       }
     }
 
-    revalidatePath(`/residents/${residentId}/tenants`);
-    redirect(`/residents/${residentId}/tenants`);
   } catch {
     return {
       ok: false,
       message: "Unable to create tenant.",
     };
   }
+
+  // redirect() throws to navigate, so it must run outside the try/catch (which used to swallow it
+  // and show "Unable to create tenant." even though the tenant was saved, inviting duplicates).
+  revalidatePath(`/residents/${residentId}/tenants`);
+  redirect(`/residents/${residentId}/tenants`);
 }
 
 export async function updateTenant(

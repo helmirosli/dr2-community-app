@@ -52,7 +52,7 @@ export async function buildMonthlyReportWorkbook(
   month: number,
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "DR2 Community";
+  workbook.creator = "JR2 Desa Restu";
   workbook.created = new Date(year, month - 1, 1);
 
   const sheet = workbook.addWorksheet(`Report ${monthLabel(year, month)}`);
@@ -160,16 +160,16 @@ export async function buildMonthlyReportPdf(
   const emptyRow = ["No residents match this report filter.", "", "", "", "", "", ""];
 
   const docDefinition: Record<string, unknown> = {
-    pageOrientation: "landscape",
+    pageOrientation: "portrait",
     pageSize: "A4",
     pageMargins: [28, 40, 28, 40],
     defaultStyle: { font: "Roboto", fontSize: 9 },
     info: {
-      title: `DR2 monthly report ${periodLabel}`,
-      author: "DR2 Community",
+      title: `JR2 monthly report ${periodLabel}`,
+      author: "JR2 Desa Restu",
     },
     content: [
-      { text: "DR2 Community", style: "brand" },
+      { text: "JR2 Desa Restu", style: "brand" },
       { text: `Resident fee status — ${periodLabel}`, style: "title" },
       {
         text: `Residents: ${summary.residentCount}    Paid: ${summary.paidCount + summary.upfrontCount}    Partial: ${summary.partialCount}    Unpaid: ${summary.unpaidCount}    Outstanding: ${formatRM(summary.outstandingAmountSen)}`,
@@ -217,13 +217,13 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
   });
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "DR2 Community";
+  workbook.creator = "JR2 Desa Restu";
 
   const sheet = workbook.addWorksheet(`${year}`);
 
   const monthHeaders = MONTH_ABBR.map((m) => ({ header: `${m}-${String(year).slice(2)}`, key: m, width: 10 }));
   const extraHeaders = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ header: sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
+    ? specialCollections.map((sc) => ({ header: sc.carriedFrom ? `${sc.title.toUpperCase()} (from ${sc.carriedFrom})` : sc.title.toUpperCase(), key: `extra_${sc.id}`, width: 12 }))
     : [];
 
   sheet.columns = [
@@ -231,7 +231,7 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
     { header: "NO RUMAH", key: "unit", width: 12 },
     { header: "NAMA", key: "name", width: 28 },
     ...monthHeaders,
-    ...(extraHeaders.length > 0 ? extraHeaders : [{ header: "EXTRA", key: "extra", width: 10 }]),
+    ...extraHeaders,
   ];
 
   const headerRow = sheet.getRow(1);
@@ -241,52 +241,28 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
 
   for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
     const row = rows[rowIdx];
-    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
     const monthValues: Record<string, string | number> = {};
     for (let i = 0; i < 12; i++) {
       const key = MONTH_ABBR[i];
       const amountSen = row.months[i];
       const monthOverride = row.monthStatusOverrides[i];
-      monthValues[key] = row.isForSale
-        ? statusText
-        : amountSen !== null
-          ? amountSen / 100
-          : monthOverride === "FOR_SALE"
-            ? "FOR SALE"
-            : monthOverride === "MOVED_OUT"
-              ? "MOVED OUT"
-          : row.status === "EXEMPT"
-            ? "EXEMPT"
-            : "";
+      monthValues[key] = amountSen !== null ? amountSen / 100 : statusLabelFor(monthOverride ?? (row.monthStatus[i] !== "ACTIVE" ? row.monthStatus[i] : null));
     }
 
+    // One column per collection, using that house's assignment for that collection (not its total).
     const extraValues: Record<string, string> = {};
-    if (extraHeaders.length > 0) {
-      for (const sc of specialCollections) {
-        extraValues[`extra_${sc.id}`] = row.isForSale
-          ? statusText
-          : row.extraOutstandingSen > 0
-            ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
-            : row.extraDueSen > 0
-              ? "PAID"
-              : "";
-      }
-    } else {
-      extraValues["extra"] = row.isForSale
-        ? statusText
-        : row.extraOutstandingSen > 0
-          ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}`
-          : row.extraDueSen > 0
-            ? "PAID"
-            : "";
+    for (const sc of specialCollections) {
+      const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
+      extraValues[`extra_${sc.id}`] = !a
+          ? ""
+          : a.outstanding > 0
+            ? `RM${(a.outstanding / 100).toFixed(2)}`
+            : "PAID";
     }
 
     const dataRow = sheet.addRow({ no: rowIdx + 1, unit: row.unitNumber, name: row.name, ...monthValues, ...extraValues });
 
-    if (row.isForSale) {
-      dataRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
-      dataRow.font = { italic: true, color: { argb: "FF94A3B8" } };
-    } else {
+    {
       for (let i = 0; i < 12; i++) {
         const amountSen = row.months[i];
         const cell = dataRow.getCell(4 + i);
@@ -309,6 +285,16 @@ export async function buildYearGridWorkbook(data: YearGridData): Promise<Buffer>
   return Buffer.from(arrayBuffer);
 }
 
+/** Label for an unpaid month from the house's status that month ("" when it was active). */
+function statusLabelFor(status: string | null | undefined) {
+  return status === "FOR_SALE" ? "FOR SALE" : status === "MOVED_OUT" ? "MOVED OUT" : status === "EXEMPT" ? "EXEMPT" : "";
+}
+
+/** "50" for RM50.00, "12.50" for RM12.50: narrow portrait columns state "Amounts in RM" once in the header. */
+function compactRM(amountSen: number) {
+  return amountSen % 100 === 0 ? String(amountSen / 100) : (amountSen / 100).toFixed(2);
+}
+
 export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   configurePdfFonts();
   const { rows: unsortedRows, specialCollections, year } = data;
@@ -319,8 +305,8 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
     return unitA - unitB;
   });
 
-  const hasExtra = specialCollections.length > 0 || rows.some((r) => r.extraDueSen > 0);
-  const extraColCount = specialCollections.length > 0 ? specialCollections.length : hasExtra ? 1 : 0;
+  const hasExtra = specialCollections.length > 0; // no generic EXTRA column
+  const extraColCount = specialCollections.length;
 
   const monthHeaderCells = MONTH_ABBR.map((m) => ({
     text: `${m}\n${String(year).slice(2)}`,
@@ -332,7 +318,7 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   }));
 
   const extraHeaderCells = specialCollections.length > 0
-    ? specialCollections.map((sc) => ({ text: sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
+    ? specialCollections.map((sc) => ({ text: sc.carriedFrom ? `${sc.title.toUpperCase()}\n(from ${sc.carriedFrom})` : sc.title.toUpperCase(), bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }))
     : hasExtra
       ? [{ text: "EXTRA", bold: true, fillColor: "#d97706", color: "#ffffff", alignment: "center" as const, fontSize: 7 }]
       : [];
@@ -346,50 +332,30 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   ];
 
   const bodyRows = rows.map((row, idx) => {
-    const statusText = row.status === "FOR_SALE" ? "FOR SALE" : row.status === "MOVED_OUT" ? "MOVED OUT" : row.status === "EXEMPT" ? "EXEMPT" : "";
-    const monthCells = row.isForSale
-      ? Array.from({ length: 12 }, () => ({
-          text: statusText,
-          italics: true,
-          color: "#94a3b8",
-          alignment: "center" as const,
-          fontSize: 7,
-        }))
-      : row.months.map((amountSen, i) => ({
-          text:
-            amountSen !== null
-              ? `RM${(amountSen / 100).toFixed(2)}`
-              : row.monthStatusOverrides[i] === "FOR_SALE"
-                ? "FOR SALE"
-                : row.monthStatusOverrides[i] === "MOVED_OUT"
-                  ? "MOVED OUT"
-                  : row.status === "EXEMPT"
-                    ? "EXEMPT"
-                    : "",
-          alignment: "center" as const,
-          fontSize: 7,
-          fillColor: amountSen !== null && amountSen < DEFAULT_MONTHLY_FEE_SEN && amountSen > 0 ? "#fef3c7" : undefined,
-        }));
+    // Payments always show; the house's status that month only labels unpaid months.
+    const monthCells = row.months.map((amountSen, i) => {
+      const label = amountSen === null ? statusLabelFor(row.monthStatusOverrides[i] ?? (row.monthStatus[i] !== "ACTIVE" ? row.monthStatus[i] : null)) : "";
+      return {
+        // Portrait page: amounts in RM without decimals ("50"), unit stated once in the header.
+        text: amountSen !== null ? compactRM(amountSen) : label,
+        alignment: "center" as const,
+        fontSize: 7,
+        italics: Boolean(label),
+        color: label ? "#94a3b8" : undefined,
+        fillColor: amountSen !== null && amountSen < DEFAULT_MONTHLY_FEE_SEN && amountSen > 0 ? "#fef3c7" : label ? "#f1f5f9" : undefined,
+      };
+    });
 
-    const extraCells =
-      extraColCount === 0
-        ? []
-        : row.isForSale
-          ? Array.from({ length: extraColCount }, () => ({
-              text: statusText,
-              italics: true,
-              color: "#94a3b8",
-              alignment: "center" as const,
-              fontSize: 7,
-            }))
-          : specialCollections.length > 0
-            ? specialCollections.map(() => ({
-                text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "",
-                alignment: "center" as const,
-                color: row.extraOutstandingSen > 0 ? "#d97706" : "#16a34a",
-                fontSize: 7,
-              }))
-            : [{ text: row.extraOutstandingSen > 0 ? `RM${(row.extraOutstandingSen / 100).toFixed(2)}` : row.extraDueSen > 0 ? "PAID" : "", alignment: "center" as const, fontSize: 7 }];
+    // Collections show the house's real balance even if it is now for sale / moved out.
+    const extraCells = specialCollections.map((sc) => {
+      const a = row.assignments.find((x) => x.specialCollectionId === sc.id);
+      return {
+        text: !a ? "" : a.outstanding > 0 ? compactRM(a.outstanding) : "PAID",
+        alignment: "center" as const,
+        color: a && a.outstanding > 0 ? "#d97706" : "#16a34a",
+        fontSize: 7,
+      };
+    });
 
     return [
       { text: idx + 1, alignment: "center", fontSize: 7, fillColor: row.isForSale ? "#e2e8f0" : undefined },
@@ -404,20 +370,22 @@ export async function buildYearGridPdf(data: YearGridData): Promise<Buffer> {
   const noWidth = 12;
   const unitWidth = 28;
   const nameWidth = 46;
-  const remaining = 595 - 28 - 28 - noWidth - unitWidth - nameWidth;
+  // A4 portrait (595pt) minus margins; pdfmake adds 2+2pt padding and a 0.5pt rule per column on top of each width.
+  const perColumnChrome = 4.5;
+  const remaining = 595 - 20 - 20 - noWidth - unitWidth - nameWidth - totalCols * perColumnChrome - 1;
   const monthWidth = Math.floor(remaining / (12 + extraColCount));
   const widths = [noWidth, unitWidth, nameWidth, ...Array(12 + extraColCount).fill(monthWidth)];
 
   const docDefinition: Record<string, unknown> = {
-    pageOrientation: "landscape",
+    pageOrientation: "portrait",
     pageSize: "A4",
-    pageMargins: [28, 40, 28, 40],
+    pageMargins: [20, 36, 20, 36],
     defaultStyle: { font: "Roboto", fontSize: 7 },
-    info: { title: `DR2 resident fee ${year}`, author: "DR2 Community" },
+    info: { title: `JR2 resident fee ${year}`, author: "JR2 Desa Restu" },
     content: [
-      { text: "DR2 Community", style: "brand" },
+      { text: "JR2 Desa Restu", style: "brand" },
       { text: `Resident fee payment status — ${year}`, style: "title" },
-      { text: `Total: ${rows.length} units    |    Blank = not paid yet    |    FOR SALE = vacant unit`, style: "subtitle", margin: [0, 3, 0, 10] },
+      { text: `Total: ${rows.length} units    |    Amounts in RM    |    Blank = not paid yet    |    FOR SALE = vacant unit`, style: "subtitle", margin: [0, 3, 0, 10] },
       {
         table: {
           headerRows: 1,

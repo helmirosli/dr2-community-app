@@ -7,6 +7,7 @@ import { z } from "zod";
 import { assertDashboardUser } from "@/lib/auth";
 import { expandMonthRange, isValidMonthRange } from "@/lib/months";
 import { DEFAULT_MONTHLY_FEE_SEN, ringgitToSen } from "@/lib/money";
+import { buildMonthlyCoverageRows } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { getSingleUploadedFile, removeStoredUpload, storeProofUpload, type StoredUpload } from "@/lib/uploads";
 
@@ -191,37 +192,6 @@ async function findDuplicateCoverage(residentId: string, coveredMonths: { year: 
   });
 }
 
-function buildCoverageRows(
-  residentId: string,
-  coveredMonths: { year: number; month: number }[],
-  amountSen: number,
-  existingCoverageMap?: Map<string, number>,
-) {
-  const rows = [];
-  let remainingAmountSen = amountSen;
-
-  // Process initially selected months - smart distribution for partial payments
-  for (const coverage of coveredMonths) {
-    if (remainingAmountSen <= 0) break;
-
-    const key = `${coverage.year}:${coverage.month}`;
-    const existingAmount = existingCoverageMap?.get(key) ?? 0;
-    const amountNeeded = Math.max(0, DEFAULT_MONTHLY_FEE_SEN - existingAmount);
-    const amountApplied = Math.min(amountNeeded || DEFAULT_MONTHLY_FEE_SEN, remainingAmountSen);
-    remainingAmountSen -= amountApplied;
-
-    rows.push({
-      residentId,
-      year: coverage.year,
-      month: coverage.month,
-      amountApplied,
-      status: existingAmount + amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? ("PAID" as const) : ("PARTIAL" as const),
-    });
-  }
-
-  return rows;
-}
-
 export async function createPayment(_previousState: PaymentFormState, formData: FormData): Promise<PaymentFormState> {
   const user = await assertDashboardUser();
   const paymentInput = getPaymentInput(formData);
@@ -277,8 +247,15 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
           referenceNo: paymentInput.data.referenceNo || null,
           notes: paymentInput.data.notes || null,
           createdById: user.id,
+          // Link special-collection payments to their collection (the collection page totals these).
+          specialCollectionId:
+            paymentInput.data.paymentType === "SPECIAL_COLLECTION" ? paymentInput.data.specialCollectionId || null : null,
           coverages: {
-            create: buildCoverageRows(resident.id, paymentInput.coveredMonths, paymentInput.amountSen),
+            // Official payments cover only the selected months; no carry-forward.
+            create: buildMonthlyCoverageRows(resident.id, paymentInput.coveredMonths, paymentInput.amountSen).slice(
+              0,
+              paymentInput.coveredMonths.length,
+            ),
           },
           uploads: storedUpload ? { create: storedUpload } : undefined,
         },
@@ -308,6 +285,7 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
         afterJson: JSON.stringify({
           residentId: resident.id,
           paymentType: paymentInput.data.paymentType,
+          specialCollectionId: paymentInput.data.specialCollectionId || null,
           amountSen: paymentInput.amountSen,
           coveredMonths: paymentInput.coveredMonths,
           adjusted: paymentInput.data.allowAdjustment === "on",

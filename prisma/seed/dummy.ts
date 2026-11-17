@@ -1,9 +1,21 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { hashSync } from "bcryptjs";
 
 import { clearCoreData, prisma } from "./_client";
 
 const DEFAULT_MONTHLY_FEE_SEN = 5000;
+
+// Raw-SQL inserts below bypass Prisma's @default(uuid(7)), so generate UUID v7 here too (RFC 9562):
+// 48-bit Unix ms timestamp, version 7, RFC variant, rest random. Keeps every table on one id format.
+function newId() {
+  const bytes = randomBytes(16);
+  const ms = Date.now(); // < 2^48, exact as a JS number
+  for (let i = 0; i < 6; i++) bytes[i] = Math.floor(ms / 2 ** (8 * (5 - i))) % 256;
+  bytes[6] = (bytes[6] & 0x0f) | 0x70; // version 7
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 9562 variant
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 type MonthPoint = { year: number; month: number };
 
@@ -65,18 +77,42 @@ async function insertSpecialCollectionAssignments(
     amountPaid: number;
     status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "QUARANTINED";
   }>,
+  payment: { createdById: string; paymentDate: Date },
 ) {
   const now = new Date();
   const legacyColumns = await detectLegacyAssignmentRelationColumns();
 
   for (const row of rows) {
+    // Every "paid" amount is backed by a real payment linked to the collection, so the collection
+    // page (which totals linked payments) and the stored amountPaid always agree.
+    if (row.amountPaid > 0) {
+      await prisma.$executeRawUnsafe(
+        `insert into desarestu_db."Payment"
+          ("id","residentId","paymentType","amountSen","paymentDate","method","referenceNo","notes","createdById","specialCollectionId","createdAt","updatedAt")
+         values
+          ($1,$2,$3::desarestu_db."PaymentType",$4,$5,$6::desarestu_db."PaymentMethod",$7,$8,$9,$10,$11,$12)`,
+        newId(),
+        row.residentId,
+        "SPECIAL_COLLECTION",
+        row.amountPaid,
+        payment.paymentDate,
+        "BANK_TRANSFER",
+        `DMY-SC-${row.residentId.slice(-6)}`,
+        "Dummy special collection payment",
+        payment.createdById,
+        row.specialCollectionId,
+        now,
+        now,
+      );
+    }
+
     if (legacyColumns) {
       await prisma.$executeRawUnsafe(
         `insert into desarestu_db."SpecialCollectionAssignment"
           ("id","specialCollectionId","specialCollection","residentId","resident","amountDue","amountPaid","status","createdAt","updatedAt")
          values
           ($1,$2,$3,$4,$5,$6,$7,$8::desarestu_db."SubmissionStatus",$9,$10)`,
-        randomUUID(),
+        newId(),
         row.specialCollectionId,
         row.specialCollectionId,
         row.residentId,
@@ -93,7 +129,7 @@ async function insertSpecialCollectionAssignments(
           ("id","specialCollectionId","residentId","amountDue","amountPaid","status","createdAt","updatedAt")
          values
           ($1,$2,$3,$4,$5,$6::desarestu_db."SubmissionStatus",$7,$8)`,
-        randomUUID(),
+        newId(),
         row.specialCollectionId,
         row.residentId,
         row.amountDue,
@@ -135,7 +171,7 @@ async function createCoveragePayment(input: {
 }) {
   const amountSen = input.coverages.reduce((sum, coverage) => sum + coverage.amountApplied, 0);
   if (amountSen <= 0) return;
-  const paymentId = randomUUID();
+  const paymentId = newId();
   const now = new Date();
 
   await prisma.$executeRawUnsafe(
@@ -160,7 +196,7 @@ async function createCoveragePayment(input: {
 
   for (const coverage of input.coverages) {
     const status = coverage.amountApplied >= DEFAULT_MONTHLY_FEE_SEN ? "PAID" : "PARTIAL";
-    const coverageId = randomUUID();
+    const coverageId = newId();
 
     if (legacyColumns) {
       await prisma.$executeRawUnsafe(
@@ -569,6 +605,7 @@ async function main() {
       amountPaid: idx % 3 === 0 ? 12000 : idx % 3 === 1 ? 6000 : 0,
       status: idx % 3 === 2 ? "PENDING_REVIEW" : "APPROVED",
     })),
+    { createdById: admin.id, paymentDate: new Date(Date.UTC(currentYear, Math.max(0, currentMonth - 2), 10)) },
   );
 
   await insertSpecialCollectionAssignments(
@@ -579,6 +616,7 @@ async function main() {
       amountPaid: 8000,
       status: "APPROVED",
     })),
+    { createdById: admin.id, paymentDate: new Date(Date.UTC(currentYear - 1, 10, 15)) },
   );
 
   await prisma.publicPaymentSubmission.createMany({

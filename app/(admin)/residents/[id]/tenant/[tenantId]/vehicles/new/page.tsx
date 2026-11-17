@@ -1,0 +1,43 @@
+import { notFound } from "next/navigation";
+
+import { HouseHeader } from "@/app/(admin)/residents/[id]/vehicles/vehicle-list-view";
+import { AdminPage } from "@/app/components/page-header";
+import { requireDashboardUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { VehicleForm } from "../vehicle-form";
+
+type NewTenantVehiclePageProps = {
+  params: Promise<{ id: string; tenantId: string }>;
+};
+
+export default async function NewTenantVehiclePage({ params }: NewTenantVehiclePageProps) {
+  await requireDashboardUser();
+  const { id: residentId, tenantId } = await params;
+
+  const [tenant, resident] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, name: true },
+    }),
+    prisma.resident.findUnique({
+      where: { id: residentId },
+      select: { unitNumber: true, name: true },
+    }),
+  ]);
+
+  if (!tenant || !resident) {
+    notFound();
+  }
+
+  return (
+    <AdminPage width="narrow">
+      <HouseHeader
+        unitNumber={resident.unitNumber}
+        title="Add vehicle"
+        subtitle={`${tenant.name} · tenant of ${resident.name}`}
+        back={{ href: `/residents/${residentId}/tenant/${tenantId}/vehicles`, label: "Back to vehicles" }}
+      />
+      <VehicleForm residentId={residentId} tenantId={tenantId} owner={`${tenant.name} · Tenant`} />
+    </AdminPage>
+  );
+}
