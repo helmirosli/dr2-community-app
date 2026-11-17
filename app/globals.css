@@ -304,7 +304,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   .collection-row { grid-template-areas: "tile name due paid status actions"; row-gap: 0; }
 }
 
-/* A short side-to-side shake for an error that just appeared. */
+/* A short side-to-side shake for an error that has just appeared. */
 @keyframes jr2-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
 .animate-shake { animation: jr2-shake 0.45s ease-in-out; }
 @media (prefers-reduced-motion: reduce) { .animate-shake { animation: none; } }
