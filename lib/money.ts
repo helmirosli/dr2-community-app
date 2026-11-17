@@ -16,3 +16,8 @@ export function ringgitToSen(value: string | number) {
 
   return Math.round(amount * 100);
 }
+
+/** "RM 1,440" when there are no cents, "RM 33.33" when there are. For headline figures; ledgers keep formatRM so decimals line up. */
+export function formatRMShort(sen: number) {
+  return formatRM(sen).replace(/\.00$/, "");
+}

@@ -29,3 +29,14 @@ export function monthRange(year: number, month: number) {
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return { from: `${year}-${pad2(month)}-01`, to: `${year}-${pad2(month)}-${pad2(last)}` };
 }
+
+/**
+ * The month the community is collecting for right now: this month, except in its first 7 days when most
+ * people have not paid yet, so it is last month (the home page uses the same rule).
+ */
+export function collectionMonth(now: Date = new Date()) {
+  const today = malaysiaToday(now);
+  const useLast = today.day <= 7;
+  const previous = today.month === 1 ? { year: today.year - 1, month: 12 } : { year: today.year, month: today.month - 1 };
+  return { ...(useLast ? previous : { year: today.year, month: today.month }), isPrevious: useLast };
+}

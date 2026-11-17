@@ -267,3 +267,21 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
   }
   .ledger-row { grid-template-areas: "tile name date for amount proof" "tile name date meta amount proof"; }
 }
+
+/* Residents list: one row markup, two layouts (grid-areas). Phones: tile + name + contact buttons, chips underneath; md+: columns. */
+.resident-row {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.4rem;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  grid-template-areas: "tile name actions" "tile meta meta";
+}
+@media (min-width: 768px) {
+  .resident-row,
+  .resident-head {
+    column-gap: 1.25rem;
+    grid-template-columns: 2.75rem minmax(0, 1.5fr) 6rem 8rem 9rem 7rem;
+  }
+  .resident-row { grid-template-areas: "tile name block status month actions"; row-gap: 0; }
+}
