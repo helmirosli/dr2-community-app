@@ -1,7 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
-import { Download, Eye, X } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { Download, FileText, Paperclip, X } from "lucide-react";
 
 type FileViewerProps = {
   files: Array<{
@@ -19,116 +19,108 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
   const [selectedFileId, setSelectedFileId] = useState<string | null>(files[0]?.id || null);
   const dialogTitleId = useId();
 
+  // Esc closes the viewer, and the page behind it stays put while it is open.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   if (files.length === 0) {
-    return <span className="text-slate-500">No files</span>;
+    return <span className="text-[var(--ink-2)]">No files</span>;
   }
 
   const selectedFile = files.find((f) => f.id === selectedFileId);
+  const sourceOf = (file: (typeof files)[number]) => file.url ?? `/api/uploads/${file.storagePath}`;
 
   return (
     <>
       <button
-        className="inline-flex items-center gap-1.5 rounded-md bg-cyan-50 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-200 transition hover:bg-cyan-100"
+        className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-[#ddf5fd] px-3 text-xs font-semibold text-[#0b6e8e] ring-1 ring-inset ring-[#0b6e8e]/15 transition hover:bg-[#cdeffb] active:scale-95"
         onClick={() => setIsOpen(true)}
         type="button"
       >
-        <Eye size={14} />
-        {triggerLabel} ({files.length})
+        <Paperclip size={13} aria-hidden="true" />
+        {triggerLabel}
+        <span className="tabular-nums opacity-70">{files.length}</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center">
+        <div className="fixed inset-0 z-50 grid items-end bg-[var(--night)]/60 backdrop-blur-sm sm:place-items-center sm:p-6" onClick={() => setIsOpen(false)}>
           <div
-            className="w-full max-h-[90vh] rounded-t-lg bg-white shadow-lg sm:rounded-lg sm:max-w-2xl overflow-hidden flex flex-col sm:w-auto"
+            className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[28px] bg-white shadow-[0_40px_80px_-20px_rgba(0,0,0,.5)] sm:max-w-3xl sm:rounded-[28px]"
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-              <h3 className="text-lg font-semibold text-slate-900" id={dialogTitleId}>
-                Attached files ({files.length})
+            <header className="flex items-center justify-between gap-3 border-b border-black/5 px-5 py-4 sm:px-6">
+              <h3 className="font-heading text-lg font-bold text-[var(--ink)]" id={dialogTitleId}>
+                Attached files <span className="font-sans text-sm font-normal text-[var(--ink-2)]">{files.length}</span>
               </h3>
               <button
-                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100"
+                className="grid size-10 place-items-center rounded-full text-[var(--ink-2)] transition hover:bg-black/5"
                 onClick={() => setIsOpen(false)}
                 type="button"
                 aria-label="Close file viewer"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
-            </div>
+            </header>
 
-            {/* Content */}
-            <div className="flex flex-1 overflow-hidden">
-              {/* File list */}
-              <div className="w-40 border-r border-slate-100 overflow-y-auto">
-                {files.map((file) => (
-                  <button
-                    className={`w-full border-b border-slate-100 px-4 py-3 text-left text-xs font-medium transition ${
-                      selectedFileId === file.id
-                        ? "bg-cyan-50 text-cyan-700"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }`}
-                    key={file.id}
-                    onClick={() => setSelectedFileId(file.id)}
-                    type="button"
-                  >
-                    <p className="truncate">{file.originalFilename}</p>
-                  </button>
-                ))}
-              </div>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden sm:flex-row">
+              {/* Only worth a list when there is more than one file. */}
+              {files.length > 1 && (
+                <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-black/5 p-3 sm:w-52 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r">
+                  {files.map((file) => (
+                    <button
+                      className={`flex min-w-0 shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-xs font-semibold transition sm:w-full ${
+                        selectedFileId === file.id ? "bg-[#ddf5fd] text-[#0b6e8e]" : "text-[var(--ink-2)] hover:bg-[var(--paper)]"
+                      }`}
+                      key={file.id}
+                      onClick={() => setSelectedFileId(file.id)}
+                      type="button"
+                    >
+                      <FileText size={14} aria-hidden="true" className="shrink-0" />
+                      <span className="max-w-40 truncate sm:max-w-none">{file.originalFilename}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
-              {/* File preview */}
-              <div className="flex-1 overflow-auto bg-slate-50 p-4">
+              <div className="min-h-0 flex-1 overflow-auto bg-[var(--paper)] p-4 sm:p-5">
                 {selectedFile && (
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs font-semibold text-slate-600 uppercase">Filename</p>
-                      <p className="mt-1 text-sm text-slate-900 break-all">{selectedFile.originalFilename}</p>
-                    </div>
+                  <div className="grid gap-3">
+                    <p className="break-all text-sm font-semibold text-[var(--ink)]">{selectedFile.originalFilename}</p>
 
-                    {/* File preview based on type */}
                     {selectedFile.mimeType.startsWith("image/") ? (
-                      <div className="mt-4">
-                        <p className="text-xs font-semibold text-slate-600 uppercase">Preview</p>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          alt={selectedFile.originalFilename}
-                          className="mt-2 max-w-full rounded-lg border border-slate-200"
-                          src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
-                        />
-                      </div>
+                      // eslint-disable-next-line @next/next/no-img-element -- user upload of unknown size and host
+                      <img
+                        alt={selectedFile.originalFilename}
+                        className="max-h-[60vh] w-full rounded-2xl bg-white object-contain p-2 ring-1 ring-black/5"
+                        src={sourceOf(selectedFile)}
+                      />
                     ) : selectedFile.mimeType === "application/pdf" ? (
-                      <div className="mt-4">
-                        <p className="text-xs font-semibold text-slate-600 uppercase">Preview</p>
-                        <embed
-                          src={selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`}
-                          type="application/pdf"
-                          className="w-full h-96 rounded-lg border border-slate-200 mt-2"
-                        />
-                      </div>
+                      <embed src={sourceOf(selectedFile)} type="application/pdf" className="h-[60vh] w-full rounded-2xl bg-white ring-1 ring-black/5" />
                     ) : (
-                      <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 text-center">
-                        <p className="text-sm text-slate-600">Preview not available for this file type</p>
+                      <div className="grid justify-items-center gap-2 rounded-2xl bg-white p-8 text-center text-sm text-[var(--ink-2)] ring-1 ring-black/5">
+                        <FileText size={28} aria-hidden="true" />
+                        Preview not available for this file type
                       </div>
                     )}
 
-                    <button
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 mt-4"
-                      onClick={() => {
-                        const link = document.createElement("a");
-                        link.href = selectedFile.url ?? `/api/uploads/${selectedFile.storagePath}`;
-                        link.download = selectedFile.originalFilename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
-                      type="button"
-                    >
-                      <Download size={16} />
+                    <a className="ui-button-secondary w-fit" href={sourceOf(selectedFile)} download={selectedFile.originalFilename}>
+                      <Download size={16} aria-hidden="true" />
                       Download
-                    </button>
+                    </a>
                   </div>
                 )}
               </div>

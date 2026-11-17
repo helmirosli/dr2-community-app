@@ -15,3 +15,17 @@ export function daysUntil(date: Date, now: Date = new Date()): number {
 export function formatDate(date: Date, locale: Locale): string {
   return date.toLocaleDateString(locale === "ms" ? "ms-MY" : "en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 }
+
+export const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Today's date in Malaysia, month 1–12. */
+export function malaysiaToday(now: Date = new Date()) {
+  const [year, month, day] = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).split("-").map(Number);
+  return { year, month, day };
+}
+
+/** First and last day of a month as "YYYY-MM-DD" strings (month 1–12). */
+export function monthRange(year: number, month: number) {
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return { from: `${year}-${pad2(month)}-01`, to: `${year}-${pad2(month)}-${pad2(last)}` };
+}
