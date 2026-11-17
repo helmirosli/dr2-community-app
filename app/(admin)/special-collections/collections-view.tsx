@@ -31,7 +31,7 @@ function CompactRow({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
           </Link>
           <span className="ui-chip bg-[#eef0f4] text-[#5d6779]">{isClosed ? copy.closed : copy.draft}</span>
           {isClosed && c.outstandingSen > 0 && (
-            <span className="ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: formatRMShort(c.outstandingSen) })}</span>
+            <span className="money ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: formatRMShort(c.outstandingSen) })}</span>
           )}
           {c.waitingCount > 0 && <span className="ui-chip bg-[#ddf5fd] text-[#0b6e8e]">{fill(copy.waiting, { n: c.waitingCount })}</span>}
         </div>
@@ -41,8 +41,8 @@ function CompactRow({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
       </div>
       <div className="col-span-2 flex items-center justify-between gap-3 sm:contents">
         <div className="flex items-baseline gap-2 sm:block sm:text-right">
-          <p className="font-heading font-bold tabular-nums text-[var(--ink)]">{formatRMShort(c.paidSen)}</p>
-          <p className="text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</p>
+          <p className="money font-heading font-bold tabular-nums text-[var(--ink)]">{formatRMShort(c.paidSen)}</p>
+          <p className="money text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</p>
         </div>
         <Link
           href={`/special-collections/${c.id}/edit`}

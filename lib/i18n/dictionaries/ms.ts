@@ -2,6 +2,8 @@ import type { Dictionary } from "./en";
 
 const ms: Dictionary = {
   common: {
+    showAmounts: "Tunjuk amaun",
+    hideAmounts: "Sembunyi amaun",
     signOut: "Log keluar",
     save: "Simpan",
     cancel: "Batal",

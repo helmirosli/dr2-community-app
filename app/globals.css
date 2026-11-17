@@ -375,3 +375,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .scroll-gutter::-webkit-scrollbar-track { background: transparent; }
 .scroll-gutter::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.22); border: 3px solid #fff; border-radius: 999px; }
 .scroll-gutter::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.38); }
+
+/* Money figures stay blurred until the eye button is pressed (see amount-veil.tsx). */
+html:not([data-veil="off"]) .money { filter: blur(12px); user-select: none; pointer-events: none; }
+.money { transition: filter 0.2s; }

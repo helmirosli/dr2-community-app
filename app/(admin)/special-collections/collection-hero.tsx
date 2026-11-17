@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CalendarDays, CircleAlert, Clock, PartyPopper, Pencil } from "lucide-react";
 
+import { AmountEye } from "@/app/components/amount-veil";
 import { ProgressRing } from "@/app/components/progress-ring";
 import { HouseTile, stateStyles } from "@/app/components/status";
 import { daysUntil, formatDate } from "@/lib/dates";
@@ -151,8 +152,9 @@ export function CollectionHero({
           </ProgressRing>
           <div className="grid min-w-0 gap-1.5">
             <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 font-heading font-extrabold leading-none tracking-tight tabular-nums">
-              <span className="text-blend text-[clamp(1.9rem,5vw,2.75rem)]">{formatRMShort(c.paidSen)}</span>
-              <span className="text-base font-semibold text-white/40">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</span>
+              <span className="money text-blend text-[clamp(1.9rem,5vw,2.75rem)]">{formatRMShort(c.paidSen)}</span>
+              <span className="money text-base font-semibold text-white/40">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</span>
+              <AmountEye className="grid size-8 place-items-center self-center rounded-full bg-white/10 text-[#c7cedd] ring-1 ring-white/15 transition hover:bg-white/15 hover:text-white" />
             </p>
             <p className="text-sm text-[#c7cedd]">
               {fill(copy.housesPaid, { paid: c.paidCount, total: c.houses.length })}
@@ -160,7 +162,7 @@ export function CollectionHero({
                 <>
                   <span className="text-white/30"> · </span>
                   <span className="whitespace-nowrap text-[#f5b400]">
-                    {formatRMShort(c.outstandingSen)} {copy.outstanding}
+                    <span className="money">{formatRMShort(c.outstandingSen)}</span> {copy.outstanding}
                   </span>
                 </>
               ) : (

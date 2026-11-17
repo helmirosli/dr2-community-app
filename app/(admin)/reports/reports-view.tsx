@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Search, Sigma, X } from "lucide-react
 import { StatusPill, stateStyles, TILE_RAISED } from "@/app/components/status";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
+import { AmountVeil } from "@/app/components/amount-veil";
 import { formatRMShort } from "@/lib/money";
 import type { HoldKind, ReportCell, ReportRow, Show, YearReport } from "@/lib/reports/year-report";
 import { monthName, type MonthState } from "@/lib/status";
@@ -94,23 +95,25 @@ function Hero({ t, locale, report, rows, href, includeInactive }: { t: Dictionar
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="grid content-start gap-4">
           <span className="text-blend font-heading text-sm font-semibold">{fill(c.collectedIn, { year: report.year })}</span>
+          <AmountVeil>
           <p className="font-heading text-[clamp(2.5rem,6vw,3.75rem)] font-extrabold leading-none tracking-tight tabular-nums">
-            <span className="text-blend">{formatRMShort(collectedSen)}</span>
+            <span className="money text-blend">{formatRMShort(collectedSen)}</span>
           </p>
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
             {arrearsSen > 0 ? (
               <Link href={href({ show: "arrears" })} className="inline-flex items-center gap-1.5 rounded-full bg-[#3d1a16] px-2.5 py-1 text-[#ff8a6e] hover:brightness-125">
-                {c.arrears} {formatRMShort(arrearsSen)} · {arrearsHouses} {c.housesInView}
+                {c.arrears} <span className="money">{formatRMShort(arrearsSen)}</span> · {arrearsHouses} {c.housesInView}
               </Link>
             ) : (
               <span className="inline-flex items-center rounded-full bg-[#1c3a2a] px-2.5 py-1 text-[var(--lime)]">{c.owesNothing}</span>
             )}
             {pendingSen > 0 && (
               <Link href={href({ show: "pending" })} className="inline-flex items-center gap-1.5 rounded-full bg-[#0e3346] px-2.5 py-1 text-[var(--cyan)] hover:brightness-125">
-                {c.pendingReview} {formatRMShort(pendingSen)}
+                {c.pendingReview} <span className="money">{formatRMShort(pendingSen)}</span>
               </Link>
             )}
           </div>
+          </AmountVeil>
           <div className="flex items-center gap-3 text-sm text-[#c7cedd]">
             <span className="grid h-2 w-40 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
               <span className="h-full rounded-full bg-[image:var(--blend)]" style={{ width: `${pct}%` }} />

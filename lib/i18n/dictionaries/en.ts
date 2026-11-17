@@ -1,5 +1,7 @@
 const en = {
   common: {
+    showAmounts: "Show amounts",
+    hideAmounts: "Hide amounts",
     signOut: "Sign out",
     save: "Save",
     cancel: "Cancel",
