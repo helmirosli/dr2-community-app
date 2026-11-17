@@ -6,17 +6,14 @@ import { TablePagination } from "@/app/components/table-pagination";
 import { formatDate, malaysiaToday, monthRange } from "@/lib/dates";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
-import { formatRM } from "@/lib/money";
+import { formatRM, formatRMShort } from "@/lib/money";
 import { DEFAULT_PER_PAGE, PER_PAGE_OPTIONS, type Ledger, type LedgerFilters, type LedgerPayment } from "@/lib/reports/payments-ledger";
 import { monthName } from "@/lib/status";
+import { fill } from "@/lib/text";
+import { TILE_RAISED } from "@/app/components/status";
 
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
-/** "RM 1,440" when there are no cents, "RM 33.33" when there are. */
-const rm = (sen: number) => formatRM(sen).replace(/\.00$/, "");
 
-/** Raised, button-like edge for the house tiles. */
-const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
 
 // Same colours as the payment form: monthly fees green, special collections amber.
 const TONE = {
@@ -114,7 +111,7 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
           </div>
 
           <p className="font-heading text-[clamp(2.5rem,6vw,3.75rem)] font-extrabold leading-none tracking-tight tabular-nums">
-            <span className="text-blend">{rm(ledger.totalSen)}</span>
+            <span className="text-blend">{formatRMShort(ledger.totalSen)}</span>
           </p>
           <p className="text-[#c7cedd]">{ledger.totalCount === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: ledger.totalCount })}</p>
 
@@ -127,11 +124,11 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
               <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#c7cedd]">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--leaf)]" aria-hidden="true" />
-                  {copy.monthlyTotal} <b className="font-semibold tabular-nums text-white">{rm(ledger.monthlySen)}</b>
+                  {copy.monthlyTotal} <b className="font-semibold tabular-nums text-white">{formatRMShort(ledger.monthlySen)}</b>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--amber)]" aria-hidden="true" />
-                  {copy.specialTotal} <b className="font-semibold tabular-nums text-white">{rm(ledger.specialSen)}</b>
+                  {copy.specialTotal} <b className="font-semibold tabular-nums text-white">{formatRMShort(ledger.specialSen)}</b>
                 </span>
               </div>
             </div>
@@ -146,7 +143,7 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
               const selected = filters.from === range.from && filters.to === range.to;
               const pct = max > 0 ? Math.round((b.totalSen / max) * 100) : 0;
               const isNow = b.year === today.year && b.month === today.month;
-              const label = `${monthName(locale, b.year, b.month, "long")} · ${rm(b.totalSen)} · ${b.count === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: b.count })}`;
+              const label = `${monthName(locale, b.year, b.month, "long")} · ${formatRMShort(b.totalSen)} · ${b.count === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: b.count })}`;
               return (
                 <Link
                   key={b.key}
@@ -311,7 +308,7 @@ function PaymentRow({ p, t, locale, highlight }: { p: LedgerPayment; t: Dictiona
         href={resident}
         tabIndex={-1}
         aria-hidden="true"
-        className={`[grid-area:tile] grid size-11 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums transition hover:scale-105 ${tone.tile} ${RAISED}`}
+        className={`[grid-area:tile] grid size-11 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums transition hover:scale-105 ${tone.tile} ${TILE_RAISED}`}
       >
         {p.unit}
       </Link>
@@ -465,7 +462,7 @@ export function PaymentsView({
                     <h3 className="font-heading text-sm font-bold text-[var(--ink)]">{monthName(locale, g.year, g.month, "long")}</h3>
                     {total && (
                       <p className="text-xs tabular-nums text-[var(--ink-2)]">
-                        {total.count === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: total.count })} · <b className="font-semibold text-[var(--ink)]">{rm(total.sen)}</b>
+                        {total.count === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: total.count })} · <b className="font-semibold text-[var(--ink)]">{formatRMShort(total.sen)}</b>
                       </p>
                     )}
                   </div>

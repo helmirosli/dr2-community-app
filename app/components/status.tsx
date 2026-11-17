@@ -2,6 +2,9 @@ import Link from "next/link";
 
 import type { MonthState } from "@/lib/status";
 
+/** Raised, button-like edge for small status tiles. */
+export const TILE_RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
+
 // One colour per state (spec §3). Light surfaces; the dark variants are for night bands.
 export const stateStyles: Record<MonthState, { pill: string; dot: string; tile: string; tileDark: string }> = {
   paid: { pill: "bg-[#e2f7e1] text-[#1c7a33]", dot: "bg-[var(--leaf)]", tile: "bg-[#e2f7e1] text-[#1c7a33]", tileDark: "bg-[#1c3a2a] text-[var(--lime)]" },

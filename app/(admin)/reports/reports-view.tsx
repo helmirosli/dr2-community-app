@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 
-import { StatusPill, stateStyles } from "@/app/components/status";
+import { StatusPill, stateStyles, TILE_RAISED } from "@/app/components/status";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
 import { formatRMShort } from "@/lib/money";
@@ -11,8 +11,6 @@ import { fill } from "@/lib/text";
 
 export type ReportQuery = { year: number; includeInactive: boolean; q: string; show: Show };
 
-/** Raised, button-like edge for the small status tiles. */
-const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
 const CELL = "border-b border-black/5 p-1 text-center group-hover:bg-[#fafafc]";
 
 const fmtCell = (sen: number) => `RM${(sen / 100).toFixed(2)}`;
@@ -46,7 +44,7 @@ function Cell({ cell, t, highlight }: { cell: ReportCell; t: Dictionary; highlig
     <td className={`${CELL} ${highlight ? "bg-[#eef5ff]" : ""}`}>
       <span
         title={cell.amountSen ? fmtCell(cell.amountSen) : label}
-        className={`grid min-h-8 min-w-14 place-items-center rounded-lg px-1 text-[11px] font-semibold tabular-nums ${RAISED} ${stateStyles[cell.state].tile}`}
+        className={`grid min-h-8 min-w-14 place-items-center rounded-lg px-1 text-[11px] font-semibold tabular-nums ${TILE_RAISED} ${stateStyles[cell.state].tile}`}
       >
         {cell.pending ? (
           <span className="grid leading-tight">
@@ -286,7 +284,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
             <li key={r.residentId}>
               <Link href={`/residents/${r.residentId}`} className="grid gap-2.5 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-black/5 transition active:scale-[0.99]">
                 <span className="flex items-center gap-3">
-                  <span className={`grid size-12 shrink-0 place-items-center rounded-xl font-heading text-lg font-bold tabular-nums ${RAISED} ${stateStyles[r.cells[focus].state].tile}`}>{r.unit}</span>
+                  <span className={`grid size-12 shrink-0 place-items-center rounded-xl font-heading text-lg font-bold tabular-nums ${TILE_RAISED} ${stateStyles[r.cells[focus].state].tile}`}>{r.unit}</span>
                   <span className="grid min-w-0 flex-1 gap-0.5">
                     <span className="truncate font-heading font-semibold">{r.name}</span>
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs tabular-nums text-[var(--ink-2)]">
@@ -362,7 +360,7 @@ export function ReportsView({ t, locale, report, query }: { t: Dictionary; local
                   {r.extras.map((extra, i) => (
                     <td className={CELL} key={report.collections[i].id}>
                       {extra ? (
-                        <span className={`grid min-h-8 min-w-14 place-items-center rounded-lg px-1 text-[11px] font-semibold tabular-nums ${RAISED} ${stateStyles[extra.state].tile}`}>
+                        <span className={`grid min-h-8 min-w-14 place-items-center rounded-lg px-1 text-[11px] font-semibold tabular-nums ${TILE_RAISED} ${stateStyles[extra.state].tile}`}>
                           {extra.state === "pending" ? (
                             <span className="grid leading-tight">
                               <span>{fmtCell(extra.sen)}</span>

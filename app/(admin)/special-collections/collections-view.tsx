@@ -6,15 +6,13 @@ import { HouseTile, stateStyles } from "@/app/components/status";
 import { daysUntil, formatDate } from "@/lib/dates";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
-import { formatRM } from "@/lib/money";
+import { formatRMShort } from "@/lib/money";
 import type { CollectionOverview } from "@/lib/reports/collections-overview";
+import { fill } from "@/lib/text";
 
 type Copy = Dictionary["collections"];
 
-/** "RM 1,440" when there are no cents, "RM 33.33" when there are. */
-const rm = (sen: number) => formatRM(sen).replace(/\.00$/, "");
 
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 /** Raised, button-like edge for house tiles on the dark card. */
 const RAISED_DARK = "shadow-[inset_0_1px_0_rgba(255,255,255,.14),0_3px_0_rgba(0,0,0,.4)]";
@@ -118,8 +116,8 @@ function ActiveCard({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
           </ProgressRing>
           <div className="grid min-w-0 gap-1.5">
             <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 font-heading font-extrabold leading-none tracking-tight tabular-nums">
-              <span className="text-blend text-[clamp(1.9rem,5vw,2.75rem)]">{rm(c.paidSen)}</span>
-              <span className="text-base font-semibold text-white/40">{fill(copy.ofTotal, { total: rm(c.dueSen) })}</span>
+              <span className="text-blend text-[clamp(1.9rem,5vw,2.75rem)]">{formatRMShort(c.paidSen)}</span>
+              <span className="text-base font-semibold text-white/40">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</span>
             </p>
             <p className="text-sm text-[#c7cedd]">
               {fill(copy.housesPaid, { paid: c.paidCount, total: c.houses.length })}
@@ -127,7 +125,7 @@ function ActiveCard({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
                 <>
                   <span className="text-white/30"> · </span>
                   <span className="whitespace-nowrap text-[#f5b400]">
-                    {rm(c.outstandingSen)} {copy.outstanding}
+                    {formatRMShort(c.outstandingSen)} {copy.outstanding}
                   </span>
                 </>
               )}
@@ -144,7 +142,7 @@ function ActiveCard({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
                     dark
                     unit={h.unit}
                     state={h.state}
-                    label={`${t.states[h.state]} · ${rm(h.paidSen)} / ${rm(h.dueSen)}`}
+                    label={`${t.states[h.state]} · ${formatRMShort(h.paidSen)} / ${formatRMShort(h.dueSen)}`}
                     href={`/residents/${h.residentId}`}
                     className={RAISED_DARK}
                   />
@@ -202,18 +200,18 @@ function CompactRow({ c, t, locale, now }: { c: CollectionOverview; t: Dictionar
           </Link>
           <span className="ui-chip bg-[#eef0f4] text-[#5d6779]">{isClosed ? copy.closed : copy.draft}</span>
           {isClosed && c.outstandingSen > 0 && (
-            <span className="ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: rm(c.outstandingSen) })}</span>
+            <span className="ui-chip bg-[#fff4d6] tabular-nums text-[#8a6300]">{fill(copy.stillOwed, { amount: formatRMShort(c.outstandingSen) })}</span>
           )}
           {c.waitingCount > 0 && <span className="ui-chip bg-[#ddf5fd] text-[#0b6e8e]">{fill(copy.waiting, { n: c.waitingCount })}</span>}
         </div>
         <p className="mt-0.5 text-xs text-[var(--ink-2)]">
-          {due.text} · {fill(copy.perHouse, { amount: rm(c.amountPerResident) })} · {fill(copy.housesPaid, { paid: c.paidCount, total: c.houses.length })}
+          {due.text} · {fill(copy.perHouse, { amount: formatRMShort(c.amountPerResident) })} · {fill(copy.housesPaid, { paid: c.paidCount, total: c.houses.length })}
         </p>
       </div>
       <div className="col-span-2 flex items-center justify-between gap-3 sm:contents">
         <div className="flex items-baseline gap-2 sm:block sm:text-right">
-          <p className="font-heading font-bold tabular-nums text-[var(--ink)]">{rm(c.paidSen)}</p>
-          <p className="text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: rm(c.dueSen) })}</p>
+          <p className="font-heading font-bold tabular-nums text-[var(--ink)]">{formatRMShort(c.paidSen)}</p>
+          <p className="text-xs text-[var(--ink-2)]">{fill(copy.ofTotal, { total: formatRMShort(c.dueSen) })}</p>
         </div>
         <Link
           href={`/special-collections/${c.id}/edit`}

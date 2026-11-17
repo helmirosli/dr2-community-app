@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { firstName, isFutureMonth, monthName, monthState, type MonthState } from "@/lib/status";
+import { fill } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,6 @@ const LAMP: Record<MonthState, string> = {
   upcoming: "34,199,242",
 };
 
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 export default async function HousePage({
   params,

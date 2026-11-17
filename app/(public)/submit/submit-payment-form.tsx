@@ -7,13 +7,13 @@ import { createPublicSubmission, type PublicSubmissionState } from "@/lib/action
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { useDictionary } from "@/lib/i18n/context";
 import { TurnstileWidget, type TurnstileHandle } from "./turnstile-widget";
+import { fill } from "@/lib/text";
 
 export type SubmitHouse = { unit: string; name: string; paidUntil: string | null; nextYear: number; nextMonth: number };
 type SpecialCollection = { id: string; title: string; amountPerResident: number };
 type Bank = { name: string; holder: string; account: string };
 
 const initialState: PublicSubmissionState = { ok: false, message: "" };
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 function addMonths(year: number, month: number, n: number) {
   const index = year * 12 + (month - 1) + n;

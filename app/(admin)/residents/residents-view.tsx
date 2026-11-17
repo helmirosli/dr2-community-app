@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LayoutGrid, List, MessageCircle, Phone, Plus, Search, SearchX } from "lucide-react";
 
 import { ProgressRing } from "@/app/components/progress-ring";
-import { StatusPill, stateStyles } from "@/app/components/status";
+import { StatusPill, stateStyles, TILE_RAISED } from "@/app/components/status";
 import { TablePagination } from "@/app/components/table-pagination";
 import type { Dictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/locale";
@@ -21,8 +21,6 @@ import { fill } from "@/lib/text";
 
 type View = "list" | "map";
 
-/** Raised, button-like edge for the house tiles. */
-const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
 
 const STATUS_STYLE: Record<ResidentStatus, { chip: string; bar: string; dot: string }> = {
   ACTIVE: { chip: "bg-[#e2f7e1] text-[#1c7a33]", bar: "bg-[var(--leaf)]", dot: "bg-[var(--leaf)]" },
@@ -224,7 +222,7 @@ function ResidentRow({ r, t }: { r: DirectoryResident; t: Dictionary }) {
   const c = t.residents;
   return (
     <li className="resident-row relative px-4 py-3.5 transition hover:bg-[#fafafc] sm:px-5">
-      <span aria-hidden="true" className={`grid size-11 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums [grid-area:tile] ${stateStyles[r.state].tile} ${RAISED}`}>
+      <span aria-hidden="true" className={`grid size-11 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums [grid-area:tile] ${stateStyles[r.state].tile} ${TILE_RAISED}`}>
         {r.unit}
       </span>
 
@@ -306,7 +304,7 @@ function MapView({ t, residents }: { t: Dictionary; residents: DirectoryResident
                     href={`/residents/${r.id}`}
                     title={`${r.unit}: ${r.name} · ${t.states[r.state]}`}
                     aria-label={`${fill(c.openHouse, { unit: r.unit })}: ${r.name}`}
-                    className={`grid gap-0.5 rounded-2xl px-2 py-3 text-center transition hover:-translate-y-0.5 active:translate-y-[1px] ${stateStyles[r.state].tile} ${RAISED}`}
+                    className={`grid gap-0.5 rounded-2xl px-2 py-3 text-center transition hover:-translate-y-0.5 active:translate-y-[1px] ${stateStyles[r.state].tile} ${TILE_RAISED}`}
                   >
                     <span className="font-heading text-xl font-bold tabular-nums">{r.unit}</span>
                     <span className="truncate text-[11px] font-medium opacity-80">{firstName(r.name)}</span>

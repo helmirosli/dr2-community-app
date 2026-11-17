@@ -10,6 +10,7 @@ import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { prisma } from "@/lib/prisma";
 import { isFutureMonth, monthName, monthState, type MonthState } from "@/lib/status";
 import { StatusBoard, type BoardCell, type BoardRow } from "./status-board";
+import { fill } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,7 +21,6 @@ type StatusPageProps = {
 
 const LEGEND: MonthState[] = ["paid", "ahead", "pending", "partial", "unpaid", "hold"];
 
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 function fmtCell(amountSen: number) {
   return `RM${(amountSen / 100).toFixed(2)}`;

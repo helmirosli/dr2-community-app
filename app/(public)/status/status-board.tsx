@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Search } from "lucide-react";
 
-import { stateStyles } from "@/app/components/status";
+import { stateStyles, TILE_RAISED } from "@/app/components/status";
 import type { MonthState } from "@/lib/status";
 
 export type BoardCell = { state: MonthState; text: string };
@@ -33,8 +33,6 @@ export type BoardLabels = {
 
 type Filter = "all" | "unpaid" | "pending";
 
-/** Raised, button-like edge for the small status tiles. */
-const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
 
 const isPaid = (s: MonthState) => s === "paid" || s === "ahead";
 
@@ -42,7 +40,7 @@ function Cell({ cell, label, className = "" }: { cell: BoardCell; label: string;
   return (
     <span
       title={label}
-      className={`grid min-h-8 min-w-12 place-items-center rounded-lg px-1 text-[11px] font-semibold ${RAISED} ${stateStyles[cell.state].tile} ${className}`}
+      className={`grid min-h-8 min-w-12 place-items-center rounded-lg px-1 text-[11px] font-semibold ${TILE_RAISED} ${stateStyles[cell.state].tile} ${className}`}
     >
       {isPaid(cell.state) ? <Check size={14} strokeWidth={3} aria-label={label} /> : cell.text}
     </span>
@@ -135,7 +133,7 @@ export function StatusBoard({
               className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-black/5 transition active:scale-[0.99]"
             >
               <span
-                className={`grid size-12 shrink-0 place-items-center rounded-xl font-heading text-lg font-bold tabular-nums ${RAISED} ${stateStyles[r.cells[focusMonth].state].tile}`}
+                className={`grid size-12 shrink-0 place-items-center rounded-xl font-heading text-lg font-bold tabular-nums ${TILE_RAISED} ${stateStyles[r.cells[focusMonth].state].tile}`}
               >
                 {r.unit}
               </span>

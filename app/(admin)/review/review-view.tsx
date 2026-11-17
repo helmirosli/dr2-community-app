@@ -11,13 +11,12 @@ import type { QueueItem, RecentDecision, ReviewData, ReviewItem } from "@/lib/re
 import { monthName } from "@/lib/status";
 import { fill } from "@/lib/text";
 import { ReviewActions } from "./review-actions";
+import { TILE_RAISED } from "@/app/components/status";
 
 type Item = Extract<ReviewData, { kind: "item" }>;
 type Clear = Extract<ReviewData, { kind: "empty" }>;
 type Actions = { approve: (formData: FormData) => Promise<void>; reject: (formData: FormData) => Promise<void> };
 
-/** Raised, button-like edge for the house tiles. */
-const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_2px_0_rgba(0,0,0,.07)]";
 
 // Same colours as the payment form: monthly fees green, special collections amber.
 const TONE = { MONTHLY_FEE: "bg-[#e2f7e1] text-[#1c7a33]", SPECIAL_COLLECTION: "bg-[#fff4d6] text-[#8a6300]" } as const;
@@ -61,7 +60,7 @@ function QueuePanel({ t, data }: { t: Dictionary; data: Item }) {
                 aria-current={active ? "true" : undefined}
                 className={`flex items-center gap-3 rounded-2xl p-3 text-sm transition ${active ? "bg-white shadow-sm ring-2 ring-[var(--cyan)]" : "hover:bg-white"}`}
               >
-                <span className={`grid size-11 shrink-0 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums ${TONE[s.type]} ${RAISED}`}>{s.unit}</span>
+                <span className={`grid size-11 shrink-0 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums ${TONE[s.type]} ${TILE_RAISED}`}>{s.unit}</span>
                 <span className="grid min-w-0 flex-1 gap-0.5">
                   <span className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-semibold">{s.name || "—"}</span>
@@ -124,12 +123,12 @@ function Header({ t, item, data }: { t: Dictionary; item: ReviewItem; data: Item
           href={`/residents/${item.residentId}`}
           aria-label={`${r.openProfile}: ${item.name}`}
           title={r.openProfile}
-          className={`grid size-14 shrink-0 place-items-center rounded-2xl font-heading text-xl font-bold tabular-nums transition hover:scale-105 ${TONE[item.type]} ${RAISED}`}
+          className={`grid size-14 shrink-0 place-items-center rounded-2xl font-heading text-xl font-bold tabular-nums transition hover:scale-105 ${TONE[item.type]} ${TILE_RAISED}`}
         >
           {item.unit}
         </Link>
       ) : (
-        <span className={`grid size-14 shrink-0 place-items-center rounded-2xl font-heading text-xl font-bold tabular-nums ${TONE[item.type]} ${RAISED}`}>{item.unit}</span>
+        <span className={`grid size-14 shrink-0 place-items-center rounded-2xl font-heading text-xl font-bold tabular-nums ${TONE[item.type]} ${TILE_RAISED}`}>{item.unit}</span>
       )}
       <div className="min-w-0 flex-1 basis-48">
         <h2 className="truncate font-heading text-2xl font-bold leading-tight">{item.name || "—"}</h2>
@@ -338,7 +337,7 @@ function ClearState({ t, locale, data }: { t: Dictionary; locale: Locale; data: 
               const approved = d.status === "APPROVED";
               return (
                 <li key={d.id} className="flex items-center gap-3 px-5 py-3.5">
-                  <span className={`grid size-11 shrink-0 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums ${approved ? "bg-[#e2f7e1] text-[#1c7a33]" : "bg-[#ffe6e0] text-[#c2341a]"} ${RAISED}`}>{d.unit}</span>
+                  <span className={`grid size-11 shrink-0 place-items-center rounded-xl font-heading text-sm font-bold tabular-nums ${approved ? "bg-[#e2f7e1] text-[#1c7a33]" : "bg-[#ffe6e0] text-[#c2341a]"} ${TILE_RAISED}`}>{d.unit}</span>
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="truncate font-semibold">{d.name || "—"}</span>

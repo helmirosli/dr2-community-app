@@ -9,10 +9,10 @@ import { prisma } from "@/lib/prisma";
 import { countPaid, getMonthStates } from "@/lib/reports/month-states";
 import { monthName, type MonthState } from "@/lib/status";
 import { CopyButton, UnitLookup } from "./home-client";
+import { fill } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
 
-const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 
 /** Raised, button-like edge for the small status tiles. */
 const RAISED = "shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_3px_0_rgba(0,0,0,.08)]";
