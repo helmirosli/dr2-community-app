@@ -321,6 +321,8 @@ const ms: Dictionary = {
     notFound: "Tiada rumah {unit} di Desa Restu 2.",
     tryAgain: "Semak rumah lain",
     year: "Tahun",
+    owed: "{count} bulan belum bayar tahun ini · {amount}",
+    home: "Utama",
   },
   statusBoard: {
     filterAll: "Semua",

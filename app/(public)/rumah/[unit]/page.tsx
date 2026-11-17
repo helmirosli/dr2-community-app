@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { StatusPill, stateStyles } from "@/app/components/status";
 import { getDictionary, getLocale } from "@/lib/i18n";
-import { formatRM } from "@/lib/money";
+import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
@@ -86,18 +86,28 @@ export default async function HousePage({
 
   const paidUntil =
     summary.paidUntilYear && summary.paidUntilMonth ? monthName(locale, summary.paidUntilYear, summary.paidUntilMonth, "long") : t.house.never;
+  const owedMonths = year === now.getFullYear() ? months.filter((m) => m.state === "unpaid" || m.state === "partial") : [];
+  const owedSen = owedMonths.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - (m.amountSen ?? 0), 0);
   const dateFmt = new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", { day: "numeric", month: "short" });
 
   return (
     <>
       <section className="px-4 pb-14 pt-12 sm:pt-16">
         <div className="mx-auto grid max-w-2xl justify-items-center gap-4 text-center">
+          <Link href="/" className="inline-flex items-center gap-1 justify-self-start text-sm text-[var(--cyan)] hover:underline">
+            <ChevronLeft size={16} /> {t.house.home}
+          </Link>
           <p className="text-blend font-heading text-sm font-semibold">{firstName(row.name)}</p>
           <h1 className="font-heading text-[clamp(2.4rem,8vw,4rem)] font-bold leading-none tracking-tight">{fill(t.house.title, { unit })}</h1>
           <StatusPill state={thisMonthState} label={`${t.house.thisMonth}: ${t.states[thisMonthState]}`} className="px-4 py-1.5 text-sm" />
           <p className="text-[#a1a1a6]">
             {t.house.paidUntil} <strong className="font-heading text-white">{paidUntil}</strong>
           </p>
+          {owedMonths.length > 0 && (
+            <p className="text-sm tabular-nums text-[#ff8a6e]">
+              {fill(t.house.owed, { count: owedMonths.length, amount: formatRM(owedSen) })}
+            </p>
+          )}
           <Link
             href={`/submit?unit=${encodeURIComponent(unit)}`}
             className="mt-2 rounded-full bg-[var(--lime)] px-6 py-3 font-heading font-semibold text-[#06210b] hover:brightness-105"

@@ -362,6 +362,8 @@ const en = {
     notFound: "There is no house {unit} in Desa Restu 2.",
     tryAgain: "Check another house",
     year: "Year",
+    owed: "{count} months unpaid this year · {amount}",
+    home: "Home",
   },
   statusBoard: {
     filterAll: "All",
