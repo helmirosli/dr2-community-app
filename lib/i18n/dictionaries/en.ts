@@ -377,6 +377,8 @@ const en = {
     paymentCount: "{n} payments",
     paymentCountOne: "1 payment",
     monthlyTotal: "Monthly fees",
+    showAmounts: "Show amounts",
+    hideAmounts: "Hide amounts",
     specialTotal: "Special collections",
     waitingReview: "{n} waiting for review",
     perMonthHint: "Tap a month to filter",

@@ -336,6 +336,8 @@ const ms: Dictionary = {
     paymentCount: "{n} pembayaran",
     paymentCountOne: "1 pembayaran",
     monthlyTotal: "Yuran bulanan",
+    showAmounts: "Tunjuk amaun",
+    hideAmounts: "Sembunyi amaun",
     specialTotal: "Kutipan khas",
     waitingReview: "{n} menunggu semakan",
     perMonthHint: "Ketik bulan untuk menapis",

@@ -369,3 +369,7 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 .jr2-tour .driver-popover-arrow-side-top { border-top-color: var(--night-2); }
 .jr2-tour .driver-popover-arrow-side-left { border-left-color: #0f1b3f; }
 .jr2-tour .driver-popover-arrow-side-right { border-right-color: #0f1b3f; }
+
+/* Money figures stay hidden behind the eye button (see AmountVeil). */
+[data-veil="on"] .money { filter: blur(12px); user-select: none; pointer-events: none; }
+.money { transition: filter 0.2s; }

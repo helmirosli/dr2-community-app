@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Clock, Plus, Search, SearchX, Sparkles, StickyNote, X } from "lucide-react";
 
+import { AmountVeil } from "@/app/components/amount-veil";
 import { FileViewer } from "@/app/components/file-viewer";
 import { TablePagination } from "@/app/components/table-pagination";
 import { formatDate, malaysiaToday, monthRange } from "@/lib/dates";
@@ -93,8 +94,9 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
             )}
           </div>
 
+          <AmountVeil showLabel={copy.showAmounts} hideLabel={copy.hideAmounts}>
           <p className="font-heading text-[clamp(2.5rem,6vw,3.75rem)] font-extrabold leading-none tracking-tight tabular-nums">
-            <span className="text-blend">{formatRMShort(ledger.totalSen)}</span>
+            <span className="money text-blend">{formatRMShort(ledger.totalSen)}</span>
           </p>
           <p className="text-[#c7cedd]">{ledger.totalCount === 1 ? copy.paymentCountOne : fill(copy.paymentCount, { n: ledger.totalCount })}</p>
 
@@ -107,15 +109,16 @@ function Hero({ t, locale, ledger, filters, href, now }: { t: Dictionary; locale
               <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-[#c7cedd]">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--leaf)]" aria-hidden="true" />
-                  {copy.monthlyTotal} <b className="font-semibold tabular-nums text-white">{formatRMShort(ledger.monthlySen)}</b>
+                  {copy.monthlyTotal} <b className="money font-semibold tabular-nums text-white">{formatRMShort(ledger.monthlySen)}</b>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-[var(--amber)]" aria-hidden="true" />
-                  {copy.specialTotal} <b className="font-semibold tabular-nums text-white">{formatRMShort(ledger.specialSen)}</b>
+                  {copy.specialTotal} <b className="money font-semibold tabular-nums text-white">{formatRMShort(ledger.specialSen)}</b>
                 </span>
               </div>
             </div>
           )}
+          </AmountVeil>
         </div>
 
         {/* Last 12 months: each bar is a link that filters the ledger to that month. */}
