@@ -68,8 +68,8 @@ export type ReviewData =
 const DAY_MS = 86_400_000;
 
 /** The name the house is registered under, so every row reads the same whatever the sender typed. */
-async function registeredNames(units: string[]) {
-  const rows = await prisma.resident.findMany({ where: { unitNumber: { in: units } }, select: { unitNumber: true, name: true } });
+async function registeredNames() {
+  const rows = await prisma.resident.findMany({ select: { unitNumber: true, name: true } });
   return new Map(rows.map((r) => [r.unitNumber, r.name]));
 }
 
@@ -78,6 +78,7 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
   const now = Date.now();
   const ageOf = (d: Date) => Math.max(0, Math.floor((now - d.getTime()) / DAY_MS));
 
+  const namesPromise = registeredNames();
   const queueRows = await prisma.publicPaymentSubmission.findMany({
     where: { status: "PENDING_REVIEW" },
     orderBy: { createdAt: "asc" },
@@ -104,7 +105,7 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
       }),
     ]);
     const countOf = (s: string) => decided.find((d) => d.status === s)?._count._all ?? 0;
-    const names = await registeredNames(recent.map((r) => r.unitNumber));
+    const names = await namesPromise;
     return {
       kind: "empty",
       approvedToday: countOf("APPROVED"),
@@ -113,7 +114,7 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
     };
   }
 
-  const names = await registeredNames(queueRows.map((s) => s.unitNumber));
+  const names = await namesPromise;
   const queue: QueueItem[] = queueRows.map((s) => ({
     id: s.id,
     unit: s.unitNumber,
@@ -130,33 +131,20 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
   const isMonthly = row.paymentType === "MONTHLY_FEE";
   const months = isMonthly ? expandMonthRange(row.coverageStartYear, row.coverageStartMonth, row.coverageEndYear, row.coverageEndMonth) : [];
 
-  // Special collections: expect what this house still owes (due − already paid), not the full per-house amount.
-  const assignment =
-    !isMonthly && row.specialCollectionId
-      ? await prisma.specialCollectionAssignment.findFirst({
-          where: { specialCollectionId: row.specialCollectionId, resident: { unitNumber: row.unitNumber } },
-          select: { amountDue: true, amountPaid: true },
-        })
-      : null;
-  // A month that already holds part of its fee (an earlier overpayment spilled into it) only needs the rest.
-  // Read the amounts from the year grid, the same numbers the house pages show.
-  const inByMonth = new Map<string, number>();
-  if (isMonthly) {
-    for (const year of new Set(months.map((m) => m.year))) {
-      const gridRow = (await getYearGridData({ year, includeInactive: true })).rows.find((r) => r.unitNumber === row.unitNumber);
-      gridRow?.months.forEach((amount, i) => inByMonth.set(`${year}-${i + 1}`, amount ?? 0));
-    }
-  }
-  const inFor = (m: { year: number; month: number }) => Math.min(DEFAULT_MONTHLY_FEE_SEN, inByMonth.get(`${m.year}-${m.month}`) ?? 0);
-  const expectedSen = isMonthly
-    ? months.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - inFor(m), 0)
-    : assignment
-      ? Math.max(0, assignment.amountDue - assignment.amountPaid)
-      : row.specialCollection?.amountPerResident ?? 0;
   const hashes = row.uploads.map((u) => u.contentHash).filter((h): h is string => Boolean(h));
   const nowDate = new Date(now);
 
-  const [resident, overlap, duplicateCount, report] = await Promise.all([
+  // Everything about the chosen receipt is read in one round, not one after another.
+  // Special collections: expect what this house still owes (due − already paid). Monthly: the fee minus what each month
+  // already holds (an earlier overpayment spilled into it), read from the same year grid the house pages use.
+  const [assignment, grids, resident, overlap, duplicateCount, report] = await Promise.all([
+    !isMonthly && row.specialCollectionId
+      ? prisma.specialCollectionAssignment.findFirst({
+          where: { specialCollectionId: row.specialCollectionId, resident: { unitNumber: row.unitNumber } },
+          select: { amountDue: true, amountPaid: true },
+        })
+      : null,
+    isMonthly ? Promise.all([...new Set(months.map((m) => m.year))].map(async (year) => ({ year, grid: await getYearGridData({ year, includeInactive: true }) }))) : [],
     prisma.resident.findUnique({ where: { unitNumber: row.unitNumber }, select: { id: true } }),
     isMonthly
       ? findExistingOfficialCoverageByUnitNumber(row.unitNumber, row.coverageStartYear, row.coverageStartMonth, row.coverageEndYear, row.coverageEndMonth)
@@ -164,6 +152,16 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
     hashes.length ? prisma.upload.count({ where: { contentHash: { in: hashes }, NOT: { submissionId: row.id } } }) : 0,
     getMonthlyReport({ year: nowDate.getFullYear(), month: nowDate.getMonth() + 1, includeInactive: true }),
   ]);
+  const inByMonth = new Map<string, number>();
+  for (const { year, grid } of grids) {
+    grid.rows.find((r) => r.unitNumber === row.unitNumber)?.months.forEach((amount, i) => inByMonth.set(`${year}-${i + 1}`, amount ?? 0));
+  }
+  const inFor = (m: { year: number; month: number }) => Math.min(DEFAULT_MONTHLY_FEE_SEN, inByMonth.get(`${m.year}-${m.month}`) ?? 0);
+  const expectedSen = isMonthly
+    ? months.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - inFor(m), 0)
+    : assignment
+      ? Math.max(0, assignment.amountDue - assignment.amountPaid)
+      : row.specialCollection?.amountPerResident ?? 0;
   const house = report.rows.find((r) => r.unitNumber === row.unitNumber);
 
   return {

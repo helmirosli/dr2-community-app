@@ -15,11 +15,10 @@ type ResidentsPageProps = {
 };
 
 export default async function ResidentsPage({ searchParams }: ResidentsPageProps) {
-  await requireDashboardUser();
   const params = await searchParams;
   const { filters, view, page, perPage } = parseDirectoryParams(params);
 
-  const [t, locale, dir] = await Promise.all([getDictionary(), getLocale(), getDirectory(filters, page, perPage, view === "map")]);
+  const [, t, locale, dir] = await Promise.all([requireDashboardUser(), getDictionary(), getLocale(), getDirectory(filters, page, perPage, view === "map")]);
 
   return (
     <AdminPage>

@@ -69,9 +69,8 @@ export async function getYearReport(year: number, includeInactive: boolean): Pro
   const now = new Date();
   const today = malaysiaToday(now);
 
-  const { rows: gridRows, specialCollections } = await getYearGridData({ year, includeInactive });
-
-  const [pendingMonthly, pendingCollections] = await Promise.all([
+  const [{ rows: gridRows, specialCollections }, pendingMonthly, pendingCollections] = await Promise.all([
+    getYearGridData({ year, includeInactive }),
     prisma.publicPaymentSubmission.findMany({
       where: { paymentType: "MONTHLY_FEE", status: "PENDING_REVIEW", coverageStartYear: { lte: year }, coverageEndYear: { gte: year } },
       select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },

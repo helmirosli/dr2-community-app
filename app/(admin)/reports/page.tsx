@@ -20,10 +20,9 @@ type ReportsPageProps = {
 };
 
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
-  await requireDashboardUser();
   const query = parseReportParams(await searchParams);
 
-  const [t, locale, report] = await Promise.all([getDictionary(), getLocale(), getYearReport(query.year, query.includeInactive)]);
+  const [, t, locale, report] = await Promise.all([requireDashboardUser(), getDictionary(), getLocale(), getYearReport(query.year, query.includeInactive)]);
 
   const exportQuery = new URLSearchParams({
     year: String(query.year),

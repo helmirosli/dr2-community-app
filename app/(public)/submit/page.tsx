@@ -13,7 +13,19 @@ export const dynamic = "force-dynamic";
 
 export default async function PublicSubmitPage({ searchParams }: { searchParams: Promise<{ unit?: string; count?: string }> }) {
   const now = new Date();
-  const [{ unit, count }, t, locale, report, specialCollections] = await Promise.all([
+  const thisYear = now.getFullYear();
+  const thisMonth = now.getMonth() + 1;
+  // All independent reads run together (Prisma queries only start once awaited, so they go in this one Promise.all).
+  const assignmentsQuery = prisma.specialCollectionAssignment.findMany({
+    where: { specialCollection: { status: "ACTIVE" } },
+    select: { specialCollectionId: true, amountDue: true, amountPaid: true, resident: { select: { unitNumber: true } } },
+  });
+  const waitingQuery = prisma.publicPaymentSubmission.findMany({
+    where: { status: "PENDING_REVIEW", paymentType: "MONTHLY_FEE" },
+    select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
+  });
+  const gridsQuery = Promise.all([thisYear, thisYear + 1].map((year) => getYearGridData({ year, includeInactive: false })));
+  const [{ unit, count }, t, locale, report, specialCollections, assignments, waiting, grids] = await Promise.all([
     searchParams,
     getDictionary(),
     getLocale(),
@@ -23,23 +35,18 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
       select: { id: true, title: true, amountPerResident: true },
       orderBy: { createdAt: "asc" },
     }),
+    assignmentsQuery,
+    waitingQuery,
+    gridsQuery,
   ]);
 
   // What each house still owes per active special collection (due − paid). The form asks for this, not the full amount.
-  const assignments = await prisma.specialCollectionAssignment.findMany({
-    where: { specialCollection: { status: "ACTIVE" } },
-    select: { specialCollectionId: true, amountDue: true, amountPaid: true, resident: { select: { unitNumber: true } } },
-  });
   const outstandingByUnit: Record<string, Record<string, number>> = {};
   for (const a of assignments) {
     (outstandingByUnit[a.resident.unitNumber] ??= {})[a.specialCollectionId] = Math.max(0, a.amountDue - a.amountPaid);
   }
 
   // Months that already have a receipt waiting for review, per house: they cannot be paid again.
-  const waiting = await prisma.publicPaymentSubmission.findMany({
-    where: { status: "PENDING_REVIEW", paymentType: "MONTHLY_FEE" },
-    select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
-  });
   const pendingByUnit: Record<string, string[]> = {};
   for (const key of getPendingSubmissionsMap(waiting).keys()) {
     const [unit, year, month] = key.split(":");
@@ -49,9 +56,6 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
   // Step 1 needs: house list, paid-until, and the first month still owed (next after paid-until, never before this month's start of billing).
   // Months already paid in full (this year and next) cannot be paid again, and the choice starts at the
   // first month still owed, even when it is older than the paid-until month (a gap such as Jan-Mar).
-  const thisYear = now.getFullYear();
-  const thisMonth = now.getMonth() + 1;
-  const grids = await Promise.all([thisYear, thisYear + 1].map((year) => getYearGridData({ year, includeInactive: false })));
   const paidByUnit: Record<string, string[]> = {};
   const partialByUnit: Record<string, Record<string, number>> = {};
   const firstOwedByUnit: Record<string, { year: number; month: number }> = {};

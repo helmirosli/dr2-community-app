@@ -35,44 +35,27 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  const { rows, specialCollections } = await getYearGridData({
-    year: selectedYear,
-    includeInactive: true,
-  });
-
-  const pendingSubmissions = await prisma.publicPaymentSubmission.findMany({
-    where: {
-      paymentType: "MONTHLY_FEE",
-      status: "PENDING_REVIEW",
-      coverageStartYear: { lte: selectedYear },
-      coverageEndYear: { gte: selectedYear },
-    },
-    select: {
-      unitNumber: true,
-      amountSen: true,
-      coverageStartYear: true,
-      coverageStartMonth: true,
-      coverageEndYear: true,
-      coverageEndMonth: true,
-    },
-  });
+  const [{ rows, specialCollections }, pendingSubmissions, pendingCollectionSubmissions, report] = await Promise.all([
+    getYearGridData({ year: selectedYear, includeInactive: true }),
+    prisma.publicPaymentSubmission.findMany({
+      where: {
+        paymentType: "MONTHLY_FEE",
+        status: "PENDING_REVIEW",
+        coverageStartYear: { lte: selectedYear },
+        coverageEndYear: { gte: selectedYear },
+      },
+      select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
+    }),
+    prisma.publicPaymentSubmission.findMany({
+      where: { paymentType: "SPECIAL_COLLECTION", status: "PENDING_REVIEW", specialCollectionId: { not: null } },
+      select: { unitNumber: true, amountSen: true, specialCollectionId: true },
+    }),
+    getMonthlyReport({ year: currentYear, month: currentMonth, includeInactive: true }),
+  ]);
 
   const pendingMap = getPendingSubmissionsMap(pendingSubmissions);
 
   // Pending special-collection submissions: key = "unitNumber:collectionId"
-  const pendingCollectionSubmissions = await prisma.publicPaymentSubmission.findMany({
-    where: {
-      paymentType: "SPECIAL_COLLECTION",
-      status: "PENDING_REVIEW",
-      specialCollectionId: { not: null },
-    },
-    select: {
-      unitNumber: true,
-      amountSen: true,
-      specialCollectionId: true,
-    },
-  });
-
   const pendingCollectionMap = new Map<string, number>();
   for (const sub of pendingCollectionSubmissions) {
     if (!sub.specialCollectionId) continue;
@@ -80,7 +63,6 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
     pendingCollectionMap.set(key, (pendingCollectionMap.get(key) ?? 0) + sub.amountSen);
   }
 
-  const report = await getMonthlyReport({ year: currentYear, month: currentMonth, includeInactive: true });
   const paidUntilByUnit = new Map(
     report.rows.map((r) => [
       r.unitNumber,

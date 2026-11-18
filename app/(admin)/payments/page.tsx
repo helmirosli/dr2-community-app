@@ -23,11 +23,10 @@ type PaymentsPageProps = {
 };
 
 export default async function PaymentsPage({ searchParams }: PaymentsPageProps) {
-  await requireDashboardUser();
   const params = await searchParams;
   const { filters, page, perPage } = parseLedgerParams(params);
 
-  const [t, locale, ledger] = await Promise.all([getDictionary(), getLocale(), getPaymentsLedger(filters, page, perPage)]);
+  const [, t, locale, ledger] = await Promise.all([requireDashboardUser(), getDictionary(), getLocale(), getPaymentsLedger(filters, page, perPage)]);
 
   return (
     <AdminPage>

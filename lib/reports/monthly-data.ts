@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import {
   buildMonthlyReport,
@@ -10,7 +11,7 @@ export type MonthlyReportQuery = {
   includeInactive: boolean;
 };
 
-export async function getMonthlyReport({ year, month, includeInactive }: MonthlyReportQuery) {
+async function loadMonthlyReport({ year, month, includeInactive }: MonthlyReportQuery) {
   const residents = await prisma.resident.findMany({
     where: includeInactive ? {} : { status: "ACTIVE" },
     orderBy: { unitNumber: "asc" },
@@ -62,3 +63,8 @@ export function clampReportYear(value: string | undefined, fallback: number) {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed >= 2020 && parsed <= 2100 ? parsed : fallback;
 }
+
+const monthlyReportOnce = cache((year: number, month: number, includeInactive: boolean) => loadMonthlyReport({ year, month, includeInactive }));
+
+/** Read once per request: pages that need the report in several places share one load. */
+export const getMonthlyReport = ({ year, month, includeInactive }: MonthlyReportQuery) => monthlyReportOnce(year, month, includeInactive);
