@@ -379,3 +379,8 @@ h1, h2, h3, .font-heading { font-family: var(--font-heading), Arial, Helvetica, 
 /* Money figures stay blurred until the eye button is pressed (see amount-veil.tsx). */
 html:not([data-veil="off"]) .money { filter: blur(12px); user-select: none; pointer-events: none; }
 .money { transition: filter 0.2s; }
+
+/* Read-only viewers (staff role VIEWER): hide every link that leads to a form or the review inbox. The server refuses their writes too (assertDashboardUser), this only keeps buttons out of sight. */
+[data-viewer] :is(a[href$="/new"], a[href$="/edit"], a[href*="/payments/new"], a[href="/review"], a[href*="/file-upload"]) {
+  display: none !important;
+}

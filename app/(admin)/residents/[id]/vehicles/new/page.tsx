@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminPage } from "@/app/components/page-header";
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VehicleForm } from "../vehicle-form";
 import { HouseHeader } from "../vehicle-list-view";
@@ -11,7 +11,7 @@ type NewVehiclePageProps = {
 };
 
 export default async function NewVehiclePage({ params }: NewVehiclePageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   const { id: residentId } = await params;
 
   const resident = await prisma.resident.findUnique({

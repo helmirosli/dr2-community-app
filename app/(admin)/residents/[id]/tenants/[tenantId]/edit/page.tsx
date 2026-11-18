@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { HouseHeader } from "@/app/(admin)/residents/[id]/vehicles/vehicle-list-view";
 import { AdminPage } from "@/app/components/page-header";
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TenantForm } from "../../tenant-form";
 
@@ -11,7 +11,7 @@ type EditTenantPageProps = {
 };
 
 export default async function EditTenantPage({ params }: EditTenantPageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   const { id: residentId, tenantId } = await params;
 
   const tenant = await prisma.tenant.findUnique({

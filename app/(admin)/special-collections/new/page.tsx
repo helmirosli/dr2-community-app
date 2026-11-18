@@ -1,4 +1,4 @@
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { SpecialCollectionForm } from "../special-collection-form";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function NewSpecialCollectionPage() {
-  await requireDashboardUser();
+  await requireDashboardEditor();
 
   const residents = await prisma.resident.findMany({
     where: { status: "ACTIVE" },

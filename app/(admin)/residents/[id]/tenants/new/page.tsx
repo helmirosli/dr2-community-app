@@ -1,7 +1,7 @@
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TenantForm } from "../tenant-form";
 
@@ -10,7 +10,7 @@ type NewTenantPageProps = {
 };
 
 export default async function NewTenantPage({ params }: NewTenantPageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   const { id: residentId } = await params;
 
   const resident = await prisma.resident.findUnique({

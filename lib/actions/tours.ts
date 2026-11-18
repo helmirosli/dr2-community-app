@@ -1,13 +1,13 @@
 "use server";
 
-import { assertDashboardUser } from "@/lib/auth";
+import { assertSignedIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tourById } from "@/lib/tours/defs";
 import { parseSeen } from "@/lib/tours/state";
 
 /** Remembers that the signed-in person finished or skipped a tour, so it stays off. The version comes from the code, never from the caller. */
 export async function completeTour(id: string) {
-  const user = await assertDashboardUser();
+  const user = await assertSignedIn();
   const tour = tourById(id);
   if (!tour || tour.audience !== "staff") return;
 
@@ -19,6 +19,6 @@ export async function completeTour(id: string) {
 
 /** "Show tips again": forget every tour this person has seen. */
 export async function resetTours() {
-  const user = await assertDashboardUser();
+  const user = await assertSignedIn();
   await prisma.user.update({ where: { id: user.id }, data: { tourState: {} } });
 }

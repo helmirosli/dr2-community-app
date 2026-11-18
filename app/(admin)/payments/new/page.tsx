@@ -1,4 +1,4 @@
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { PaymentForm } from "../payment-form";
@@ -12,7 +12,7 @@ type NewPaymentPageProps = {
 };
 
 export default async function NewPaymentPage({ searchParams }: NewPaymentPageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   const params = await searchParams;
 
   const [residents, specialCollections] = await Promise.all([
