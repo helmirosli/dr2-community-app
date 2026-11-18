@@ -9,7 +9,15 @@ import { useDictionary } from "@/lib/i18n/context";
 import { TurnstileWidget, type TurnstileHandle } from "./turnstile-widget";
 import { fill } from "@/lib/text";
 
-export type SubmitHouse = { unit: string; name: string; paidUntil: string | null; nextYear: number; nextMonth: number };
+export type SubmitHouse = {
+  unit: string;
+  name: string;
+  paidUntil: string | null;
+  nextYear: number;
+  nextMonth: number;
+  /** Months ("2026-5") that already have a receipt waiting for review. */
+  pending: string[];
+};
 type SpecialCollection = { id: string; title: string; amountPerResident: number };
 type Bank = { name: string; holder: string; account: string };
 
@@ -55,10 +63,20 @@ export function SubmitPaymentForm({
   const monthFmt = useMemo(() => new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", { month: "short", year: "2-digit" }), [locale]);
   const label = (ym: { year: number; month: number }) => monthFmt.format(new Date(ym.year, ym.month - 1, 1));
 
-  const start = house ? { year: house.nextYear, month: house.nextMonth } : null;
-  const chips = start ? Array.from({ length: 12 }, (_, i) => addMonths(start.year, start.month, i)) : [];
-  const end = start ? addMonths(start.year, start.month, count - 1) : null;
-  const untilDecember = start ? 12 - start.month + 1 : 1;
+  // Months with a receipt already waiting for review cannot be paid again: the choice starts at the first free
+  // month and stops before the next one that is under review.
+  const pendingMonths = new Set(house?.pending ?? []);
+  const underReview = (m: { year: number; month: number }) => pendingMonths.has(`${m.year}-${m.month}`);
+  const offered = house ? Array.from({ length: 36 }, (_, i) => addMonths(house.nextYear, house.nextMonth, i)) : [];
+  const skip = Math.max(0, offered.findIndex((m) => !underReview(m)));
+  const chips = offered.slice(0, skip + 12);
+  let room = 0;
+  while (skip + room < chips.length && !underReview(chips[skip + room])) room += 1;
+  const months = Math.max(1, Math.min(count, room));
+  const start = house ? chips[skip] : null;
+  const end = start ? addMonths(start.year, start.month, months - 1) : null;
+  const untilDecember = start ? Math.min(12 - start.month + 1, room) : 1;
+  const waiting = chips.slice(0, skip);
   // Only collections this house still owes, priced at its remaining balance.
   const owed = house ? (outstandingByUnit[house.unit] ?? {}) : {};
   const houseCollections = specialCollections
@@ -71,7 +89,7 @@ export function SubmitPaymentForm({
       ? Math.round((Number(customAmount) || 0) * 100)
       : paymentType === "SPECIAL_COLLECTION"
         ? collection?.outstanding ?? 0
-        : count * DEFAULT_MONTHLY_FEE_SEN;
+        : months * DEFAULT_MONTHLY_FEE_SEN;
 
   useEffect(() => {
     if (state.message && !state.ok) turnstileRef.current?.reset();
@@ -212,35 +230,52 @@ export function SubmitPaymentForm({
           <div className="grid gap-3">
             <p className="text-sm font-semibold">{f.whichMonths}</p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" className={chip(count === 1)} onClick={() => setCount(1)}>
+              <button type="button" className={chip(months === 1)} onClick={() => setCount(1)}>
                 {f.quick1}
               </button>
-              <button type="button" className={chip(count === 3)} onClick={() => setCount(3)}>
-                {f.quick3}
-              </button>
+              {room >= 3 && (
+                <button type="button" className={chip(months === 3)} onClick={() => setCount(3)}>
+                  {f.quick3}
+                </button>
+              )}
               {untilDecember > 3 && (
-                <button type="button" className={chip(count === untilDecember)} onClick={() => setCount(untilDecember)}>
+                <button type="button" className={chip(months === untilDecember)} onClick={() => setCount(untilDecember)}>
                   {f.quickDec}
                 </button>
               )}
             </div>
+            {waiting.length > 0 && (
+              <p className="rounded-2xl bg-[#ddf5fd] px-4 py-3 text-sm text-[#0b6e8e]">
+                {fill(f.pendingNote, { months: waiting.map(label).join(", "), next: start ? label(start) : "" })}
+              </p>
+            )}
             <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
-              {chips.map((m, i) => (
-                <button
-                  key={`${m.year}-${m.month}`}
-                  type="button"
-                  aria-pressed={i < count}
-                  onClick={() => setCount(i + 1)}
-                  className={`rounded-xl py-2 text-xs font-semibold transition ${
-                    i < count ? "bg-[#e2f7e1] text-[#1c7a33] ring-1 ring-inset ring-[var(--leaf)]" : "bg-[var(--paper)] text-[var(--ink-2)]"
-                  }`}
-                >
-                  {label(m)}
-                </button>
-              ))}
+              {chips.map((m, i) => {
+                const review = underReview(m);
+                const picked = !review && i >= skip && i < skip + months;
+                return (
+                  <button
+                    key={`${m.year}-${m.month}`}
+                    type="button"
+                    disabled={review}
+                    aria-pressed={picked}
+                    onClick={() => setCount(i - skip + 1)}
+                    className={`rounded-xl py-2 text-xs font-semibold transition ${
+                      review
+                        ? "cursor-not-allowed bg-[#ddf5fd] text-[#0b6e8e]"
+                        : picked
+                          ? "bg-[#e2f7e1] text-[#1c7a33] ring-1 ring-inset ring-[var(--leaf)]"
+                          : "bg-[var(--paper)] text-[var(--ink-2)]"
+                    }`}
+                  >
+                    {label(m)}
+                    {review && <span className="block text-[10px] font-medium">{f.underReview}</span>}
+                  </button>
+                );
+              })}
             </div>
             {start && end && (
-              <p className="text-sm text-[var(--ink-2)]">{fill(f.monthsSelected, { n: count, from: label(start), to: label(end) })}</p>
+              <p className="text-sm text-[var(--ink-2)]">{fill(f.monthsSelected, { n: months, from: label(start), to: label(end) })}</p>
             )}
           </div>
         ) : houseCollections.length ? (

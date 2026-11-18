@@ -655,6 +655,8 @@ const en = {
     monthsPaid: "{paid} of {due} months paid",
   },
   submitFlow: {
+    underReview: "Under review",
+    pendingNote: "{months}: a receipt is already waiting for review, so you can pay from {next}.",
     title: "Send payment proof",
     subtitle: "Three quick steps. The AJK checks every receipt before marking a month paid.",
     stepHouse: "House",

@@ -1,4 +1,5 @@
 import { getDictionary, getLocale } from "@/lib/i18n";
+import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { firstName, monthName } from "@/lib/status";
@@ -32,6 +33,17 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
     (outstandingByUnit[a.resident.unitNumber] ??= {})[a.specialCollectionId] = Math.max(0, a.amountDue - a.amountPaid);
   }
 
+  // Months that already have a receipt waiting for review, per house: they cannot be paid again.
+  const waiting = await prisma.publicPaymentSubmission.findMany({
+    where: { status: "PENDING_REVIEW", paymentType: "MONTHLY_FEE" },
+    select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
+  });
+  const pendingByUnit: Record<string, string[]> = {};
+  for (const key of getPendingSubmissionsMap(waiting).keys()) {
+    const [unit, year, month] = key.split(":");
+    (pendingByUnit[unit] ??= []).push(`${year}-${month}`);
+  }
+
   // Step 1 needs: house list, paid-until, and the first month still owed (next after paid-until, never before this month's start of billing).
   const houses: SubmitHouse[] = report.rows
     .map((r) => {
@@ -45,6 +57,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
         unit: r.unitNumber,
         name: firstName(r.name),
         paidUntil: hasPaid ? monthName(locale, r.paidUntilYear!, r.paidUntilMonth!, "long") : null,
+        pending: pendingByUnit[r.unitNumber] ?? [],
         nextYear: next.year,
         nextMonth: next.month,
       };
