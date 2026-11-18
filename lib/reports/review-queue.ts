@@ -3,6 +3,7 @@ import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { expandMonthRange } from "@/lib/months";
 import { findExistingOfficialCoverageByUnitNumber } from "@/lib/payments/duplicates";
 import { prisma } from "@/lib/prisma";
+import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 
 export type QueueItem = {
@@ -137,16 +138,16 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
           select: { amountDue: true, amountPaid: true },
         })
       : null;
-  // A month that already has part of its fee (an earlier overpayment spilled into it) only needs the rest.
-  const alreadyIn =
-    isMonthly && months.length
-      ? await prisma.paymentCoverage.findMany({
-          where: { resident: { unitNumber: row.unitNumber }, OR: months.map((m) => ({ year: m.year, month: m.month })) },
-          select: { year: true, month: true, amountApplied: true },
-        })
-      : [];
-  const inFor = (m: { year: number; month: number }) =>
-    Math.min(DEFAULT_MONTHLY_FEE_SEN, alreadyIn.filter((c) => c.year === m.year && c.month === m.month).reduce((sum, c) => sum + c.amountApplied, 0));
+  // A month that already holds part of its fee (an earlier overpayment spilled into it) only needs the rest.
+  // Read the amounts from the year grid, the same numbers the house pages show.
+  const inByMonth = new Map<string, number>();
+  if (isMonthly) {
+    for (const year of new Set(months.map((m) => m.year))) {
+      const gridRow = (await getYearGridData({ year, includeInactive: true })).rows.find((r) => r.unitNumber === row.unitNumber);
+      gridRow?.months.forEach((amount, i) => inByMonth.set(`${year}-${i + 1}`, amount ?? 0));
+    }
+  }
+  const inFor = (m: { year: number; month: number }) => Math.min(DEFAULT_MONTHLY_FEE_SEN, inByMonth.get(`${m.year}-${m.month}`) ?? 0);
   const expectedSen = isMonthly
     ? months.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - inFor(m), 0)
     : assignment

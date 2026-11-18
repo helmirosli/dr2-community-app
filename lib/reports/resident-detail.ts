@@ -1,4 +1,5 @@
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
+import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { DEFAULT_PER_PAGE, PER_PAGE_OPTIONS, paymentRowSelect, toLedgerPayment, type LedgerPayment } from "@/lib/reports/payments-ledger";
@@ -162,7 +163,7 @@ export async function getResidentDetail(id: string, opts: { year: number | null;
         override: row.monthStatusOverrides[i],
         residentStatus: row.monthStatus[i],
         isFuture: isFutureMonth(forYear, i + 1, now),
-        pending: !amountSen && pendingMap.has(`${resident.unitNumber}:${forYear}:${i + 1}`),
+        pending: (amountSen ?? 0) < DEFAULT_MONTHLY_FEE_SEN && pendingMap.has(`${resident.unitNumber}:${forYear}:${i + 1}`),
       }),
     }));
 

@@ -71,7 +71,7 @@ export default async function HousePage({
       override: row.monthStatusOverrides[i],
       residentStatus: row.monthStatus[i],
       isFuture: isFutureMonth(year, month, now),
-      pending: !amountSen && pendingMap.has(`${unit}:${year}:${month}`),
+      pending: (amountSen ?? 0) < DEFAULT_MONTHLY_FEE_SEN && pendingMap.has(`${unit}:${year}:${month}`),
     });
     return { month, amountSen, state };
   });
@@ -183,7 +183,7 @@ export default async function HousePage({
                       <span className="text-[11px] font-semibold">{fill(t.house.leftToPay, { amount: formatRM(Math.max(0, DEFAULT_MONTHLY_FEE_SEN - amountSen)) })}</span>
                     </>
                   ) : (
-                    <span className="text-[11px] font-medium">{amountSen ? formatRM(amountSen) : t.states[state]}</span>
+                    <span className="text-[11px] font-medium">{amountSen && state !== "pending" ? formatRM(amountSen) : t.states[state]}</span>
                   )}
                   {payable && <span className="text-[10px] font-semibold underline underline-offset-2">{t.house.tapToPay}</span>}
                 </>
