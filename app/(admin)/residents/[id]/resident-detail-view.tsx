@@ -274,7 +274,7 @@ function YearCard({ t, locale, d, href }: { t: Dictionary; locale: Locale; d: Re
             <li key={month} className="animate-pop" style={{ animationDelay: `${i * 40}ms` }}>
               <div
                 aria-current={current ? "date" : undefined}
-                className={`relative grid h-full gap-0.5 rounded-2xl px-3 py-3.5 text-center ${TILE_RAISED} ${stateStyles[state].tile} ${
+                className={`relative grid h-full min-h-[6rem] content-center gap-0.5 rounded-2xl px-3 py-3.5 text-center ${TILE_RAISED} ${stateStyles[state].tile} ${
                   current ? "outline outline-2 outline-offset-2 outline-[var(--blue)]" : ""
                 }`}
               >
