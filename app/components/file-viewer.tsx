@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { Download, FileText, Paperclip, X } from "lucide-react";
 
 type FileViewerProps = {
@@ -53,7 +54,8 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
         <span className="tabular-nums opacity-70">{files.length}</span>
       </button>
 
-      {isOpen && (
+      {/* Drawn on <body>: inside a list row, an ancestor with a filter or transform would cut the overlay down to the row. */}
+      {isOpen && createPortal(
         <div className="fixed inset-0 z-50 grid items-end bg-[var(--night)]/60 backdrop-blur-sm sm:place-items-center sm:p-6" onClick={() => setIsOpen(false)}>
           <div
             className="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-[28px] bg-white shadow-[0_40px_80px_-20px_rgba(0,0,0,.5)] sm:max-w-3xl sm:rounded-[28px]"
@@ -126,7 +128,8 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
