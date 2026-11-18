@@ -614,6 +614,8 @@ const ms: Dictionary = {
     monthsPaid: "{paid} daripada {due} bulan dibayar",
   },
   submitFlow: {
+    underReview: "Sedang disemak",
+    pendingNote: "{months}: resit sudah menunggu semakan, jadi anda boleh bayar bermula {next}.",
     title: "Hantar bukti bayaran",
     subtitle: "Tiga langkah ringkas. AJK menyemak setiap resit sebelum bulan ditanda sudah bayar.",
     stepHouse: "Rumah",
