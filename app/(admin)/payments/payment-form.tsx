@@ -158,8 +158,16 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
       return col ? (col.amountPerResident / 100).toFixed(2) : "";
     }
     const n = monthCount(startYear, startMonth, endYear, endMonth);
-    return n > 0 ? (n * 50).toFixed(2) : "";
-  }, [isSpecialCollection, selectedCollectionId, specialCollections, startYear, startMonth, endYear, endMonth]);
+    if (n === 0) return "";
+    // The fee minus what each month already holds (an overpayment spills into the next month).
+    let owed = 0;
+    for (let i = 0; i < n; i++) {
+      const index = startYear * 12 + (startMonth - 1) + i;
+      const held = snapshot?.monthAmounts[`${Math.floor(index / 12)}-${(index % 12) + 1}`] ?? 0;
+      owed += 5000 - Math.min(5000, held);
+    }
+    return (owed / 100).toFixed(2);
+  }, [isSpecialCollection, selectedCollectionId, specialCollections, startYear, startMonth, endYear, endMonth, snapshot]);
 
   useEffect(() => {
     if (state.message && !state.ok) dialogRef.current?.showModal();
@@ -434,7 +442,7 @@ export function PaymentForm({ residents, specialCollections, selectedResidentId 
                 <input className="mt-0.5 size-4" name="allowAdjustment" type="checkbox" />
                 <span>
                   <span className="block font-medium">Allow adjusted amount</span>
-                  <span className="block text-xs text-[var(--ink-2)]">Tick when the payment doesn&apos;t exactly match RM50 per month.</span>
+                  <span className="block text-xs text-[var(--ink-2)]">Tick when the payment doesn&apos;t match the expected amount (RM50 per month, less what a month already holds).</span>
                 </span>
               </label>
             )}
