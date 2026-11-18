@@ -8,6 +8,7 @@ import { assertDashboardUser } from "@/lib/auth";
 import { expandMonthRange, isValidMonthRange } from "@/lib/months";
 import { DEFAULT_MONTHLY_FEE_SEN, ringgitToSen } from "@/lib/money";
 import { buildMonthlyCoverageRows } from "@/lib/payments/coverage";
+import { getMonthAmounts, owedForMonths } from "@/lib/payments/month-amounts";
 import { prisma } from "@/lib/prisma";
 import { getSingleUploadedFile, removeStoredUpload, storeProofUpload, type StoredUpload } from "@/lib/uploads";
 
@@ -41,6 +42,8 @@ export type ResidentSnapshot = {
   name: string;
   latestCoverage: { year: number; month: number } | null;
   outstandingMonths: number[];
+  /** What each month already holds, keyed "2026-5" (this year and next). */
+  monthAmounts: Record<string, number>;
   currentYear: number;
   currentMonth: number;
   assignedCollections: {
@@ -83,12 +86,10 @@ export async function getResidentSnapshot(residentId: string): Promise<ResidentS
 
   const latestCoverage = coverages[0] ?? null;
 
-  const coveredThisYear = new Set(
-    coverages.filter((c) => c.year === currentYear).map((c) => c.month),
-  );
+  const monthAmounts = await getMonthAmounts(residentId, [currentYear, currentYear + 1]);
   const outstandingMonths: number[] = [];
   for (let m = 1; m <= currentMonth; m++) {
-    if (!coveredThisYear.has(m)) outstandingMonths.push(m);
+    if ((monthAmounts[`${currentYear}-${m}`] ?? 0) < DEFAULT_MONTHLY_FEE_SEN) outstandingMonths.push(m);
   }
 
   return {
@@ -96,6 +97,7 @@ export async function getResidentSnapshot(residentId: string): Promise<ResidentS
     name: resident.name,
     latestCoverage: latestCoverage ? { year: latestCoverage.year, month: latestCoverage.month } : null,
     outstandingMonths,
+    monthAmounts,
     currentYear,
     currentMonth,
     assignedCollections: assignments.map((a) => ({
@@ -150,46 +152,12 @@ function getPaymentInput(formData: FormData) {
     };
   }
 
-  const expectedAmountSen = coveredMonths.length * DEFAULT_MONTHLY_FEE_SEN;
-
-  if (
-    parsed.data.paymentType === "MONTHLY_FEE" &&
-    expectedAmountSen > 0 &&
-    parsed.data.allowAdjustment !== "on" &&
-    ringgitToSen(parsed.data.amount) !== expectedAmountSen
-  ) {
-    return {
-      ok: false as const,
-      message: `Expected amount is RM${(expectedAmountSen / 100).toFixed(2)}. Tick adjusted payment if this amount is intentional.`,
-    };
-  }
-
   return {
     ok: true as const,
     data: parsed.data,
     amountSen: ringgitToSen(parsed.data.amount),
     coveredMonths,
   };
-}
-
-async function findDuplicateCoverage(residentId: string, coveredMonths: { year: number; month: number }[]) {
-  if (coveredMonths.length === 0) {
-    return null;
-  }
-
-  return prisma.paymentCoverage.findFirst({
-    where: {
-      residentId,
-      OR: coveredMonths.map((coverage) => ({
-        year: coverage.year,
-        month: coverage.month,
-      })),
-    },
-    select: {
-      year: true,
-      month: true,
-    },
-  });
 }
 
 export async function createPayment(_previousState: PaymentFormState, formData: FormData): Promise<PaymentFormState> {
@@ -212,12 +180,24 @@ export async function createPayment(_previousState: PaymentFormState, formData: 
     };
   }
 
-  const duplicateCoverage = await findDuplicateCoverage(resident.id, paymentInput.coveredMonths);
+  // A month that is only partly paid (e.g. an overpayment spilled into it) can be topped up; a full month cannot be paid twice.
+  const isMonthly = paymentInput.data.paymentType === "MONTHLY_FEE";
+  const amounts = isMonthly ? await getMonthAmounts(resident.id, paymentInput.coveredMonths.map((m) => m.year)) : {};
+  const fullMonth = paymentInput.coveredMonths.find((m) => (amounts[`${m.year}-${m.month}`] ?? 0) >= DEFAULT_MONTHLY_FEE_SEN);
 
-  if (duplicateCoverage) {
+  if (fullMonth) {
     return {
       ok: false,
-      message: `This resident already has coverage for ${duplicateCoverage.month}/${duplicateCoverage.year}.`,
+      message: `This resident already has coverage for ${fullMonth.month}/${fullMonth.year}.`,
+    };
+  }
+
+  const expectedAmountSen = owedForMonths(paymentInput.coveredMonths, amounts);
+
+  if (isMonthly && expectedAmountSen > 0 && paymentInput.data.allowAdjustment !== "on" && paymentInput.amountSen !== expectedAmountSen) {
+    return {
+      ok: false,
+      message: `Expected amount is RM${(expectedAmountSen / 100).toFixed(2)}. Tick adjusted payment if this amount is intentional.`,
     };
   }
 

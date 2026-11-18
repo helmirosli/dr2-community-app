@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { SpecialCollectionForm } from "../../special-collection-form";
@@ -14,7 +14,7 @@ type EditPageProps = {
 };
 
 export default async function EditSpecialCollectionPage({ params }: EditPageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
 
   const { id } = await params;
   const [collection, residents, assigned] = await Promise.all([

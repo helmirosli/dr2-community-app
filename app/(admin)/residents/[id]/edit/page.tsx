@@ -1,7 +1,7 @@
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { notFound } from "next/navigation";
 
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ResidentForm } from "../../resident-form";
 
@@ -13,7 +13,7 @@ type EditResidentPageProps = {
 };
 
 export default async function EditResidentPage({ params }: EditResidentPageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
 
   const { id } = await params;
   const resident = await prisma.resident.findUnique({

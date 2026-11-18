@@ -130,10 +130,6 @@ export async function getCurrentUser(): Promise<DashboardUser | null> {
     },
   });
 
-  if (!user || (user.role !== "ADMIN" && user.role !== "AJK")) {
-    return null;
-  }
-
   return user;
 }
 
@@ -147,11 +143,34 @@ export async function requireDashboardUser() {
   return user;
 }
 
-export async function assertDashboardUser() {
+/** Any signed-in staff, including read-only viewers (e.g. for the walkthrough state). */
+export async function assertSignedIn() {
   const user = await getCurrentUser();
 
   if (!user) {
-    throw new Error("Admin or AJK login is required.");
+    throw new Error("Login is required.");
+  }
+
+  return user;
+}
+
+/** Signed in AND allowed to change data: every server action that writes goes through this, so viewers are read-only. */
+export async function assertDashboardUser() {
+  const user = await assertSignedIn();
+
+  if (user.role === "VIEWER") {
+    throw new Error("Viewers have read-only access.");
+  }
+
+  return user;
+}
+
+/** For pages that only make sense for someone who can change data (forms, the review inbox). */
+export async function requireDashboardEditor() {
+  const user = await requireDashboardUser();
+
+  if (user.role === "VIEWER") {
+    redirect("/dashboard");
   }
 
   return user;

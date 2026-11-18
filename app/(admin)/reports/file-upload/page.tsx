@@ -1,7 +1,7 @@
 import { AdminPage, PageHeader } from "@/app/components/page-header";
 import { redirect } from "next/navigation";
 
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { FileUploadForm } from "./file-upload-form";
 
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 const UPLOAD_ENABLED = false;
 
 export default async function FileUploadPage() {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   if (!UPLOAD_ENABLED) redirect("/reports");
 
   return (

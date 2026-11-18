@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import Papa from "papaparse";
 import { read, utils } from "xlsx";
 
-import { requireDashboardUser } from "@/lib/auth";
+import { assertDashboardUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export type ParsedPayment = {
@@ -127,7 +127,7 @@ export async function analyzePaymentFile(
   formData: FormData
 ): Promise<{ ok: boolean; message: string; analysis?: FileAnalysisResult }> {
   try {
-    await requireDashboardUser();
+    await assertDashboardUser();
 
     const file = formData.get("file") as File | null;
     if (!file) {
@@ -213,7 +213,7 @@ export async function confirmPaymentImport(
   paymentIds: string[]
 ): Promise<{ ok: boolean; message: string; imported?: number }> {
   try {
-    await requireDashboardUser();
+    await assertDashboardUser();
 
     if (paymentIds.length === 0) {
       return { ok: false, message: "No payments selected" };
