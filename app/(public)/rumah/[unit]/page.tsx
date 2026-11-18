@@ -181,7 +181,7 @@ export default async function HousePage({
                   {payable && <span className="text-[10px] font-semibold underline underline-offset-2">{t.house.tapToPay}</span>}
                 </>
               );
-              const cls = `relative grid h-full gap-0.5 rounded-2xl px-3 py-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_3px_0_rgba(0,0,0,.08)] ${stateStyles[state].tile} ${
+              const cls = `relative grid h-full min-h-[7.5rem] content-center gap-0.5 rounded-2xl px-3 py-3.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_3px_0_rgba(0,0,0,.08)] ${stateStyles[state].tile} ${
                 isThisMonth(month) ? "outline outline-2 outline-offset-2 outline-[var(--blue)]" : ""
               }`;
               return (
