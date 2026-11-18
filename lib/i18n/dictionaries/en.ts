@@ -643,6 +643,8 @@ const en = {
     payOwed: "Pay {amount} now",
     monthsPaid: "months paid",
     tapToPay: "Tap to pay",
+    paidSoFar: "{amount} paid",
+    leftToPay: "{amount} left",
   },
   statusBoard: {
     filterAll: "All",

@@ -177,7 +177,14 @@ export default async function HousePage({
                 <>
                   {Icon && <Icon size={14} strokeWidth={3} className="absolute right-2 top-2 opacity-70" />}
                   <span className="font-heading text-base font-bold">{monthName(locale, year, month)}</span>
-                  <span className="text-[11px] font-medium">{amountSen ? formatRM(amountSen) : t.states[state]}</span>
+                  {state === "partial" && amountSen ? (
+                    <>
+                      <span className="text-[11px] font-medium">{fill(t.house.paidSoFar, { amount: formatRM(amountSen) })}</span>
+                      <span className="text-[11px] font-semibold">{fill(t.house.leftToPay, { amount: formatRM(Math.max(0, DEFAULT_MONTHLY_FEE_SEN - amountSen)) })}</span>
+                    </>
+                  ) : (
+                    <span className="text-[11px] font-medium">{amountSen ? formatRM(amountSen) : t.states[state]}</span>
+                  )}
                   {payable && <span className="text-[10px] font-semibold underline underline-offset-2">{t.house.tapToPay}</span>}
                 </>
               );

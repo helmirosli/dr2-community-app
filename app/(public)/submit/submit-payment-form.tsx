@@ -19,6 +19,8 @@ export type SubmitHouse = {
   pending: string[];
   /** Months ("2026-5") already paid in full. */
   paid: string[];
+  /** Months ("2026-5") with part of the fee already in, and how much (sen). */
+  partial: Record<string, number>;
 };
 type SpecialCollection = { id: string; title: string; amountPerResident: number };
 type Bank = { name: string; holder: string; account: string };
@@ -93,7 +95,7 @@ export function SubmitPaymentForm({
       ? Math.round((Number(customAmount) || 0) * 100)
       : paymentType === "SPECIAL_COLLECTION"
         ? collection?.outstanding ?? 0
-        : months * DEFAULT_MONTHLY_FEE_SEN;
+        : chips.slice(skip, skip + months).reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - (house?.partial[`${m.year}-${m.month}`] ?? 0), 0);
 
   useEffect(() => {
     if (state.message && !state.ok) turnstileRef.current?.reset();

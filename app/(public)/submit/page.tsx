@@ -53,12 +53,19 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
   const thisMonth = now.getMonth() + 1;
   const grids = await Promise.all([thisYear, thisYear + 1].map((year) => getYearGridData({ year, includeInactive: false })));
   const paidByUnit: Record<string, string[]> = {};
+  const partialByUnit: Record<string, Record<string, number>> = {};
   const firstOwedByUnit: Record<string, { year: number; month: number }> = {};
   grids.forEach((grid, g) => {
     for (const row of grid.rows) {
       row.months.forEach((amount, i) => {
-        if ((amount ?? 0) >= DEFAULT_MONTHLY_FEE_SEN) (paidByUnit[row.unitNumber] ??= []).push(`${grid.year}-${i + 1}`);
-        else if (g === 0 && i + 1 <= thisMonth && !firstOwedByUnit[row.unitNumber] && row.monthStatus[i] === "ACTIVE" && !row.monthStatusOverrides[i]) {
+        const paid = amount ?? 0;
+        if (paid >= DEFAULT_MONTHLY_FEE_SEN) {
+          (paidByUnit[row.unitNumber] ??= []).push(`${grid.year}-${i + 1}`);
+          return;
+        }
+        // Part of the fee is already in (e.g. an earlier overpayment spilled into this month).
+        if (paid > 0) (partialByUnit[row.unitNumber] ??= {})[`${grid.year}-${i + 1}`] = paid;
+        if (g === 0 && i + 1 <= thisMonth && !firstOwedByUnit[row.unitNumber] && row.monthStatus[i] === "ACTIVE" && !row.monthStatusOverrides[i]) {
           firstOwedByUnit[row.unitNumber] = { year: grid.year, month: i + 1 };
         }
       });
@@ -79,6 +86,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
         paidUntil: hasPaid ? monthName(locale, r.paidUntilYear!, r.paidUntilMonth!, "long") : null,
         pending: pendingByUnit[r.unitNumber] ?? [],
         paid: paidByUnit[r.unitNumber] ?? [],
+        partial: partialByUnit[r.unitNumber] ?? {},
         nextYear: next.year,
         nextMonth: next.month,
       };

@@ -602,6 +602,8 @@ const ms: Dictionary = {
     payOwed: "Bayar {amount} sekarang",
     monthsPaid: "bulan dibayar",
     tapToPay: "Ketik untuk bayar",
+    paidSoFar: "{amount} dibayar",
+    leftToPay: "{amount} lagi",
   },
   statusBoard: {
     filterAll: "Semua",

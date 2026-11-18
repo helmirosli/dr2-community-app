@@ -137,8 +137,18 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
           select: { amountDue: true, amountPaid: true },
         })
       : null;
+  // A month that already has part of its fee (an earlier overpayment spilled into it) only needs the rest.
+  const alreadyIn =
+    isMonthly && months.length
+      ? await prisma.paymentCoverage.findMany({
+          where: { resident: { unitNumber: row.unitNumber }, OR: months.map((m) => ({ year: m.year, month: m.month })) },
+          select: { year: true, month: true, amountApplied: true },
+        })
+      : [];
+  const inFor = (m: { year: number; month: number }) =>
+    Math.min(DEFAULT_MONTHLY_FEE_SEN, alreadyIn.filter((c) => c.year === m.year && c.month === m.month).reduce((sum, c) => sum + c.amountApplied, 0));
   const expectedSen = isMonthly
-    ? months.length * DEFAULT_MONTHLY_FEE_SEN
+    ? months.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - inFor(m), 0)
     : assignment
       ? Math.max(0, assignment.amountDue - assignment.amountPaid)
       : row.specialCollection?.amountPerResident ?? 0;
