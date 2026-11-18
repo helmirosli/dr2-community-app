@@ -39,7 +39,9 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
     return <span className="text-[var(--ink-2)]">No files</span>;
   }
 
-  const selectedFile = files.find((f) => f.id === selectedFileId);
+  // The viewer stays mounted when the review inbox moves to the next receipt, so the remembered file can belong to the
+  // previous one; fall back to this receipt's first file instead of showing an empty box.
+  const selectedFile = files.find((f) => f.id === selectedFileId) ?? files[0];
   const sourceOf = (file: (typeof files)[number]) => file.url ?? `/api/uploads/${file.storagePath}`;
 
   return (
@@ -85,7 +87,7 @@ export function FileViewer({ files, triggerLabel = "View files" }: FileViewerPro
                   {files.map((file) => (
                     <button
                       className={`flex min-w-0 shrink-0 items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-xs font-semibold transition sm:w-full ${
-                        selectedFileId === file.id ? "bg-[#ddf5fd] text-[#0b6e8e]" : "text-[var(--ink-2)] hover:bg-[var(--paper)]"
+                        selectedFile?.id === file.id ? "bg-[#ddf5fd] text-[#0b6e8e]" : "text-[var(--ink-2)] hover:bg-[var(--paper)]"
                       }`}
                       key={file.id}
                       onClick={() => setSelectedFileId(file.id)}
