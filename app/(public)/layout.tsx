@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 import { getDictionary } from "@/lib/i18n";
 import { LocaleToggle } from "@/app/components/locale-toggle";
 import { TourFooterLink } from "@/app/components/tour/tour-button";
@@ -24,6 +24,11 @@ export default async function PublicLayout({ children }: { children: React.React
             </Link>
             <Link href="/status" className="hidden hover:text-white sm:inline">
               {t.publicLayout.status}
+            </Link>
+            {/* Short on purpose ("AJK" + a lock) so it fits next to the buttons on a phone; the footer keeps the full "AJK login". */}
+            <Link href="/login" aria-label={t.home.staffLogin} className="flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-1 text-xs font-semibold hover:bg-white/10 hover:text-white">
+              <Lock size={13} aria-hidden="true" />
+              AJK
             </Link>
             <Link href="/submit" className="whitespace-nowrap rounded-full bg-[var(--lime)] px-3 py-1 font-semibold text-[#06210b] hover:brightness-105">
               <span className="sm:hidden">{t.publicLayout.submit}</span>
