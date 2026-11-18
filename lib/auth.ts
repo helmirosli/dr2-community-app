@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { cookies } from "next/headers";
@@ -105,7 +106,7 @@ export async function clearAuthSession() {
   cookieStore.delete(sessionCookieName);
 }
 
-export async function getCurrentUser(): Promise<DashboardUser | null> {
+export const getCurrentUser = cache(async (): Promise<DashboardUser | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(sessionCookieName)?.value;
 
@@ -131,7 +132,7 @@ export async function getCurrentUser(): Promise<DashboardUser | null> {
   });
 
   return user;
-}
+});
 
 export async function requireDashboardUser() {
   const user = await getCurrentUser();

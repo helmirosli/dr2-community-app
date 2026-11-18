@@ -24,19 +24,26 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function DashboardPage() {
-  await requireDashboardUser();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   const [
+    ,
     residentCount,
     pendingSubmissions,
     currentMonthFeePayments,
     ytdFeePayments,
     activeCollectionAssignments,
     recentActivity,
+    t,
+    locale,
+    grid,
+    residentIds,
+    pendingThisMonth,
+    pendingSummary,
   ] = await Promise.all([
+    requireDashboardUser(),
     prisma.resident.count({ where: { status: "ACTIVE" } }),
     prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } }),
 
@@ -66,9 +73,6 @@ export default async function DashboardPage() {
       take: 8,
       select: { id: true, entityType: true, action: true, createdAt: true, createdBy: true },
     }),
-  ]);
-
-  const [t, locale, grid, residentIds, pendingThisMonth] = await Promise.all([
     getDictionary(),
     getLocale(),
     getYearGridData({ year: now.getFullYear(), includeInactive: true }),
@@ -77,12 +81,12 @@ export default async function DashboardPage() {
       where: { status: "PENDING_REVIEW", paymentType: "MONTHLY_FEE" },
       select: { unitNumber: true, amountSen: true, coverageStartYear: true, coverageStartMonth: true, coverageEndYear: true, coverageEndMonth: true },
     }),
+    prisma.publicPaymentSubmission.aggregate({
+      where: { status: "PENDING_REVIEW" },
+      _sum: { amountSen: true },
+      _min: { createdAt: true },
+    }),
   ]);
-  const pendingSummary = await prisma.publicPaymentSubmission.aggregate({
-    where: { status: "PENDING_REVIEW" },
-    _sum: { amountSen: true },
-    _min: { createdAt: true },
-  });
   const oldestDays = pendingSummary._min.createdAt
     ? Math.floor((now.getTime() - pendingSummary._min.createdAt.getTime()) / 86_400_000)
     : null;

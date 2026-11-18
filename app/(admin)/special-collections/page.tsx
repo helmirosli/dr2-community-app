@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function SpecialCollectionsPage() {
-  await requireDashboardUser();
+  // (the sign-in check runs together with the reads below)
 
-  const [t, locale, collections] = await Promise.all([getDictionary(), getLocale(), getCollectionsOverview()]);
+  const [, t, locale, collections] = await Promise.all([requireDashboardUser(), getDictionary(), getLocale(), getCollectionsOverview()]);
 
   return (
     <AdminPage>

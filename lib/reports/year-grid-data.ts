@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { monthKey } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { normalizeMonthlyAppliedByMonth } from "@/lib/reports/monthly";
@@ -44,6 +45,11 @@ export type YearGridData = {
 
 const YEAR_END_MONTH = 12;
 
+const yearGridOnce = cache((year: number, includeInactive: boolean) => loadYearGridData({ year, includeInactive }));
+
+/** Read once per request: pages that need the grid in several places share one load. */
+export const getYearGridData = ({ year, includeInactive = false }: { year: number; includeInactive?: boolean }) => yearGridOnce(year, includeInactive);
+
 function parseResidentStatusFromJson(json: string | null) {
   if (!json) return null;
   try {
@@ -58,7 +64,7 @@ function parseResidentStatusFromJson(json: string | null) {
   }
 }
 
-export async function getYearGridData({
+async function loadYearGridData({
   year,
   includeInactive = false,
 }: {
@@ -66,7 +72,7 @@ export async function getYearGridData({
   includeInactive?: boolean;
 }): Promise<YearGridData> {
 
-  const [residents, specialCollections] = await Promise.all([
+  const [residents, specialCollections, allResidentAuditLogs] = await Promise.all([
     prisma.resident.findMany({
       where: includeInactive ? {} : { status: "ACTIVE" },
       orderBy: { unitNumber: "asc" },
@@ -96,6 +102,12 @@ export async function getYearGridData({
       },
       orderBy: { createdAt: "asc" },
     }),
+    // Read with the houses (not after them): filtered to the houses below. One round trip fewer per page.
+    prisma.auditLog.findMany({
+      where: { entityType: "Resident", action: "UPDATE", createdAt: { lt: new Date(year + 1, 0, 1) } },
+      orderBy: { createdAt: "asc" },
+      select: { entityId: true, beforeJson: true, afterJson: true, createdAt: true },
+    }),
   ]);
 
   sortByUnit(residents); // numeric house order, so row "no" follows 1, 2, … 10
@@ -106,24 +118,8 @@ export async function getYearGridData({
     .slice(0, 5)
     .map(({ id, title }) => ({ id, title }));
 
-  const residentIds = residents.map((resident) => resident.id);
-  const residentAuditLogs = residentIds.length
-    ? await prisma.auditLog.findMany({
-        where: {
-          entityType: "Resident",
-          action: "UPDATE",
-          entityId: { in: residentIds },
-          createdAt: { lt: new Date(year + 1, 0, 1) },
-        },
-        orderBy: { createdAt: "asc" },
-        select: {
-          entityId: true,
-          beforeJson: true,
-          afterJson: true,
-          createdAt: true,
-        },
-      })
-    : [];
+  const residentIds = new Set(residents.map((resident) => resident.id));
+  const residentAuditLogs = allResidentAuditLogs.filter((log) => residentIds.has(log.entityId));
 
   const logsByResidentId = new Map<
     string,

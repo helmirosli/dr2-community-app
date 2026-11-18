@@ -15,11 +15,10 @@ type ResidentDetailPageProps = {
 };
 
 export default async function ResidentDetailPage({ params, searchParams }: ResidentDetailPageProps) {
-  await requireDashboardUser();
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const opts = parseResidentParams(query);
 
-  const [t, locale, detail] = await Promise.all([getDictionary(), getLocale(), getResidentDetail(id, opts)]);
+  const [, t, locale, detail] = await Promise.all([requireDashboardUser(), getDictionary(), getLocale(), getResidentDetail(id, opts)]);
   if (!detail) notFound();
 
   return (

@@ -8,9 +8,8 @@ import { AdminNav } from "./admin-nav";
 
 // Staff shell. Each page still runs its own auth guard; this check only decides whether to draw the shell.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireDashboardUser();
   // ponytail: layouts don't re-render on client navigation, so the badge refreshes on reload or revalidation.
-  const pendingCount = await prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } });
+  const [user, pendingCount] = await Promise.all([requireDashboardUser(), prisma.publicPaymentSubmission.count({ where: { status: "PENDING_REVIEW" } })]);
   const [t, locale] = await Promise.all([getDictionary(), getLocale()]);
   const now = new Date();
   const today = new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", {
