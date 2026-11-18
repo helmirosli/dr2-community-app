@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminPage } from "@/app/components/page-header";
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VehicleForm } from "../../vehicle-form";
 import { HouseHeader } from "../../vehicle-list-view";
@@ -11,7 +11,7 @@ type EditVehiclePageProps = {
 };
 
 export default async function EditVehiclePage({ params }: EditVehiclePageProps) {
-  await requireDashboardUser();
+  await requireDashboardEditor();
   const { id: residentId, vehicleId } = await params;
 
   const [vehicle, resident] = await Promise.all([

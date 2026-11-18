@@ -1,12 +1,12 @@
 import { AdminPage, PageHeader } from "@/app/components/page-header";
-import { requireDashboardUser } from "@/lib/auth";
+import { requireDashboardEditor } from "@/lib/auth";
 import { ResidentForm } from "../resident-form";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function NewResidentPage() {
-  await requireDashboardUser();
+  await requireDashboardEditor();
 
   return (
     <AdminPage>

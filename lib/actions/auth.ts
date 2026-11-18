@@ -44,7 +44,7 @@ export async function login(_previousState: AuthFormState, formData: FormData): 
   });
   const passwordMatches = user ? await bcrypt.compare(parsed.data.password, user.passwordHash) : false;
 
-  if (!user || !passwordMatches || (user.role !== "ADMIN" && user.role !== "AJK")) {
+  if (!user || !passwordMatches || false) {
     return {
       ok: false,
       message: "Invalid email or password.",
