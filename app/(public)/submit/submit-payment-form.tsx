@@ -51,6 +51,8 @@ export function SubmitPaymentForm({
   const { t, locale } = useDictionary();
   const f = t.submitFlow;
   const turnstileRef = useRef<TurnstileHandle>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const firstRender = useRef(true);
 
   const [step, setStep] = useState(1);
   const [unit, setUnit] = useState(initialUnit);
@@ -103,6 +105,16 @@ export function SubmitPaymentForm({
 
   useEffect(() => () => void (preview?.url && URL.revokeObjectURL(preview.url)), [preview]);
 
+  // Moving to another step: if the person had scrolled down, bring the top of the form (the new step's first field) back into view.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const top = formRef.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0) formRef.current?.scrollIntoView({ block: "start" });
+  }, [step]);
+
   const goNext = () => {
     if (step === 1 && !house) return setError(f.houseUnknown);
     if (step === 2 && (amountSen <= 0 || !paymentDate || (paymentType === "SPECIAL_COLLECTION" && !collection))) return setError(f.fixFirst);
@@ -144,7 +156,7 @@ export function SubmitPaymentForm({
     `rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-[var(--ink)] text-white" : "bg-[var(--paper)] text-[var(--ink)] hover:bg-[#e8e8ed]"}`;
 
   return (
-    <form action={action} className="grid gap-5 rounded-[28px] bg-white p-6 ring-1 ring-black/5 sm:p-8">
+    <form ref={formRef} action={action} className="grid scroll-mt-20 gap-5 rounded-[28px] bg-white p-6 ring-1 ring-black/5 sm:p-8">
       <input aria-hidden="true" className="hidden" name="website" tabIndex={-1} autoComplete="off" />
       <input type="hidden" name="unitNumber" value={unit.trim()} />
       <input type="hidden" name="residentName" value={house?.name ?? ""} />
@@ -342,9 +354,10 @@ export function SubmitPaymentForm({
           </div>
         )}
 
-        <label className="ui-label">
+        <label className="ui-label min-w-0">
           {f.paidOn}
-          <input className="ui-input" type="date" value={paymentDate} max={new Date().toLocaleDateString("en-CA")} onChange={(e) => setPaymentDate(e.target.value)} />
+          {/* iOS gives a date field its own minimum width; appearance-none + min-w-0 keeps it inside the card. */}
+          <input className="ui-input block min-h-11 min-w-0 max-w-full appearance-none" type="date" value={paymentDate} max={new Date().toLocaleDateString("en-CA")} onChange={(e) => setPaymentDate(e.target.value)} />
         </label>
 
         <div className="rounded-2xl px-4 py-3 text-sm ring-1 ring-black/10">
