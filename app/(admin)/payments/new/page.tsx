@@ -17,7 +17,8 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
 
   const [residents, specialCollections] = await Promise.all([
     prisma.resident.findMany({
-      where: { status: "ACTIVE" },
+      // Exempt houses are listed too: only the AJK/admin can record a payment for them (the public form cannot).
+      where: { status: { in: ["ACTIVE", "EXEMPT"] } },
       orderBy: { unitNumber: "asc" },
       select: { id: true, unitNumber: true, name: true },
     }),
@@ -32,7 +33,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
     <AdminPage>
       <PageHeader
         title="Record official payment"
-        subtitle="Record monthly fees, backdated payments, upfront payments, or special collections for an active resident."
+        subtitle="Record monthly fees, backdated payments, upfront payments, or special collections for a resident."
         back={{ href: "/payments", label: "Payment records" }}
       />
       {residents.length > 0 ? (
