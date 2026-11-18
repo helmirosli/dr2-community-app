@@ -260,7 +260,7 @@ export function SubmitPaymentForm({
                     disabled={review}
                     aria-pressed={picked}
                     onClick={() => setCount(i - skip + 1)}
-                    className={`rounded-xl py-2 text-xs font-semibold transition ${
+                    className={`flex h-12 flex-col items-center justify-center rounded-xl text-xs font-semibold leading-tight transition ${
                       review
                         ? "cursor-not-allowed bg-[#ddf5fd] text-[#0b6e8e]"
                         : picked
