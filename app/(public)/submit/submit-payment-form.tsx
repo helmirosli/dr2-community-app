@@ -17,6 +17,10 @@ export type SubmitHouse = {
   nextMonth: number;
   /** Months ("2026-5") that already have a receipt waiting for review. */
   pending: string[];
+  /** Months ("2026-5") already paid in full. */
+  paid: string[];
+  /** Months ("2026-5") with part of the fee already in, and how much (sen). */
+  partial: Record<string, number>;
 };
 type SpecialCollection = { id: string; title: string; amountPerResident: number };
 type Bank = { name: string; holder: string; account: string };
@@ -66,17 +70,19 @@ export function SubmitPaymentForm({
   // Months with a receipt already waiting for review cannot be paid again: the choice starts at the first free
   // month and stops before the next one that is under review.
   const pendingMonths = new Set(house?.pending ?? []);
+  const paidMonths = new Set(house?.paid ?? []);
   const underReview = (m: { year: number; month: number }) => pendingMonths.has(`${m.year}-${m.month}`);
+  const taken = (m: { year: number; month: number }) => underReview(m) || paidMonths.has(`${m.year}-${m.month}`);
   const offered = house ? Array.from({ length: 36 }, (_, i) => addMonths(house.nextYear, house.nextMonth, i)) : [];
-  const skip = Math.max(0, offered.findIndex((m) => !underReview(m)));
+  const skip = Math.max(0, offered.findIndex((m) => !taken(m)));
   const chips = offered.slice(0, skip + 12);
   let room = 0;
-  while (skip + room < chips.length && !underReview(chips[skip + room])) room += 1;
+  while (skip + room < chips.length && !taken(chips[skip + room])) room += 1;
   const months = Math.max(1, Math.min(count, room));
   const start = house ? chips[skip] : null;
   const end = start ? addMonths(start.year, start.month, months - 1) : null;
   const untilDecember = start ? Math.min(12 - start.month + 1, room) : 1;
-  const waiting = chips.slice(0, skip);
+  const waiting = chips.slice(0, skip).filter(underReview);
   // Only collections this house still owes, priced at its remaining balance.
   const owed = house ? (outstandingByUnit[house.unit] ?? {}) : {};
   const houseCollections = specialCollections
@@ -89,7 +95,7 @@ export function SubmitPaymentForm({
       ? Math.round((Number(customAmount) || 0) * 100)
       : paymentType === "SPECIAL_COLLECTION"
         ? collection?.outstanding ?? 0
-        : months * DEFAULT_MONTHLY_FEE_SEN;
+        : chips.slice(skip, skip + months).reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - (house?.partial[`${m.year}-${m.month}`] ?? 0), 0);
 
   useEffect(() => {
     if (state.message && !state.ok) turnstileRef.current?.reset();
@@ -252,24 +258,28 @@ export function SubmitPaymentForm({
             <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
               {chips.map((m, i) => {
                 const review = underReview(m);
-                const picked = !review && i >= skip && i < skip + months;
+                const done = !review && paidMonths.has(`${m.year}-${m.month}`);
+                const picked = !review && !done && i >= skip && i < skip + months;
                 return (
                   <button
                     key={`${m.year}-${m.month}`}
                     type="button"
-                    disabled={review}
+                    disabled={review || done}
                     aria-pressed={picked}
                     onClick={() => setCount(i - skip + 1)}
                     className={`flex h-12 flex-col items-center justify-center rounded-xl text-xs font-semibold leading-tight transition ${
                       review
                         ? "cursor-not-allowed bg-[#ddf5fd] text-[#0b6e8e]"
-                        : picked
+                        : done
+                          ? "cursor-not-allowed bg-[#e2f7e1]/60 text-[#1c7a33]/70"
+                          : picked
                           ? "bg-[#e2f7e1] text-[#1c7a33] ring-1 ring-inset ring-[var(--leaf)]"
                           : "bg-[var(--paper)] text-[var(--ink-2)]"
                     }`}
                   >
                     {label(m)}
                     {review && <span className="block text-[10px] font-medium">{f.underReview}</span>}
+                    {done && <span className="block text-[10px] font-medium">{f.paidMonth}</span>}
                   </button>
                 );
               })}

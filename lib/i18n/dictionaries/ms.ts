@@ -602,6 +602,8 @@ const ms: Dictionary = {
     payOwed: "Bayar {amount} sekarang",
     monthsPaid: "bulan dibayar",
     tapToPay: "Ketik untuk bayar",
+    paidSoFar: "{amount} dibayar",
+    leftToPay: "{amount} lagi",
   },
   statusBoard: {
     filterAll: "Semua",
@@ -615,6 +617,7 @@ const ms: Dictionary = {
   },
   submitFlow: {
     underReview: "Sedang disemak",
+    paidMonth: "Dibayar",
     pendingNote: "{months}: resit sudah menunggu semakan, jadi anda boleh bayar bermula {next}.",
     title: "Hantar bukti bayaran",
     subtitle: "Tiga langkah ringkas. AJK menyemak setiap resit sebelum bulan ditanda sudah bayar.",

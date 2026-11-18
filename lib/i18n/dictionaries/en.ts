@@ -643,6 +643,8 @@ const en = {
     payOwed: "Pay {amount} now",
     monthsPaid: "months paid",
     tapToPay: "Tap to pay",
+    paidSoFar: "{amount} paid",
+    leftToPay: "{amount} left",
   },
   statusBoard: {
     filterAll: "All",
@@ -656,6 +658,7 @@ const en = {
   },
   submitFlow: {
     underReview: "Under review",
+    paidMonth: "Paid",
     pendingNote: "{months}: a receipt is already waiting for review, so you can pay from {next}.",
     title: "Send payment proof",
     subtitle: "Three quick steps. The AJK checks every receipt before marking a month paid.",

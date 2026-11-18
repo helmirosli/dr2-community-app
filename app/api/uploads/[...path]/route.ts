@@ -1,3 +1,4 @@
+import { getCurrentUser } from "@/lib/auth";
 import { detectFileType, getGcsBucket, getPublicFullUrl, readLocalUpload, usesLocalUploads } from "@/lib/uploads";
 
 type RouteParams = {
@@ -5,6 +6,9 @@ type RouteParams = {
 };
 
 export async function GET(request: Request, { params }: RouteParams) {
+  // Receipts are for the AJK and admins only.
+  if (!(await getCurrentUser())) return new Response("Sign in to view this file", { status: 401 });
+
   const { path: pathSegments } = await params;
   const filePath = pathSegments.join("/");
 
@@ -41,6 +45,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     }
 
     const [signedUrl] = await gcsFile.getSignedUrl({
+      version: "v4",
       action: "read",
       expires: Date.now() + 5 * 60 * 1000, // 5 minutes
     });

@@ -21,6 +21,7 @@
     "db:empty": "tsx prisma/seed/empty-db.ts",
     "db:seed:dummy": "tsx prisma/seed/dummy.ts",
     "db:backup": "tsx scripts/db-backup.ts",
+    "uploads:relink": "tsx scripts/migrate-upload-links.ts",
     "db:seed:official": "tsx prisma/seed/official.ts"
   },
   "dependencies": {

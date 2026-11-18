@@ -18,7 +18,8 @@ export type StoredUpload = {
   sizeBytes: number;
   contentHash: string;
   storagePath: string;
-  url: string;
+  /** A direct link, kept only when the files are public. Private files are opened through /api/uploads/<path>. */
+  url: string | null;
 };
 
 export function getUploadLimitBytes() {
@@ -177,7 +178,7 @@ export async function storeProofUpload(
 
   const contentHash = createHash("sha256").update(buffer).digest("hex");
 
-  let url: string;
+  let url: string | null;
 
   if (usesLocalUploads()) {
     const target = localUploadPath(gcsPath);
@@ -188,7 +189,7 @@ export async function storeProofUpload(
     const { bucket } = getGcsBucket();
     await bucket.file(gcsPath).save(buffer, { contentType: mimeType, resumable: false });
     const baseUrl = (process.env.GCS_BASE_URL ?? "").replace(/\/$/, "");
-    url = `${baseUrl}/${gcsPath}`;
+    url = process.env.GCS_PUBLIC_FILES === "true" ? `${baseUrl}/${gcsPath}` : null;
   }
 
   return {

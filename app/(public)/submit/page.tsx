@@ -1,7 +1,9 @@
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
+import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { firstName, monthName } from "@/lib/status";
 import { TourButton } from "@/app/components/tour/tour-button";
 import { SubmitPaymentForm, type SubmitHouse } from "./submit-payment-form";
@@ -45,19 +47,46 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
   }
 
   // Step 1 needs: house list, paid-until, and the first month still owed (next after paid-until, never before this month's start of billing).
+  // Months already paid in full (this year and next) cannot be paid again, and the choice starts at the
+  // first month still owed, even when it is older than the paid-until month (a gap such as Jan-Mar).
+  const thisYear = now.getFullYear();
+  const thisMonth = now.getMonth() + 1;
+  const grids = await Promise.all([thisYear, thisYear + 1].map((year) => getYearGridData({ year, includeInactive: false })));
+  const paidByUnit: Record<string, string[]> = {};
+  const partialByUnit: Record<string, Record<string, number>> = {};
+  const firstOwedByUnit: Record<string, { year: number; month: number }> = {};
+  grids.forEach((grid, g) => {
+    for (const row of grid.rows) {
+      row.months.forEach((amount, i) => {
+        const paid = amount ?? 0;
+        if (paid >= DEFAULT_MONTHLY_FEE_SEN) {
+          (paidByUnit[row.unitNumber] ??= []).push(`${grid.year}-${i + 1}`);
+          return;
+        }
+        // Part of the fee is already in (e.g. an earlier overpayment spilled into this month).
+        if (paid > 0) (partialByUnit[row.unitNumber] ??= {})[`${grid.year}-${i + 1}`] = paid;
+        if (g === 0 && i + 1 <= thisMonth && !firstOwedByUnit[row.unitNumber] && row.monthStatus[i] === "ACTIVE" && !row.monthStatusOverrides[i]) {
+          firstOwedByUnit[row.unitNumber] = { year: grid.year, month: i + 1 };
+        }
+      });
+    }
+  });
+
   const houses: SubmitHouse[] = report.rows
     .map((r) => {
       const hasPaid = r.paidUntilYear !== null && r.paidUntilMonth !== null;
-      const next = hasPaid
+      const next = firstOwedByUnit[r.unitNumber] ?? (hasPaid
         ? r.paidUntilMonth === 12
           ? { year: r.paidUntilYear! + 1, month: 1 }
           : { year: r.paidUntilYear!, month: r.paidUntilMonth! + 1 }
-        : { year: now.getFullYear(), month: now.getMonth() + 1 };
+        : { year: thisYear, month: thisMonth });
       return {
         unit: r.unitNumber,
         name: firstName(r.name),
         paidUntil: hasPaid ? monthName(locale, r.paidUntilYear!, r.paidUntilMonth!, "long") : null,
         pending: pendingByUnit[r.unitNumber] ?? [],
+        paid: paidByUnit[r.unitNumber] ?? [],
+        partial: partialByUnit[r.unitNumber] ?? {},
         nextYear: next.year,
         nextMonth: next.month,
       };

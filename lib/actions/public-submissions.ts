@@ -89,6 +89,11 @@ async function submit(
     };
   }
 
+  // The form already hides houses that do not pay (exempt, for sale, moved out); this stops a hand-made request too.
+  if (resident.status !== "ACTIVE") {
+    return { ok: false, message: "This unit does not pay through the public form. Please contact the Admin / AJK for assistance." };
+  }
+
   const duplicateSubmission = await findDuplicatePublicSubmission({
     unitNumber: parsed.data.unitNumber,
     paymentType: parsed.data.paymentType,

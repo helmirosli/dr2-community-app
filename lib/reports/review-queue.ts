@@ -3,6 +3,7 @@ import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { expandMonthRange } from "@/lib/months";
 import { findExistingOfficialCoverageByUnitNumber } from "@/lib/payments/duplicates";
 import { prisma } from "@/lib/prisma";
+import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 
 export type QueueItem = {
@@ -66,6 +67,12 @@ export type ReviewData =
 
 const DAY_MS = 86_400_000;
 
+/** The name the house is registered under, so every row reads the same whatever the sender typed. */
+async function registeredNames(units: string[]) {
+  const rows = await prisma.resident.findMany({ where: { unitNumber: { in: units } }, select: { unitNumber: true, name: true } });
+  return new Map(rows.map((r) => [r.unitNumber, r.name]));
+}
+
 /** The pending-receipt inbox, with the chosen item (or the oldest) worked out in full. */
 export async function getReviewData(id?: string): Promise<ReviewData> {
   const now = Date.now();
@@ -97,18 +104,20 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
       }),
     ]);
     const countOf = (s: string) => decided.find((d) => d.status === s)?._count._all ?? 0;
+    const names = await registeredNames(recent.map((r) => r.unitNumber));
     return {
       kind: "empty",
       approvedToday: countOf("APPROVED"),
       rejectedToday: countOf("REJECTED"),
-      recent: recent.map((r) => ({ id: r.id, unit: r.unitNumber, name: r.residentName, amountSen: r.amountSen, status: r.status, reviewedAt: r.reviewedAt, reason: r.reviewReason })),
+      recent: recent.map((r) => ({ id: r.id, unit: r.unitNumber, name: names.get(r.unitNumber) ?? r.residentName, amountSen: r.amountSen, status: r.status, reviewedAt: r.reviewedAt, reason: r.reviewReason })),
     };
   }
 
+  const names = await registeredNames(queueRows.map((s) => s.unitNumber));
   const queue: QueueItem[] = queueRows.map((s) => ({
     id: s.id,
     unit: s.unitNumber,
-    name: s.residentName,
+    name: names.get(s.unitNumber) ?? s.residentName,
     amountSen: s.amountSen,
     type: s.paymentType,
     collectionTitle: s.specialCollection?.title ?? null,
@@ -129,8 +138,18 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
           select: { amountDue: true, amountPaid: true },
         })
       : null;
+  // A month that already holds part of its fee (an earlier overpayment spilled into it) only needs the rest.
+  // Read the amounts from the year grid, the same numbers the house pages show.
+  const inByMonth = new Map<string, number>();
+  if (isMonthly) {
+    for (const year of new Set(months.map((m) => m.year))) {
+      const gridRow = (await getYearGridData({ year, includeInactive: true })).rows.find((r) => r.unitNumber === row.unitNumber);
+      gridRow?.months.forEach((amount, i) => inByMonth.set(`${year}-${i + 1}`, amount ?? 0));
+    }
+  }
+  const inFor = (m: { year: number; month: number }) => Math.min(DEFAULT_MONTHLY_FEE_SEN, inByMonth.get(`${m.year}-${m.month}`) ?? 0);
   const expectedSen = isMonthly
-    ? months.length * DEFAULT_MONTHLY_FEE_SEN
+    ? months.reduce((sum, m) => sum + DEFAULT_MONTHLY_FEE_SEN - inFor(m), 0)
     : assignment
       ? Math.max(0, assignment.amountDue - assignment.amountPaid)
       : row.specialCollection?.amountPerResident ?? 0;
@@ -155,7 +174,7 @@ export async function getReviewData(id?: string): Promise<ReviewData> {
       id: row.id,
       residentId: resident?.id ?? null,
       unit: row.unitNumber,
-      name: row.residentName,
+      name: names.get(row.unitNumber) ?? row.residentName,
       phone: row.phone,
       type: row.paymentType,
       amountSen: row.amountSen,

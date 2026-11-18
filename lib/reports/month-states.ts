@@ -1,4 +1,5 @@
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
+import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { monthState, type MonthState } from "@/lib/status";
@@ -34,7 +35,7 @@ export async function getMonthStates(year: number, month: number): Promise<House
       residentStatus: r.status,
       isFuture: false,
       // Money already applied wins over a waiting receipt (same rule as the year grid).
-      pending: !r.selectedAppliedSen && pendingMap.has(`${r.unitNumber}:${year}:${month}`),
+      pending: (r.selectedAppliedSen ?? 0) < DEFAULT_MONTHLY_FEE_SEN && pendingMap.has(`${r.unitNumber}:${year}:${month}`),
     }),
   }));
 }

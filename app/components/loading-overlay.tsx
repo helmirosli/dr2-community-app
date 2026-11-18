@@ -54,7 +54,7 @@ function Bar() {
     };
     const onSubmit = (e: SubmitEvent) => {
       const form = e.target as HTMLFormElement;
-      if (!e.defaultPrevented && (form.method || "get").toLowerCase() === "get" && !form.getAttribute("action")?.startsWith("http")) start();
+      if (!e.defaultPrevented && (form.getAttribute("method") || "get").toLowerCase() === "get" && !form.getAttribute("action")?.startsWith("http")) start();
     };
     document.addEventListener("click", onClick, true);
     document.addEventListener("submit", onSubmit, true);
