@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { billingNow } from "@/lib/months";
 
 import { getCurrentUser } from "@/lib/auth";
 import { buildMonthlyReportWorkbook, reportFilename } from "@/lib/reports/exporters";
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   const params = request.nextUrl.searchParams;
-  const now = new Date();
+  const now = billingNow();
   const year = clampReportYear(params.get("year") ?? undefined, now.getFullYear());
   const month = clampReportMonth(params.get("month") ?? undefined, now.getMonth() + 1);
   const includeInactive = params.get("includeInactive") === "on";

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { assertDashboardUser } from "@/lib/auth";
-import { expandMonthRange, isValidMonthRange } from "@/lib/months";
+import { expandMonthRange, isValidMonthRange, billingNow } from "@/lib/months";
 import { DEFAULT_MONTHLY_FEE_SEN, ringgitToSen } from "@/lib/money";
 import { buildMonthlyCoverageRows } from "@/lib/payments/coverage";
 import { getMonthAmounts, owedForMonths } from "@/lib/payments/month-amounts";
@@ -58,7 +58,7 @@ export type ResidentSnapshot = {
 export async function getResidentSnapshot(residentId: string): Promise<ResidentSnapshot | null> {
   await assertDashboardUser();
 
-  const now = new Date();
+  const now = billingNow();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 

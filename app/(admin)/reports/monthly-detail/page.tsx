@@ -7,7 +7,7 @@ import type { MonthState } from "@/lib/status";
 
 import { requireDashboardUser } from "@/lib/auth";
 import { formatRM } from "@/lib/money";
-import { monthLabel } from "@/lib/months";
+import { monthLabel, billingNow } from "@/lib/months";
 import { clampReportMonth, clampReportYear, getMonthlyReport } from "@/lib/reports/monthly-data";
 import { type SelectedMonthStatus } from "@/lib/reports/monthly";
 import { SearchableSelect } from "@/app/components/searchable-select";
@@ -32,7 +32,7 @@ export default async function MonthlyDetailPage({ searchParams }: Props) {
   await requireDashboardUser();
   const params = await searchParams;
 
-  const now = new Date();
+  const now = billingNow();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
   const selectedMonth = clampReportMonth(params.month, now.getMonth() + 1);
   const includeInactive = params.includeInactive === "on";

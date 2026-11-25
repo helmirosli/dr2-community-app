@@ -1,4 +1,5 @@
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
+import { billingNow } from "@/lib/months";
 
 /** The status language from the redesign spec §3, shared by every grid, tile and pill. */
 export type MonthState = "paid" | "ahead" | "pending" | "partial" | "unpaid" | "hold" | "upcoming";
@@ -29,7 +30,7 @@ export function monthState({
 }
 
 /** True when (year, month) is after the current calendar month. */
-export function isFutureMonth(year: number, month: number, now = new Date()) {
+export function isFutureMonth(year: number, month: number, now = billingNow()) {
   return year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth() + 1);
 }
 

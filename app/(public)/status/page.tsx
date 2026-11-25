@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { billingNow } from "@/lib/months";
 
 import { ProgressRing } from "@/app/components/progress-ring";
 import { StatusPill } from "@/app/components/status";
@@ -30,7 +31,7 @@ export default async function StatusPage({ searchParams }: StatusPageProps) {
   const params = await searchParams;
   const [t, locale] = await Promise.all([getDictionary(), getLocale()]);
 
-  const now = new Date();
+  const now = billingNow();
   const selectedYear = clampReportYear(params.year, now.getFullYear());
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;

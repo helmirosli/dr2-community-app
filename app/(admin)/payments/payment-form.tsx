@@ -1,4 +1,5 @@
 "use client";
+import { billingNow } from "@/lib/months";
 
 import Link from "next/link";
 import { useState, useActionState, useEffect, useRef, useMemo, useTransition } from "react";
@@ -88,7 +89,7 @@ function TileGroup({
 }
 
 export function PaymentForm({ residents, specialCollections, selectedResidentId }: PaymentFormProps) {
-  const now = new Date();
+  const now = billingNow();
   const [state, action, pending] = useActionState(createPayment, initialState);
   const [isPeeking, startPeek] = useTransition();
   const dialogRef = useRef<HTMLDialogElement>(null);

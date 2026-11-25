@@ -2,7 +2,7 @@ import { getDictionary, getLocale } from "@/lib/i18n";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
-import { BILLING_START, clampToBilling } from "@/lib/months";
+import { BILLING_START, clampToBilling, billingNow } from "@/lib/months";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { firstName, monthName } from "@/lib/status";
@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export default async function PublicSubmitPage({ searchParams }: { searchParams: Promise<{ unit?: string; count?: string }> }) {
-  const now = new Date();
+  const now = billingNow();
   const thisYear = now.getFullYear();
   const thisMonth = now.getMonth() + 1;
   // All independent reads run together (Prisma queries only start once awaited, so they go in this one Promise.all).

@@ -1,7 +1,7 @@
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
-import { BILLING_START } from "@/lib/months";
+import { BILLING_START, billingNow } from "@/lib/months";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { DEFAULT_PER_PAGE, PER_PAGE_OPTIONS, paymentRowSelect, toLedgerPayment, type LedgerPayment } from "@/lib/reports/payments-ledger";
 import type { ResidentStatus } from "@/lib/reports/residents-directory";
@@ -100,7 +100,7 @@ export async function getResidentDetail(id: string, opts: { year: number | null;
   });
   if (!resident) return null;
 
-  const now = new Date();
+  const now = billingNow();
   const thisYear = now.getFullYear();
   const thisMonth = now.getMonth() + 1;
 
@@ -193,7 +193,7 @@ export async function getResidentDetail(id: string, opts: { year: number | null;
     phone: resident.phone,
     email: resident.email,
     block: resident.streetBlock,
-    address: [resident.addressLine1, resident.addressLine2, [resident.city, resident.state, resident.zipCode].filter(Boolean).join(" ")].filter(Boolean).join(", "),
+    address: [resident.streetBlock, resident.addressLine1, resident.addressLine2, [resident.city, resident.state, resident.zipCode].filter(Boolean).join(" ")].filter(Boolean).join(", "),
     notes: resident.notes,
 
     thisYear,

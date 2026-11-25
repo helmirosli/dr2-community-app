@@ -5,6 +5,7 @@ import { AlertCircle, Check, FileText } from "lucide-react";
 
 import { createPublicSubmission, type PublicSubmissionState } from "@/lib/actions/public-submissions";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
+import { billingNow } from "@/lib/months";
 import { useDictionary } from "@/lib/i18n/context";
 import { TurnstileWidget, type TurnstileHandle } from "./turnstile-widget";
 import { fill } from "@/lib/text";
@@ -166,7 +167,7 @@ export function SubmitPaymentForm({
       <input type="hidden" name="paymentDate" value={paymentDate} />
       <input type="hidden" name="specialCollectionId" value={paymentType === "SPECIAL_COLLECTION" ? (collection?.id ?? "") : ""} />
       {(() => {
-        const now = new Date();
+        const now = billingNow();
         const s = paymentType === "MONTHLY_FEE" && start ? start : { year: now.getFullYear(), month: now.getMonth() + 1 };
         const e = paymentType === "MONTHLY_FEE" && end ? end : s;
         return (

@@ -1,3 +1,4 @@
+import { billingNow, clampToBilling } from "@/lib/months";
 import type { Locale } from "@/lib/i18n/locale";
 
 const DAY_MS = 86_400_000;
@@ -34,9 +35,10 @@ export function monthRange(year: number, month: number) {
  * The month the community is collecting for right now: this month, except in its first 7 days when most
  * people have not paid yet, so it is last month (the home page uses the same rule).
  */
-export function collectionMonth(now: Date = new Date()) {
+export function collectionMonth(now: Date = billingNow()) {
   const today = malaysiaToday(now);
   const useLast = today.day <= 7;
   const previous = today.month === 1 ? { year: today.year - 1, month: 12 } : { year: today.year, month: today.month - 1 };
-  return { ...(useLast ? previous : { year: today.year, month: today.month }), isPrevious: useLast };
+  const month = clampToBilling(useLast ? previous : { year: today.year, month: today.month });
+  return { ...month, isPrevious: useLast && month.month === previous.month && month.year === previous.year };
 }
