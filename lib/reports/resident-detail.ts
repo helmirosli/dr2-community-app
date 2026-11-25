@@ -193,7 +193,7 @@ export async function getResidentDetail(id: string, opts: { year: number | null;
     phone: resident.phone,
     email: resident.email,
     block: resident.streetBlock,
-    address: [resident.addressLine1, resident.addressLine2, [resident.city, resident.state, resident.zipCode].filter(Boolean).join(" ")].filter(Boolean).join(", "),
+    address: [resident.streetBlock, resident.addressLine1, resident.addressLine2, [resident.city, resident.state, resident.zipCode].filter(Boolean).join(" ")].filter(Boolean).join(", "),
     notes: resident.notes,
 
     thisYear,
