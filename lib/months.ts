@@ -6,6 +6,12 @@ export type MonthCoverage = {
 /** The system starts billing here; nothing earlier is owed or shown. Earlier years live in prisma/seed/official-residents-archive.json. */
 export const BILLING_START: MonthCoverage = { year: 2027, month: 1 };
 
+/** "Now" for anything that picks the current month: the real time, but never before the billing start (so nothing shows 2026 as due). */
+export function billingNow(now: Date = new Date()): Date {
+  const start = new Date(Date.UTC(BILLING_START.year, BILLING_START.month - 1, 1, 12));
+  return now < start ? start : now;
+}
+
 /** Never earlier than the billing start. */
 export function clampToBilling(m: MonthCoverage): MonthCoverage {
   return m.year * 100 + m.month < BILLING_START.year * 100 + BILLING_START.month ? BILLING_START : m;

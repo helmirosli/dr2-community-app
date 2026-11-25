@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { clampReportYear } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { isFutureMonth, monthState, type MonthState } from "@/lib/status";
+import { billingNow } from "@/lib/months";
 
 export const SHOWS = ["all", "paid", "arrears", "pending", "hold"] as const;
 export type Show = (typeof SHOWS)[number];
@@ -53,7 +54,7 @@ export type YearReport = {
 };
 
 export function parseReportParams(params: { year?: string; includeInactive?: string; q?: string; show?: string; totals?: string }) {
-  const today = malaysiaToday();
+  const today = malaysiaToday(billingNow());
   return {
     year: clampReportYear(params.year, today.year),
     includeInactive: params.includeInactive !== "off",
@@ -66,7 +67,7 @@ export function parseReportParams(params: { year?: string; includeInactive?: str
 
 /** The year-by-month grid with every cell's state, per-house totals and arrears worked out. */
 export async function getYearReport(year: number, includeInactive: boolean): Promise<YearReport> {
-  const now = new Date();
+  const now = billingNow();
   const today = malaysiaToday(now);
 
   const [{ rows: gridRows, specialCollections }, pendingMonthly, pendingCollections] = await Promise.all([

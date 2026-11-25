@@ -9,7 +9,7 @@ import { getDictionary, getLocale } from "@/lib/i18n";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
-import { BILLING_START } from "@/lib/months";
+import { BILLING_START, billingNow } from "@/lib/months";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { firstName, isFutureMonth, monthName, monthState } from "@/lib/status";
@@ -26,7 +26,7 @@ export default async function HousePage({
 }) {
   const [{ unit: rawUnit }, { year: rawYear }] = await Promise.all([params, searchParams]);
   const unit = decodeURIComponent(rawUnit).trim();
-  const now = new Date();
+  const now = billingNow();
   const year = Math.min(2100, Math.max(BILLING_START.year, Number(rawYear) || now.getFullYear()));
 
   const [t, locale, grid, report, pending] = await Promise.all([

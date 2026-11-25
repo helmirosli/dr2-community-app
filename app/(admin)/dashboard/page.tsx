@@ -13,7 +13,7 @@ import { requireDashboardUser } from "@/lib/auth";
 import { getDictionary, getLocale } from "@/lib/i18n";
 import { AmountEye } from "@/app/components/amount-veil";
 import { DEFAULT_MONTHLY_FEE_SEN, formatRM } from "@/lib/money";
-import { monthLabel } from "@/lib/months";
+import { monthLabel, billingNow } from "@/lib/months";
 import { prisma } from "@/lib/prisma";
 import { HouseTile, StatusPill } from "@/app/components/status";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default async function DashboardPage() {
-  const now = new Date();
+  const now = billingNow();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 

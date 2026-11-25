@@ -140,6 +140,15 @@ async function main() {
     }
   }
 
+  // Kawalan Raya: RM50 from every active house, 1 Feb 2027 to year end.
+  const active = residents.filter((r) => r.status === "ACTIVE");
+  const kawalan = await prisma.specialCollection.create({
+    data: { title: "Kawalan Raya", description: "Raya guard service, RM50 per house", amountPerResident: 5000, eventStartDate: new Date(Date.UTC(2027, 1, 1)), dueDate: new Date(Date.UTC(2027, 11, 31)), status: "ACTIVE" },
+  });
+  await prisma.specialCollectionAssignment.createMany({
+    data: active.map((r) => ({ specialCollectionId: kawalan.id, residentId: ids.get(r.unitNumber)!, amountDue: 5000, amountPaid: 0, status: "PENDING_REVIEW" as const })),
+  });
+
   console.log(`Official seeding completed: ${residents.length} residents, ${monthly} monthly payments, ${rayaHouses.length} houses on the Raya 2026 collection.`);
 }
 

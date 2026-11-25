@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Landmark, LayoutGrid, Send } from "lucide-react";
+import { billingNow } from "@/lib/months";
 
 import { ProgressRing } from "@/app/components/progress-ring";
 import { TourButton } from "@/app/components/tour/tour-button";
@@ -30,7 +31,7 @@ const FIREFLIES = [
 const LEGEND: MonthState[] = ["paid", "pending", "partial", "unpaid", "hold"];
 
 export default async function HomePage() {
-  const now = new Date();
+  const now = billingNow();
   const current = { year: now.getFullYear(), month: now.getMonth() + 1 };
   const previous = current.month === 1 ? { year: current.year - 1, month: 12 } : { year: current.year, month: current.month - 1 };
   // Early in the month almost nobody has paid yet, so lead with last month and show this month underneath.
