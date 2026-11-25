@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { BILLING_START } from "@/lib/months";
 import {
   buildMonthlyReport,
   type MonthlyReportResidentInput,
@@ -61,7 +62,7 @@ export function clampReportMonth(value: string | undefined, fallback: number) {
 
 export function clampReportYear(value: string | undefined, fallback: number) {
   const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed >= 2020 && parsed <= 2100 ? parsed : fallback;
+  return Number.isInteger(parsed) && parsed >= BILLING_START.year && parsed <= 2100 ? parsed : Math.max(fallback, BILLING_START.year);
 }
 
 const monthlyReportOnce = cache((year: number, month: number, includeInactive: boolean) => loadMonthlyReport({ year, month, includeInactive }));

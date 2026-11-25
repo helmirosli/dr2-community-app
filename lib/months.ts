@@ -3,6 +3,14 @@ export type MonthCoverage = {
   month: number;
 };
 
+/** The system starts billing here; nothing earlier is owed or shown. Earlier years live in prisma/seed/official-residents-archive.json. */
+export const BILLING_START: MonthCoverage = { year: 2027, month: 1 };
+
+/** Never earlier than the billing start. */
+export function clampToBilling(m: MonthCoverage): MonthCoverage {
+  return m.year * 100 + m.month < BILLING_START.year * 100 + BILLING_START.month ? BILLING_START : m;
+}
+
 export function expandMonthRange(
   startYear: number,
   startMonth: number,
