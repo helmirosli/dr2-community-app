@@ -1,6 +1,7 @@
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
+import { BILLING_START } from "@/lib/months";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { DEFAULT_PER_PAGE, PER_PAGE_OPTIONS, paymentRowSelect, toLedgerPayment, type LedgerPayment } from "@/lib/reports/payments-ledger";
 import type { ResidentStatus } from "@/lib/reports/residents-directory";
@@ -147,7 +148,7 @@ export async function getResidentDetail(id: string, opts: { year: number | null;
   if (!reportRow || !currentRow) return null;
 
   const years = {
-    min: Math.min(thisYear, span._min.year ?? thisYear, resident.createdAt.getFullYear()),
+    min: Math.max(BILLING_START.year, Math.min(thisYear, span._min.year ?? thisYear, resident.createdAt.getFullYear())),
     max: Math.max(thisYear + 1, span._max.year ?? thisYear),
   };
   const year = clamp(opts.year ?? thisYear, years.min, years.max);

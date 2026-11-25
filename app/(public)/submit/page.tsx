@@ -2,6 +2,7 @@ import { getDictionary, getLocale } from "@/lib/i18n";
 import { getPendingSubmissionsMap } from "@/lib/payments/coverage";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
+import { BILLING_START, clampToBilling } from "@/lib/months";
 import { getMonthlyReport } from "@/lib/reports/monthly-data";
 import { getYearGridData } from "@/lib/reports/year-grid-data";
 import { firstName, monthName } from "@/lib/status";
@@ -69,7 +70,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
         }
         // Part of the fee is already in (e.g. an earlier overpayment spilled into this month).
         if (paid > 0) (partialByUnit[row.unitNumber] ??= {})[`${grid.year}-${i + 1}`] = paid;
-        if (g === 0 && i + 1 <= thisMonth && !firstOwedByUnit[row.unitNumber] && row.monthStatus[i] === "ACTIVE" && !row.monthStatusOverrides[i]) {
+        if (g === 0 && i + 1 <= thisMonth && grid.year * 100 + i + 1 >= BILLING_START.year * 100 + BILLING_START.month && !firstOwedByUnit[row.unitNumber] && row.monthStatus[i] === "ACTIVE" && !row.monthStatusOverrides[i]) {
           firstOwedByUnit[row.unitNumber] = { year: grid.year, month: i + 1 };
         }
       });
@@ -83,7 +84,7 @@ export default async function PublicSubmitPage({ searchParams }: { searchParams:
         ? r.paidUntilMonth === 12
           ? { year: r.paidUntilYear! + 1, month: 1 }
           : { year: r.paidUntilYear!, month: r.paidUntilMonth! + 1 }
-        : { year: thisYear, month: thisMonth });
+        : clampToBilling({ year: thisYear, month: thisMonth }));
       return {
         unit: r.unitNumber,
         name: firstName(r.name),

@@ -1,5 +1,5 @@
 import { DEFAULT_MONTHLY_FEE_SEN } from "@/lib/money";
-import { monthKey } from "@/lib/months";
+import { BILLING_START, monthKey } from "@/lib/months";
 
 export type MonthlyCoverageInput = {
   year: number;
@@ -145,10 +145,10 @@ export function buildMonthlyReportRow(
     selectedStatus = "UNPAID";
   }
 
-  // Billing starts at the earliest covered month, or when the resident was added.
+  // Billing starts at the earliest covered month, or when the resident was added, but never before BILLING_START.
   const coveredKeys = [...appliedByMonth.keys()].sort((a, b) => a - b);
   const createdKey = monthKey(resident.createdAt.getFullYear(), resident.createdAt.getMonth() + 1);
-  const startKey = coveredKeys.length > 0 ? Math.min(coveredKeys[0], createdKey) : createdKey;
+  const startKey = Math.max(monthKey(BILLING_START.year, BILLING_START.month), coveredKeys.length > 0 ? Math.min(coveredKeys[0], createdKey) : createdKey);
 
   let outstandingMonths = 0;
   let outstandingAmountSen = 0;
